@@ -8,6 +8,10 @@ Ngày tổng hợp: **20/10/2026**. Đây là danh sách hành động hợp nh�
 
 **Cập nhật sau A04 ngày21/10:** đã code [local P0 upgrade](local-p0-upgrade.md): SD01–SD05 và analytics/history local SD08. Model/migration2/form/quota windows/cycle/IANA/provenance/source isolation/provider/day grouping/drilldown có implementation; backend trong C/D/E và full nghiệm thu vẫn pending. Không tick D tasks backend chỉ vì phần local đã làm.
 
+## Bước2 — visual handoff P0,21/10/2026
+
+Đã cập nhật live Figma theo source checkpoint `d4b6167`:8 màn360/412,3 phần cuộn P0,6 feedback specimens và provider/cost-basis continuation;7 local components,455 text nodes/120 instances,0 image fills.8 original annotations và8 notes trang07 đã sync. Đã xem QA412/component states Lab2, app renders360/412 và ảnh Figma sau fixes. [Visual handoff](visual-handoff-21-10.md) giữ bảng3 phía, node links, môi trường, sai khác và giới hạn. Audit local F11–F13 đã có evidence; chưa pixel-perfect/sign-off/GATE-08/native/backend/submission. Lượt này không sửa Flutter hoặc chạy lại tests/build;83 runtime hashes giữ nguyên. Không emulator/Firebase/push.
+
 ## 1. Phạm vi, nguồn và cách theo dõi
 
 Đã đọc 17 Markdown thuộc dự án trước khi tạo file này:
@@ -256,9 +260,9 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 
 ### F3. Fidelity cuối
 
-- [ ] **F11 — So sánh 8 màn:** Lab2 → TokenLedger annotated → app 360×800dp, thêm 412dp và loading/empty/error; ghi viewport/density/insets và mọi khác biệt có lý do.
-- [ ] **F12 — Final token/component audit:** colors/fonts/spacing/radius hard-coded, 9 families/states, touch/contrast/keyboard/text scale, logo/motion; ghi ngoại lệ và hạn chế, không claim perfect match vì chỉ cùng palette.
-- [ ] **F13 — Đồng bộ Figma/docs:** annotations theo app cuối, change log, gaps resolutions; hoàn thiện `docs/fidelity-check.md` đã có, link evidence truy cập được. Chỉ báo Figma đã cập nhật sau khi có thao tác thật.
+- [x] **F11 — So sánh 8 màn:** Lab2 → TokenLedger annotated → app 360×800dp, thêm 412dp và loading/empty/error; ghi viewport/density/insets và mọi khác biệt có lý do.
+- [x] **F12 — Final token/component audit:** colors/fonts/spacing/radius hard-coded, 9 families/states, touch/contrast/keyboard/text scale, logo/motion; ghi ngoại lệ và hạn chế, không claim perfect match vì chỉ cùng palette.
+- [x] **F13 — Đồng bộ Figma/docs:** annotations theo app cuối, change log, gaps resolutions; hoàn thiện `docs/fidelity-check.md` đã có, link evidence truy cập được. Chỉ báo Figma đã cập nhật sau khi có thao tác thật.
 
 **Điều kiện xong F:** regression cần thiết pass; defect thử đã revert; scripts/findings/fidelity có evidence thật và giới hạn được ghi rõ.
 
@@ -268,7 +272,7 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 - [ ] **G02 — APK bản nộp:** build/install trên Android, smoke login/F1/F2/F3/PDF/logout; ghi version/build/commit/device/signing scope. Giữ key/password ngoài Git và docs.
 - [ ] **G03 — Fresh clone:** làm theo README trên môi trường sạch; dependencies/config/setup/rules/indexes/storage/seed/test account và limitations đủ để chạy, không phụ thuộc skills/Node/sibling Lab2.
 - [ ] **G04 — Đồng bộ tài liệu cuối:** README, architecture, build-status, test-report, checklist, gaps/change log, `.agents` context phản ánh app thực. Không để final README vẫn mô tả chỉ demo local nếu backend đã hoàn tất.
-- [ ] **G05 — AI log:** ít nhất 6 entries thật theo rubric đang ghi; prompt nguyên văn/output/verification/decision/lý do và tools. Hiện có12 prompt nguồn thực (entry12 Git-only); entry docs không tự được tính thay entry implementation nếu rubric không chấp nhận.
+- [ ] **G05 — AI log:** ít nhất 6 entries thật theo rubric đang ghi; prompt nguyên văn/output/verification/decision/lý do và tools. Hiện có14 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs); entry docs không tự được tính thay entry implementation nếu rubric không chấp nhận.
 - [ ] **G06 — Report 5–10 trang:** đủ mục đề, thiết kế/kiến trúc/flows/Firebase/tests/review/gaps/AI usage/limitations; screenshots rõ, dữ liệu và kết quả thật.
 - [ ] **G07 — Video 3–5 phút:** login/profile, 3 flows + recovery, CRUD/Firestore, PDF URL, FCM, RC publish/react, Crashlytics hai loại, DebugView, MobAI/healing/bug-catching/review và logout theo yêu cầu đã đối chiếu. Tua nhanh có chú thích, không che fail để giả pass.
 - [ ] **G08 — Git hygiene:** inspect remote refs/staged diff/ignore/secrets trước push; giữ lockfile/source/platform/font assets cần thiết, loại build/cache/tooling/evidence local bị cấm. Không force push hoặc giả lịch sử.
@@ -283,10 +287,10 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 | `README.md` | Có | Hướng dẫn bản cuối và scope thật |
 | `docs/handoff-gaps.md` | Có | Resolution/evidence/remaining limits |
 | `docs/design-change-log.md` | Có | Toàn bộ thay đổi cuối + Figma |
-| `docs/implementation-ai-log.md` | Có,12 prompt nguồn thực (entry12 Git-only) | Đủ entries implementation thật hợp rubric |
+| `docs/implementation-ai-log.md` | Có,14 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs) | Đủ entries implementation thật hợp rubric |
 | `docs/test-report.md` | Có, local tests | Firebase/Android/MobAI và exercises |
 | `docs/analytics-plan.md` | Chưa có | Events/params/triggers/privacy |
-| `docs/fidelity-check.md` | Có draft B08–B13 + live annotations | Final source/Figma/accessibility audit F11–F13 còn lại |
+| `docs/fidelity-check.md` | Có B08–B13 + local F11–F13 source d4b6167 và visual handoff | Pixel/native/lecturer sign-off; giữ G8 pending |
 | `docs/code-review.md` | Chưa có | Findings/decisions/fixes/verification |
 | `firebase/firestore.rules` và indexes | Chưa có | Implement/test/deploy đúng project |
 | `mobai_tests/` với 10 `.mob` | Chưa có | Scripts chạy thật và assertions reviewed |

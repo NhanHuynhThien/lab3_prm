@@ -57,7 +57,7 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - Existing direction: framed-sheet, seed1978369971. Giữ palette/type Lab2; các quy tắc skill mâu thuẫn yêu cầu kế thừa phải được ghi ngoại lệ có lý do, không thay nguồn thiết kế âm thầm.
 - Logo gốc SVG/Flutter painter và icons phải cùng geometry. Không trình bày chữ cái provider avatar như logo chính thức.
 - Motion dùng AppMotion và tôn trọng system disableAnimations; không thêm loop decoration hoặc animation che data lỗi.
-- Sửa UI phải update design log, kiểm tra360/412dp và desktop khi liên quan. B13 đã annotate8 original frames và trang handoff bổ sung (link trong fidelity-check); không suy annotations thành bộ mockup/final fidelity đã đạt.
+- Sửa UI phải update design log, kiểm tra360/412dp và desktop khi liên quan. B13 đã annotate8 original frames; bước2 thêm8 mockups360/412 và state/P0 boards theo source d4b6167 (docs/visual-handoff-21-10.md). Audit local không phải pixel/native/lecturer sign-off.
 
 ## 6. Verification và bằng chứng
 
@@ -67,7 +67,7 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - Browser inspector taste-skill không hiểu Dart/CanvasKit DOM. Khi dùng phải đánh giá ảnh render + Flutter tests; không thêm hidden h1 để qua gate giả. Output inspector là local artifact, không commit.
 - Android SDK chưa có ở lần doctor19/10; trước khi claim APK/device test cần xác minh lại toolchain. Không claim web test thay Android/MobAI.
 - Không tạo `.mob`, AI review findings, prompt logs hoặc console screenshots giả. Mỗi evidence ghi môi trường/thời gian và scope thật.
-- AI log có12 prompt nguồn thực đến checkpoint local ngày21/10 (entry12 là Git-only); vẫn cần đối chiếu scope/chất lượng theo rubric trước nộp. Không chia prompt thành các entry tưởng tượng.
+- AI log có14 prompt nguồn thực đến publication ngày21/10 (entry12/14 Git-only, entry13 visual/docs); vẫn cần đối chiếu scope/chất lượng theo rubric trước nộp. Không chia prompt thành các entry tưởng tượng.
 
 ## 7. Git và bàn giao
 

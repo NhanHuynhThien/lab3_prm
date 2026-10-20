@@ -14,6 +14,7 @@ Cập nhật 21/10/2026. Tài liệu chia trạng thái thực tế và mục ti
 
 | Tài liệu | Nội dung | Trạng thái |
 |---|---|---|
+| [Visual handoff21/10](visual-handoff-21-10.md) |8 mockups360/412, feedback/P0 fields, live links và bảng sai khác | Local source d4b6167; chưa pixel/native sign-off |
 | [Local P0 upgrade](local-p0-upgrade.md) | Schema2/migration/model/default purposes/quota windows/cycle/timezone/source/analytics | Implementation local; full Firebase/native còn pending |
 | [Scope decisions](scope-decisions.md) | A03–A06: thuật ngữ, P0/gaps SD01–SD08, trạng thái/lịch sử | Hoàn tất quyết định kỹ thuật; không thay lecturer approval |
 | [Implementation plan](IMPLEMENTATION_PLAN.md) | Full product/flow/schema/Firebase/test/submission plan | Kế hoạch; nhiều phần chưa implement |
@@ -24,9 +25,9 @@ Cập nhật 21/10/2026. Tài liệu chia trạng thái thực tế và mục ti
 | [Handoff gaps](handoff-gaps.md) | Khoảng trống spec và resolution | Phân biệt đã sửa và còn thiếu |
 | [Lab2 reference](lab2-ui-reference.md) | Mapping/tokens/Figma gốc | Không giữ bản copy lịch sử trong source |
 | [Test report](test-report.md) |200 unit/widget tests và giới hạn coverage | Không phải MobAI/Firebase evidence |
-| [AI implementation log](implementation-ai-log.md) | Prompt thật/output/verify/decision |12 entries (entry12 Git-only); cần đối chiếu chất lượng theo rubric |
+| [AI implementation log](implementation-ai-log.md) | Prompt thật/output/verify/decision |14 entries (entry12/14 Git-only, entry13 visual/docs); cần đối chiếu chất lượng theo rubric |
 | [Completion roadmap](APP_COMPLETION_ROADMAP.md) | Công việc hợp nhất, dependencies và acceptance | A03–A06 hoàn tất; B01–B14 local/annotation đã kiểm chứng21/10; Firebase pending |
-| [Fidelity draft](fidelity-check.md) | Audit B08–B13: mapping/component/layout/accessibility/states/brand/Figma | Đã xem8 final360/annotate live Figma; full QA412/mockup/final fidelity pending |
+| [Fidelity draft](fidelity-check.md) | Audit B08–B13: mapping/component/layout/accessibility/states/brand/Figma | Đã có local audit F11–F13/mockups360/412; full visual sign-off/native pending |
 | [Firebase pending](firebase-pending.md) | Điểm nối và thứ tự tích hợp | Chưa có project/config/SDK |
 | [Logo](../assets/brand/README.md) | Mark/source/icons/font license | Source SVG/painter và native icons |
 | [AGENTS.md](../AGENTS.md) | Quy tắc làm việc trong repo | Entry point agent |

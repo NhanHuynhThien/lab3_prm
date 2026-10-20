@@ -1,5 +1,9 @@
 # UI audit B08–B13 — TokenLedger
 
+## Bước2 — visual handoff P0,21/10/2026
+
+Đã cập nhật live Figma theo source checkpoint `d4b6167`:8 màn360/412,3 phần cuộn P0,6 feedback specimens và provider/cost-basis continuation;7 local components,455 text nodes/120 instances,0 image fills.8 original annotations và8 notes trang07 đã sync. Đã xem QA412/component states Lab2, app renders360/412 và ảnh Figma sau fixes. [Visual handoff](visual-handoff-21-10.md) giữ bảng3 phía, node links, môi trường, sai khác và giới hạn. Audit local F11–F13 đã có evidence; chưa pixel-perfect/sign-off/GATE-08/native/backend/submission. Lượt này không sửa Flutter hoặc chạy lại tests/build;83 runtime hashes giữ nguyên. Không emulator/Firebase/push.
+
 Ngày 21/10/2026. Phạm vi: ứng dụng Flutter local; Firebase pending, không chạy emulator theo yêu cầu người dùng. Audit gồm cấu trúc/component/layout/accessibility/states; B13 đã annotate live Figma21/10. Chưa nghiệm thu final fidelity F11–F13 hoặc bài nộp.
 
 ## Nguồn và giới hạn đối chiếu

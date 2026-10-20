@@ -1,5 +1,9 @@
 # TokenLedger — PRM393 Lab 3
 
+## Publication21/10
+
+Theo yêu cầu “push hết lên cho tôi”, target là [branch codex/local-form-safety](https://github.com/NhanHuynhThien/lab3_prm/tree/codex/local-form-safety), gồm checkpoint Flutter d4b6167 và commit tài liệu visual handoff chứa đoạn này. Xem Git log/remote refs cho SHA publication; các đoạn “chưa push” bên dưới ghi thời điểm trước yêu cầu này. Không merge main hoặc thay visibility. Runtime giữ nguyên bản200 tests đã kiểm; Firebase/native/lecturer acceptance vẫn pending.
+
 Ứng dụng **Flutter/Dart** quản lý tài khoản AI, phiên sử dụng, token, chi phí và quota. Core UI kế thừa StudentPay Lab 2. Android là platform của bài lab; web dùng để chạy preview.
 
 ## Trạng thái hiện tại
@@ -22,6 +26,8 @@ Checkpoint local21/10 trên branch `codex/local-form-safety` (SHA: `git log -1 -
 - Logo vector gốc, font Inter bundle, Android/PWA icons và animation hỗ trợ reduced motion.
 
 **Firebase đang pending:** chưa có Google Auth, Firestore, FCM, Remote Config, Crashlytics, Analytics hoặc PDF/cloud export. Demo không tự đọc usage/quota từ Claude/Codex.
+
+Figma P0 đã có8 màn360/412 và mẫu trạng thái chỉnh sửa được; xem [visual handoff](docs/visual-handoff-21-10.md) cho links/đối chiếu và các sai khác còn lại. Chưa nghiệm thu pixel/native/backend.
 
 ## Chạy bằng Flutter
 

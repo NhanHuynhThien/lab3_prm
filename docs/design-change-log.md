@@ -72,3 +72,9 @@ B11 rà cuối: progress quota chưa biết/quá reset và budget chưa đặt �
 - DC31: DataScopePicker + múi giờ báo cáo ở các màn dữ liệu, settings có draft/Retry; ngày row/header/detail nhất quán. Budget nhãn Kỳ hiện tại và detail ghi khoảng ngày exclusive; lịch sử từ account dùng cycle đó, đổi được sang kỳ báo cáo.
 - DC32: Analytics thêm provider group/drilldown và cost-basis breakdown, adaptive initial metric; donut sector hỗ trợ tap với legend accessible48dp làm thao tác tương đương. History thêm day headings và source/model/basis trong detail. Giữ IndexedStack/AppMotion/reduced motion.
 - Lượt này không sửa live Figma; annotation B13 là baseline trước field mới. Cần đồng bộ mockups/annotations ở final fidelity, không đánh DESIGN-05/F11–F13 done. Kiểm ma trận Flutter và ảnh mới ghi ở test-report/fidelity-check; không claim browser/native/MobAI.
+
+## DC33–DC35 — bước2 visual handoff21/10
+
+- DC33: Live Figma page237:2,8 core mockups360/412 và3 continuations cho model/purpose chips/cycle/timezone/usage/quota. Giữ tokens/Inter/geometry nguồn; tái sử dụng Button44:1648 và7 local components, thêm chartTertiary variable đúng source. Không đổi original Lab2 screen visuals hoặc Flutter runtime.
+- DC34:6 loading/empty/error specimens, storage/draft/quota/source notes, nav/input/busy examples và provider/cost-basis continuation. Đã xem screenshot và sửa layout rows/sourcepicker/donut/legend/filter/chips/order/disabled palette/stroke overflow; Inter + Material Icons,0 flattened UI image fills.
+- DC35:8 original annotations +8 notes trang07 sync P0, gắn checkpoint d4b6167. Bảng3 phía và node links tại [visual handoff](visual-handoff-21-10.md); QA412/state/component sources và app360/412 đã xem. Audit local F11–F13 không đồng nghĩa pixel-perfect/native/lecturer sign-off. Firebase/MobAI/GATE-08 pending, không emulator/push.

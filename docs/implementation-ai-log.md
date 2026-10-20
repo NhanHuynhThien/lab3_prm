@@ -1,6 +1,6 @@
 # AI implementation log — dữ liệu thật của phiên làm việc
 
-Hiện có12 prompt nguồn thực (entry12 Git-only) đến21/10; công cụ/kết quả ghi riêng theo từng entry. Không coi entry docs là code evidence nếu rubric không chấp nhận.
+Hiện có14 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs) đến21/10; công cụ/kết quả ghi riêng theo từng entry. Không coi entry docs là code evidence nếu rubric không chấp nhận.
 
 Lịch sử lượt đầu19/10/2026. Tool: Codex; shell/Flutter/Dart; cua_repl IAB; local taste-skill draw/lint/inspect. Không gọi AI provider để phân tích usage trong app. Không có subagent, Firebase console, MobAI hoặc AI PR review trong lượt này.
 
@@ -152,6 +152,30 @@ Ngày21/10/2026. Ngữ cảnh: bước1 đã đề xuất là rà diff/file th�
 
 Decision: checkpoint local để review/khôi phục; không phải reviewed PR, push, native/Firebase/MobAI/final submission. Ghi chú chưa commit của các entry trước là lịch sử; entry Git-only không tự thay evidence implementation theo rubric.
 
+## Entry13 — bước2 Figma và evidence
+
+Prompt người dùng nguyên văn:
+
+> tiếp bước 2
+
+Ngày21/10/2026. Ngữ cảnh: sau checkpoint d4b6167, thực hiện bước2 đã đề xuất là Figma/evidence; Firebase pending, không máy ảo. Tools: Figma metadata/use_figma/get_screenshot/get_libraries/search_design_system, shell/Python/apply_patch/view_image; không subagent. Đã đọc các SKILL.md figma-use/figma-generate-design/figma-generate-library của plugin Figma16.0.0 và Plugin API/type/component/variable/gotchas references. Code Connect trong repo không có; inspect local screens/components rồi get_libraries/search để xác minh source picker/quota không có component published. Reuse Lab2 local variable/text styles/Button, thêm7 local components và1 chartTertiary variable; không import kit khác để đổi core UI.
+
+Output: page237:2 với8 màn360/412,3 phần cuộn P0,6 feedback specimens, notes/component/provider-basis boards;455 text/120 instances/0 UI bitmap fills. Sync8 original annotations và8 notes trang07; geometry/text StudentPay giữ nguyên. View đủ8 QA412 vàcomponent/state boards67:10/144:1934,8 app screens ở360/412 vàcomponent gallery2 widths. View screenshot Figma sau compose/fixes; sửa row sizing/overlap/source picker, donut segments+caption/legend, segmented wrapping/stroke overflow, purpose chips/order, source title style và disabled palette. RIGHT constraints enum bị từ chối/rollback; đọc lại canvas, thay MAX rồi retry. Không bịa app bug hoặc findings PR từ lỗi dựng Figma.
+
+Verification: live structural read-back fontsInter/Material Icons, variables scopes, component properties, image fills/bounds; screenshot final360/412/continuations/states/components/provider vàboard233:3 đã xem. Runtime hashes83 giữ nguyên theo manifest full200; không chạy lại tests/build cho Figma/docs.22 Markdown/IDs/links/fences/portability vàdiff whitespace được kiểm; chi tiết node/environment/sai khác ở visual-handoff-21-10.md.
+
+Decision: accepted cho annotated mockups vàlocal comparison/audit/sync F11–F13 ở source d4b6167; mockups chưa pixel-perfect, có sai khác Material control details/metrics/row/padding/tile ratio đã ghi. Không tick G8/GATE-08/native/Firebase/MobAI/lecturer/submission; không emulator/push/commit mới.
+
+## Entry14 — commit và publication theo yêu cầu
+
+Prompt người dùng nguyên văn:
+
+> push hết lên cho tôi
+
+Ngày21/10/2026. Ngữ cảnh: đưa checkpoint local d4b6167 và toàn bộ tài liệu bước2 hợp lệ lên branch codex/local-form-safety của repo đã chỉ định. Tools Git/shell/Python/apply_patch; không skill/subagent/Firebase/emulator. Trước publication: ls-remote chỉ có main4aeb7b719b95c0b4aa21f02bc0f05329b909cdf2; chưa có branch đích trên remote. Kiểm diff/ignore và candidate103 files/92 text files không phát hiện secret theo pattern hoặc file cấm; không scan toàn bộ history.22 Markdown links/fences/portability và93 roadmap/196 checklist IDs sạch;83 runtime hashes không đổi, không chạy lại Flutter tests/build.
+
+Commit docs/visual handoff có kiểm soát; source checkpoint và commit docs cùng đi theo branch. Không force push, merge main, đổi visibility/collaborators hoặc publish ignored artifacts. Kết quả publication xác minh bằng remote branch SHA khớp HEAD và working tree sạch; SHA thật tra Git log/remote refs, không gán SHA baseline cho source mới. Các ghi chú chưa commit/push trong entry trước là trạng thái lịch sử. Git-only không tự thay implementation hoặc reviewed PR evidence.
+
 ## Trạng thái theo rubric
 
-Hiện có12 prompt nguồn thực (entry12 Git-only), gồm entry implementation/verification B03–B13; cần đối chiếu chất lượng/phạm vi từng entry theo rubric trước nộp, không chỉ đếm số lượng. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.
+Hiện có14 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs), gồm entry implementation/verification B03–B13; cần đối chiếu chất lượng/phạm vi từng entry theo rubric trước nộp, không chỉ đếm số lượng. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.

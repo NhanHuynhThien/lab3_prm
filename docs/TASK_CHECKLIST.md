@@ -16,6 +16,10 @@ Cập nhật21/10/2026. Đọc cùng [Implementation plan](IMPLEMENTATION_PLAN.m
 
 [Upgrade](local-p0-upgrade.md): SD01–SD05 và phần local SD08 đã code: schema2/migration backup/retry, model/defaults/multi-quota/source/cost basis/cycle/IANA, source isolation và demo-safe reset, provider/donut/history/day grouping. Task có backend/counters/server/rules vẫn chưa tick; local fields không thay G3–G6. Full suite/analyzer/web kết quả thực ở test-report. Figma mới chưa annotate field này; final fidelity/native/MobAI vẫn pending.
 
+## Bước2 — visual handoff P0,21/10/2026
+
+Đã cập nhật live Figma theo source checkpoint `d4b6167`:8 màn360/412,3 phần cuộn P0,6 feedback specimens và provider/cost-basis continuation;7 local components,455 text nodes/120 instances,0 image fills.8 original annotations và8 notes trang07 đã sync. Đã xem QA412/component states Lab2, app renders360/412 và ảnh Figma sau fixes. [Visual handoff](visual-handoff-21-10.md) giữ bảng3 phía, node links, môi trường, sai khác và giới hạn. Audit local F11–F13 đã có evidence; chưa pixel-perfect/sign-off/GATE-08/native/backend/submission. Lượt này không sửa Flutter hoặc chạy lại tests/build;83 runtime hashes giữ nguyên. Không emulator/Firebase/push.
+
 ## Lịch sử scaffold 19/10/2026
 
 Đã tạo Flutter Android/web, MVVM/Riverpod, logo và local CRUD/dashboard/animation. Firebase pending theo yêu cầu; checkbox hoàn thành chỉ xác nhận phạm vi local, không chứng minh Firestore/Auth/evidence Lab3. Chi tiết ở `build-status.md`, `test-report.md` và `firebase-pending.md`. Các gate G1/G3/G6 chưa đạt vì cần Firebase thật.
@@ -43,11 +47,11 @@ Dependency: tài liệu plan hiện tại. Exit gate: mapping đủ 8 màn / 3 f
 - [x] SCOPE-04 Chốt P0: manual usage/quota, account metadata; P1 import; P2 provider sync. Xem scope-decisions.md; không loại Firebase P0 khỏi kế hoạch.
 - [x] SCOPE-05 Chốt terminology account/provider/product/model/session/quota/auth token; định nghĩa trong scope-decisions.md. Model/provenance đã có ở schema2 sau A04; không suy model từ tên provider.
 - [x] SCOPE-06 Xác nhận USD là currency P0; VND/FX để P1 nếu có nhu cầu.
-- [ ] DESIGN-01 Xem đủ 8 final360,8 QA 412 và state/component PNG trong Lab2; ghi nguồn/version.
+- [x] DESIGN-01 Xem đủ 8 final360,8 QA 412 và state/component PNG trong Lab2; ghi nguồn/version.
 - [x] DESIGN-02 Đối chiếu core Lab2, giữ mapping/tokens trong `docs/lab2-ui-reference.md`; không bundle tài liệu/ảnh nguồn copy hoặc tooling vào app.
 - [x] DESIGN-03 Tạo `docs/handoff-gaps.md` từ HG01–HG10, mỗi gap có resolution và verification còn thiếu.
 - [x] DESIGN-04 Đã có `docs/design-change-log.md`: thay chủ đề/flow/tab/form/login demo/profile/platform; FCM/export chưa implement và còn trong plan/firebase-pending, không claim thiết kế cuối đã xong.
-- [ ] DESIGN-05 Chuẩn bị annotated mockup8 màn TokenLedger từ core Lab2; không redesign palette/font/layout tùy ý.
+- [x] DESIGN-05 Chuẩn bị annotated mockup8 màn TokenLedger từ core Lab2; không redesign palette/font/layout tùy ý.
 - [x] DESIGN-06 Cập nhật hoặc annotate Figma, lưu link/node/screenshot thật trong change log.
 - [ ] DESIGN-07 Bổ sung thiết kế S09–S14 theo component cũ; trạng thái loading/empty/error, form keyboard và Back.
 - [ ] DESIGN-08 Duyệt screen/route map4 tab,3 flow và nhánh error/recovery theo mục4 plan.
@@ -245,12 +249,12 @@ Dependency: G7. Exit gate: review trên PR, >= 3 findings thật và visual audi
 - [ ] REVIEW-04 Với mỗi finding: accepted/modified/rejected + lý do; fix accepted và link commit/before-after.
 - [ ] REVIEW-05 Rerun checks phù hợp sau fixes, không để review fix phá ownership/counters/totals.
 - [ ] REVIEW-06 Hoàn thiện `docs/code-review.md`; không bịa findings nếu tool chưa trả đủ.
-- [ ] FIDELITY-01 Ảnh8 Lab2 + annotated TokenLedger + app360×800dp, liệt kê mọi khác biệt với lý do.
-- [ ] FIDELITY-02 Ảnh412dp và trạng thái loading/empty/error thật; ghi density/insets khi đối chiếu.
-- [ ] FIDELITY-03 Audit hard-coded colors/fonts/sizes ngoài theme, liệt kê ngoại lệ có lý do.
-- [ ] FIDELITY-04 Audit9 component families và states, screens tái sử dụng thay vì duplicate.
-- [ ] FIDELITY-05 Cập nhật Figma annotations theo app cuối, design-change-log và handoff-gaps resolutions.
-- [ ] FIDELITY-06 Hoàn thiện `docs/fidelity-check.md`, báo thật hạn chế còn lại, không claim perfect match.
+- [x] FIDELITY-01 Ảnh8 Lab2 + annotated TokenLedger + app360×800dp, liệt kê mọi khác biệt với lý do.
+- [x] FIDELITY-02 Ảnh412dp và trạng thái loading/empty/error thật; ghi density/insets khi đối chiếu.
+- [x] FIDELITY-03 Audit hard-coded colors/fonts/sizes ngoài theme, liệt kê ngoại lệ có lý do.
+- [x] FIDELITY-04 Audit9 component families và states, screens tái sử dụng thay vì duplicate.
+- [x] FIDELITY-05 Cập nhật Figma annotations theo app cuối, design-change-log và handoff-gaps resolutions.
+- [x] FIDELITY-06 Hoàn thiện `docs/fidelity-check.md`, báo thật hạn chế còn lại, không claim perfect match.
 - [ ] GATE-08 Review/fidelity đạt, commit fixes và chuẩn bị PR merge sau release checks.
 
 ## G9 — Hồ sơ nộp và release (P0)

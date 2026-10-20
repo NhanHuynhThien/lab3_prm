@@ -32,3 +32,5 @@ TokenLedger dùng core UI StudentPay Lab2, chuyển nghiệp vụ từ expense/b
 Logo TokenLedger dùng source SVG và `BrandMark` painter; provider avatars là chữ viết tắt. Android dùng system bars/SafeArea, không vẽ chrome iPhone.
 
 Cập nhật B13 ngày21/10: đã xem8 live final360 và annotate8 original frames; [trang07 handoff](https://www.figma.com/design/C7FiWYzVXUS8G2cnK5AGos/PRM393-Lab2-SE192382_SE192336?node-id=233-3) ghi conversions/màn bổ sung/phần pending. Bộ mockup TokenLedger đầy đủ và final fidelity/screenshots QA412/state/component vẫn cần hoàn thiện. Xem [design change log](design-change-log.md); không suy việc giữ token thành đã hoàn tất fidelity Lab3.
+
+Bước2 sau checkpoint d4b6167: đã xem8 QA412 và component/state sources live, bổ sung8 mockups TokenLedger360/412 +feedback/P0 boards và sync annotations. [Visual handoff21/10](visual-handoff-21-10.md) giữ link/evidence/sai khác; đoạn “mockups/QA412 pending” phía trên là trạng thái B13 trước bước2. Pixel/native/lecturer acceptance vẫn pending.

@@ -156,3 +156,7 @@ Web final: `flutter build web --release --no-pub --no-wasm-dry-run` exit0, JS co
 ## Audit checkpoint local —21/10/2026
 
 Git/docs-only, không sửa runtime. Candidate102 files,91 text files: secret-pattern/machine-path scan không phát hiện; không file cấm hoặc file>2MB. Ignore probes xác nhận tooling/build/local.properties/generated registrant/credentials bị loại.83 runtime hashes khớp bộ200 tests/analyzer/format/web JS build đã ghi ở trên; không chạy lại Flutter. Markdown hiện có12 AI entries (entry12 Git-only); kiểm links/fences/IDs/portability và staged diff whitespace trước commit. Commit local trên codex/local-form-safety, chưa push; SHA dùng git log -1 --oneline. Không claim audit toàn bộ history, reviewed PR hoặc native/backend evidence.
+
+## Bước2 — live visual evidence21/10
+
+Không thay runtime; không chạy Flutter lại.83 file hashes đối chiếu manifest của full200 pass/analyzer/format/web build không đổi. Xem đủ8 QA412 và2 Lab2 component/state boards, app8 core screens360/412 +component gallery360/412 từ ảnh Flutter đã có. Tạo Figma page237:2:16 core screens,3 continuations,6 feedback specimens;7 main components/120 instances/455 text nodes/0 image fills. View ảnh từng review board và hậu sửa, sync8 original annotations và8 B13 notes. [Visual handoff](visual-handoff-21-10.md) ghi môi trường/matrix/links/sai khác; không đo similarity hoặc claim pixel/native/backend acceptance. Markdown hiện22 files/13 AI entries; kiểm links/fences/IDs/portability/diff whitespace. Không emulator/push/PR review.
