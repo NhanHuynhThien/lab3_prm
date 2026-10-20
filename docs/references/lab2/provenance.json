@@ -1,0 +1,121 @@
+{
+  "copiedOn": "2026-10-20",
+  "purpose": "Portable Lab2 design and handoff reference; source snapshots are unchanged. Historical relative links inside txt snapshots refer to Lab2.",
+  "files": [
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/01-home-360.png",
+      "target": "assets/design/lab2/01-home-360.png",
+      "sha256": "0b44a564746800605fabf0e45f5a1b9e04d852a4a013f0c83deef491dfc5062d"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/01-home-412.png",
+      "target": "assets/design/lab2/01-home-412.png",
+      "sha256": "fc395df695a95b838b54d389c8acb73856ebc6cae89e9e0bae08ef407f57248a"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/02-add-expense-360.png",
+      "target": "assets/design/lab2/02-add-expense-360.png",
+      "sha256": "6551cd83f29e690d43654c730420df6f7bc6a7c75a2288bb0e72d674eed257ae"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/02-add-expense-412.png",
+      "target": "assets/design/lab2/02-add-expense-412.png",
+      "sha256": "dba8735e33369273bcbd4d4ad801e7560d82b7ff0c2f3b14f49cfbf43c2de97e"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/03-category-360.png",
+      "target": "assets/design/lab2/03-category-360.png",
+      "sha256": "9908c324a9057c61c38bf3812af3552b2bee8459bb32e1853d60f9400457b6ec"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/03-category-412.png",
+      "target": "assets/design/lab2/03-category-412.png",
+      "sha256": "7463ecdf44814cef499d42f39c4e34ab14100ed4ada5dddae64d05dede3f7f0b"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/04-analytics-360.png",
+      "target": "assets/design/lab2/04-analytics-360.png",
+      "sha256": "0e18625ea195e212cdec399390872e2ac96831f59d5896ca527975f531775a63"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/04-analytics-412.png",
+      "target": "assets/design/lab2/04-analytics-412.png",
+      "sha256": "490b3648a7a5f7ccb0d54b33fd675e2af4cbc034df185a577bc82d9274ecbd69"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/05-transactions-360.png",
+      "target": "assets/design/lab2/05-transactions-360.png",
+      "sha256": "cd555471cbc2357964fd011f408db76cb178c5f88d8ebb93cd894bd5da541577"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/05-transactions-412.png",
+      "target": "assets/design/lab2/05-transactions-412.png",
+      "sha256": "89f91e55657d21a9c3c4de7175380fffc83f02f34db6f6ca01025842b4196466"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/06-split-bills-360.png",
+      "target": "assets/design/lab2/06-split-bills-360.png",
+      "sha256": "ac92d5bc14484c0af5df899b3c8d51f10ebe863bf6dcd15f80f6d74c08668648"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/06-split-bills-412.png",
+      "target": "assets/design/lab2/06-split-bills-412.png",
+      "sha256": "f3331659cbc424614267af0933aac20083bb80a340c17db5de57e37b85ff955f"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/07-create-bill-360.png",
+      "target": "assets/design/lab2/07-create-bill-360.png",
+      "sha256": "fec972006b1e8e2856a37343b0f948bd9bc1c317b1559060c6a8985de355dedd"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/07-create-bill-412.png",
+      "target": "assets/design/lab2/07-create-bill-412.png",
+      "sha256": "8e124d5a072cf1035a37b24869ae53cdf4259b83583d299de4be1cfaf66df503"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/08-bill-detail-360.png",
+      "target": "assets/design/lab2/08-bill-detail-360.png",
+      "sha256": "9b486e3edc1f0ea3ebd50a00788ece6e8f3acefb659b172662c1eb416ea7ead1"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/08-bill-detail-412.png",
+      "target": "assets/design/lab2/08-bill-detail-412.png",
+      "sha256": "91fa503bc46794411c857ca82c9d97fd503dfbfb745bd741fd9cf622c3af6330"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/09-empty-analytics.png",
+      "target": "assets/design/lab2/09-empty-analytics.png",
+      "sha256": "a87d3f915394b2e20bbf90ea957eeeae0ed8e6137d7f102ad961fec8fa2dd6b3"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/10-amount-error-overlay.png",
+      "target": "assets/design/lab2/10-amount-error-overlay.png",
+      "sha256": "1f0dd9384779d9db7638979e299bed3bb9a57b38b20ca76f6b3c8a4797264792"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/11-components-nine-families.png",
+      "target": "assets/design/lab2/11-components-nine-families.png",
+      "sha256": "3a9a975701321ba0966397f5a5c9c9af80f3f0e46fac096fb7ca53c292928dc2"
+    },
+    {
+      "source": "lab2_prm/assets/figma/2026-10-09/12-elevation-styles.png",
+      "target": "assets/design/lab2/12-elevation-styles.png",
+      "sha256": "244a8eedc7cadf8380e761a9a7f4ead24f1cbcf43202d9310e2de910df6a3ae8"
+    },
+    {
+      "source": "lab2_prm/handoff/flutter-handoff.md",
+      "target": "docs/references/lab2/source-flutter-handoff.txt",
+      "sha256": "f2a701e4915d8e2574e7983f93a2e1e71af1d6a6dfe2958fba33e421aaca4c17"
+    },
+    {
+      "source": "lab2_prm/design/DESIGN.md",
+      "target": "docs/references/lab2/source-design-system.txt",
+      "sha256": "46f4742046975c7a301da7ec9f4a81cb91a2a89f7d18d3ce7f0ef8c7ab6a119a"
+    },
+    {
+      "source": "lab2_prm/design/screen-spec.md",
+      "target": "docs/references/lab2/source-screen-spec.txt",
+      "sha256": "ec8a4901fcae7016c137c33aed519e88a2999ec555509b860716d970dde8b2ac"
+    }
+  ]
+}
