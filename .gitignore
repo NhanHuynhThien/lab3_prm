@@ -61,3 +61,22 @@ app.*.map.json
 
 # Machine-local editor state; keep team launch/tasks configs when needed
 .vscode/settings.json
+
+# Local AI tooling: installed for development, not Flutter application source
+/.agents/skills/
+/.taste-skill/
+/skills-lock.json
+
+# Assignment/reference material and generated verification output
+/PRM393 - Lab 3 From Design to Working App with Flutter and Firebase.pdf
+/assets/design/
+/assets/evidence/
+/docs/references/
+/assets/brand/tokenledger-icon-1024.png
+
+# Scripting caches and compiled Python artifacts
+__pycache__/
+*.pyo
+.pytest_cache/
+.venv/
+venv/

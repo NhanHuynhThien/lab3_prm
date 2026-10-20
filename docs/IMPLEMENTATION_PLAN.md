@@ -38,7 +38,7 @@ Hành động đầu lộ trình: chuẩn bị mapping UI/flow ở mục 3 để
 
 ## Cập nhật tài liệu ngày 20/10/2026
 
-Để đọc sau clone, dùng `lab2-ui-reference.md` và `references/lab2/` trong repo thay các đường dẫn Lab2 sibling lịch sử ở bảng nguồn bên dưới. Bản nguồn nguyên vẹn được giữ cùng hashes. Kiến trúc đang chạy được mô tả ở `architecture.md`, hướng dẫn agent ở root `AGENTS.md` và `.agents/`. Firebase vẫn pending; source Dart không thay ở lượt docs/push.
+Để đọc sau clone, dùng `lab2-ui-reference.md` và Figma gốc. Theo yêu cầu cleanup20/10, không còn commit bản copy ảnh/text/PDF nguồn; các đường dẫn Lab2 sibling ở bảng dưới là provenance lịch sử. Kiến trúc đang chạy được mô tả ở `architecture.md`, hướng dẫn agent ở root `AGENTS.md` và `.agents/`. Firebase vẫn pending; source Dart không thay ở lượt docs/push.
 
 ## 2. Nguồn đã đọc và kết luận audit
 
@@ -55,7 +55,7 @@ Các đường dẫn sau tính từ thư mục `lab3_prm/`:
 | `../lab2_prm/design/screen-spec.md` | Danh sách 8 màn final và navigation |
 | `../lab2_prm/assets/figma/2026-10-09/` | Bộ final360, QA 412, states, component, elevation; baseline visual |
 
-Lab 2 là repo thiết kế/handoff, **chưa có mã Flutter để copy**. “Lấy core UI” nghĩa là chuyển tokens/components/bố cục thành Flutter dựa trên tài sản này. Khi tạo repo nộp, đưa snapshot nguồn cần thiết vào `assets/design/lab2/` để không phụ thuộc đường dẫn máy cá nhân.
+Lab 2 là repo thiết kế/handoff, **chưa có mã Flutter để copy**. “Lấy core UI” nghĩa là chuyển tokens/components/bố cục thành Flutter dựa trên tài sản này. Repo app chỉ giữ tài liệu mapping/tokens và nguồn Figma; không đưa bản copy ảnh/tài liệu Lab2 vào asset bundle.
 
 Đã xem trực tiếp ảnh Home, Analytics và Create bill final360. Trước khi code từng màn còn lại phải xem ảnh màn đó; không suy diễn từ tên file. Chưa đọc/chỉnh sửa live Figma trong lượt lập kế hoạch này.
 
@@ -327,8 +327,6 @@ firebase/
 mobai_tests/
 test/                    # calculator, VM, mapping, widget checks trọng yếu
 integration_test/        # nếu cần cho Flutter-level checks
-assets/design/lab2/
-assets/evidence/          # app, firebase, tests, review; không thêm vào APK tùy tiện
 docs/
 ```
 
@@ -399,19 +397,24 @@ Admin/API credentials không đặt trong APK hay Firestore client-readable. Đ�
 
 ## 9. Seed và bộ dữ liệu nghiệm thu
 
-Seed chỉ do user/tester chủ động tạo, dưới UID hiện tại, có `isDemo=true`. Dùng ID xác định theo seed version để chạy lại không nhân đôi; reset chỉ xóa dữ liệu demo thuộc UID, không xóa toàn bộ dữ liệu thật.
+### 9.1 Dataset local hiện có trong source
 
-| Account demo | Usage/cost ban đầu | Budget/quota | Kỳ vọng |
-|---|---|---|---|
-| Claude cá nhân | Review30k tokens/$0.12; Research20k/$0.08 | budget$5; quota5h used65%, reset nhập rõ | total50k/$0.20; remaining budget$4.80; quota remaining35% |
-| Codex học tập | Debug40k/$0.15; Code60k/$0.25 | budget$10; weekly used40% | total100k/$0.40; remaining$9.60; quota remaining60% |
-| AI khác | Writing, tokens null/cost null | budget null/quota chưa biết | 1 phiên; không hiện0 token hoặc100% remaining |
+Nguồn: `createDemoSeed` tại `lib/services/demo_seed.dart`. Khi chưa có dữ liệu local, demo tạo 3 accounts và 12 sessions; Profile có thao tác restore/clear. Model local hiện chưa có UID/isDemo hay provider API sync.
 
-Các giá cost trên là **số giả định nhập tay phục vụ test**, không phải bảng giá provider. Session token mẫu được tách input/output trong seed fixture; total phải đúng bảng. Quota snapshots độc lập usage logs, không có công thức biến50k token thành65%.
+| Account demo | Sessions | Token đã biết | Cost đã ghi | Budget/quota | Remaining budget |
+|---|---:|---:|---:|---|---:|
+| Claude cá nhân |4|121,000|$5.68|budget$20; quota5h used65%|$14.32|
+| Codex học tập |4|141,000|$5.86|budget$25; weekly used40%|$19.14|
+| Gemini nghiên cứu |4|24,000|$1.30|budget$5; quota chưa biết|$3.70|
+| Tổng |12|286,000|$12.84|budget$50|$37.16|
 
-Sau thêm Codex Test10k/$0.05: Codex110k/$0.45/remaining$9.55; cả dataset confirmed known160k/$0.65,1 phiên unknown. Sửa cost phiên mới thành$0.07 → total known$0.67; xóa phiên đó → về$0.60. Nếu snapshot quota không đổi, quota vẫn40% used.
+Một session Gemini chưa biết token/cost; các tổng trên chỉ gồm dữ liệu đã biết. Chi phí là giả định nhập tay để test, không phải pricing hiện hành. Input/output trong seed cộng đúng total; quota snapshot độc lập usage logs.
 
-Thêm account rỗng riêng `CRUD Test` để kiểm thử hard delete. Thêm user B có dataset khác cho rules/isolation. Freeze đồng hồ/window ở test fixture hoặc tái sinh ngày kỳ theo test clock; không để resetAt quá khứ làm expected quota sai.
+Kịch bản nghiệm thu trên baseline hiện tại: thêm Codex Test10k/$0.05 → Codex151k/$5.91; toàn bộ dataset296k/$12.89. Sửa cost phiên mới thành$0.07 → tổng$12.91; xóa phiên mới → baseline286k/$12.84. Quota Codex vẫn40% used nếu không có snapshot mới. Không dùng các giá trị fixture cũ50k/$0.20 và100k/$0.40 để nghiệm thu source hiện tại.
+
+### 9.2 Khi nối Firebase (chưa thực hiện)
+
+Bổ sung seed owner-scoped/versioned, phân biệt demo/real, reset chỉ dữ liệu demo đúng UID; không xóa dữ liệu user thật. Thêm account rỗng CRUD Test và userB để kiểm tra delete/rules isolation. Freeze clock hoặc tái sinh kỳ theo test clock để quota/reset không bị stale ngoài ý muốn.
 
 ## 10. Kiểm thử, MobAI, AI review và fidelity
 
@@ -428,7 +431,7 @@ Thêm account rỗng riêng `CRUD Test` để kiểm thử hard delete. Thêm us
 | ID / file dự kiến | Starting state | Outcome phải assert |
 |---|---|---|
 | M01 `01_google_login.mob` | Logged out, dedicated Google test account | Overview và profile đúng user |
-| M02 `02_flow_usage.mob` | Logged in, seed baseline | Phiên Test10k/$0.05 xuất hiện; Codex total$0.45 |
+| M02 `02_flow_usage.mob` | Logged in, seed baseline | Phiên Test10k/$0.05 xuất hiện; Codex total$5.91 |
 | M03 `03_flow_analytics.mob` | Baseline + dữ liệu test riêng | Chọn purpose Debug → chỉ đúng sessions/tổng; Back giữ filter |
 | M04 `04_flow_account.mob` | Không có account tên test | Create account + nhập quota → detail đúng budget/remaining/source |
 | M05 `05_error_recovery.mob` | Draft hoặc lỗi mạng có kiểm soát | Lỗi hiển thị; sửa/retry lưu đúng 1 record, draft giữ nguyên |

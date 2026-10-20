@@ -48,6 +48,18 @@ Verification: đọc code thực tế, kiểm tra remote private/empty, kiểm t
 
 Decision: accepted. Giữ private visibility và lịch sử commit thật; phần Firebase/MobAI/Android/PR review vẫn pending.
 
+## Entry5 — cleanup source tree
+
+Prompt người dùng nguyên văn:
+
+> bỏ các file thừa + compile python nữa. Nó đang không đúng với src code á nha
+
+Ngày20/10/2026. Output: loại vendor skills/tool cache/lock, đề PDF, ảnh/log inspector, ảnh/text tham chiếu copy và PNG export dư khỏi Git. Giữ skills đã cài local, thêm ignore patterns; bỏ asset brand directory không dùng khỏi pubspec. README/workflows chạy bằng Flutter CLI.
+
+Verification: đối chiếu pubspec và các reference trong Dart; trước cleanup không có file .py/.pyc tracked. Chạy clean, dependency resolution, analyzer/tests và web build sau thay asset bundle; kết quả ghi trong test-report. Không sửa dữ liệu nghiệp vụ hoặc bật Firebase.
+
+Decision: accepted. Repo tập trung source Dart/Flutter và assets cần thiết; không rewrite Git history hoặc gỡ skill đã được người dùng yêu cầu cài.
+
 ## Trạng thái theo rubric
 
-Mới có 4 prompt nguồn thực; chưa đủ tối thiểu 6 entry của bài nộp. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) phải ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.
+Mới có 5 prompt nguồn thực; chưa đủ tối thiểu 6 entry của bài nộp. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) phải ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.

@@ -16,12 +16,13 @@ flutter run -d chrome --web-port 4183
 
 Demo entry hoặc `/?demo=1`; không cần Firebase config. Không dùng cùng port với server đã chạy; xem process hiện có hoặc dừng server do chính task tạo trước khi mở cái mới. Đổi port có bộ SharedPreferences khác theo origin.
 
-Đối với release preview:
+Đối với release build:
 
 ```sh
 flutter build web --release
-python3 -m http.server 4183 --bind 127.0.0.1 --directory build/web
 ```
+
+Chạy preview bằng Flutter dev server ở lệnh trên; compilation/dev server dùng Flutter CLI.
 
 Build là local artifact trong `.gitignore`, không commit `build/`. Chỉ bind localhost khi chưa được yêu cầu expose mạng.
 
@@ -47,13 +48,13 @@ flutter test --reporter expanded
 4. Chart values/legend phải cùng data; zero không có height giả, missing không hiển thị như measured0.
 5. Motion phản hồi interaction/state; AppMotion tôn trọng reduced motion, tab stack không bị dispose chỉ vì transition.
 6. Xem browser render thật. Taste inspector hỗ trợ HTML/CSS/JS, không hiểu Dart CanvasKit DOM; giữ kết quả thật và giải thích giới hạn, không làm giả pass.
-7. Lưu ảnh với viewport/date/version rõ; update design-change-log. Figma chỉ báo đã chỉnh khi có thao tác/evidence thật.
+7. Nếu cần ảnh để review thì giữ local, không commit output inspector/ảnh lịch sử copy; update design-change-log. Figma chỉ báo đã chỉnh khi có thao tác/evidence thật.
 
 ## 5. Docs-only change
 
 - Cập nhật ngày/trạng thái ở phần mới; giữ evidence19/10 là lịch sử thay vì đổi ngày ảnh cũ thành hôm nay.
 - Kiểm tra Markdown fences, local links, task ID uniqueness và paths portability.
-- Links tới Lab2 dùng snapshot trong repo hoặc URL xác minh được; không thêm absolute máy cá nhân vào hướng dẫn clone.
+- Links tới Lab2 dùng docs/lab2-ui-reference.md hoặc URL Figma gốc; không thêm absolute máy cá nhân vào hướng dẫn clone.
 - AI log chép prompt user thực, outcome/verification/decision. Nếu chưa đủ 6 entries theo rubric thì để pending.
 - Kiểm tra technical claims bằng source/test logs; không phải mọi mục trong plan đều implemented.
 
@@ -61,7 +62,7 @@ flutter test --reporter expanded
 
 - User yêu cầu push là authorization cho commit/push trong phạm vi repo họ chỉ định; không hỏi lại chỉ để xác nhận hành động đã được yêu cầu.
 - Inspect remote refs trước init/fetch/push; nếu remote có history thì tích hợp an toàn, không force push.
-- `git add` có kiểm soát; xem `git diff --cached --stat`, tracked file list và secret patterns. Ignore build/cache/local properties/signing credentials.
+- `git add` có kiểm soát; xem `git diff --cached --stat`, tracked file list và secret patterns. Ignore build/cache/local properties/signing credentials, local skill tooling, đề PDF, ảnh/text tham chiếu copy và scripting bytecode.
 - Tạo commit meaningful; không backdate hoặc fabricate tiến trình nhiều ngày để đáp ứng rubric.
 - Push branch được chấp thuận; xác minh remote SHA khớp HEAD và working tree sạch. Báo commit/branch/URL.
 - Không đổi visibility, collaborators, deploy Pages/site hoặc merge PR ngoài phạm vi được yêu cầu.

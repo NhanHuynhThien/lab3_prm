@@ -49,10 +49,10 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 
 ## 5. UI kế thừa Lab2
 
-- Nguồn token cuối: `docs/references/lab2/source-design-system.txt`; ảnh gốc ở `assets/design/lab2/`.
+- Nguồn tham chiếu: `docs/lab2-ui-reference.md` và Figma gốc; implementation token hiện tại nằm trong `lib/theme/app_theme.dart`. Không copy lại ảnh/tài liệu lịch sử vào runtime assets.
 - Giữ Inter, primary#006C49, background#FAF8FF, mint#E8F7EF, card radius20, control12, spacing4/8/12/16/24/32, touch>=48dp, CTA52dp.
 - Mobile giữ 4 destinations: Tổng quan/Tài khoản/Phân tích/Cá nhân. Desktop có sidebar mở rộng; không ép giao diện web vào điện thoại.
-- Xem và đọc skill UI phù hợp trước khi áp dụng; project đã cài 13 skills trong `.agents/skills/`, source/hash trong `skills-lock.json`.
+- Xem và đọc skill UI phù hợp trước khi áp dụng; bộ skill đã cài trong `.agents/skills/` là local tooling và được gitignore. Fresh clone không cần bộ skill hoặc Node để build Flutter.
 - Existing direction: framed-sheet, seed1978369971. Giữ palette/type Lab2; các quy tắc skill mâu thuẫn yêu cầu kế thừa phải được ghi ngoại lệ có lý do, không thay nguồn thiết kế âm thầm.
 - Logo gốc SVG/Flutter painter và icons phải cùng geometry. Không trình bày chữ cái provider avatar như logo chính thức.
 - Motion dùng AppMotion và tôn trọng system disableAnimations; không thêm loop decoration hoặc animation che data lỗi.
@@ -63,17 +63,17 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - Thay Dart: `dart format --output=none --set-exit-if-changed lib test`, `flutter analyze`, tests có liên quan; chạy full `flutter test` khi thay model/VM/theme/navigation dùng chung.
 - Thay dependency/assets/runtime bootstrap: `flutter pub get`, analyze/test phù hợp và web build nếu ảnh hưởng bundling.
 - Docs-only: kiểm tra local links, path portability, facts và checklist states. Không rerun build chỉ để tạo thêm log nếu code runtime không đổi.
-- Browser inspector taste-skill không hiểu Dart/CanvasKit DOM. Đã có no-title/hero-void; giữ report thật, đánh giá ảnh render + Flutter tests; không thêm hidden h1 để qua gate giả.
+- Browser inspector taste-skill không hiểu Dart/CanvasKit DOM. Khi dùng phải đánh giá ảnh render + Flutter tests; không thêm hidden h1 để qua gate giả. Output inspector là local artifact, không commit.
 - Android SDK chưa có ở lần doctor19/10; trước khi claim APK/device test cần xác minh lại toolchain. Không claim web test thay Android/MobAI.
 - Không tạo `.mob`, AI review findings, prompt logs hoặc console screenshots giả. Mỗi evidence ghi môi trường/thời gian và scope thật.
-- AI log hiện có 4 prompt nguồn thực sau lượt docs/push20/10; tối thiểu 6 entries theo rubric vẫn chưa đạt. Không chia prompt thành các entry tưởng tượng.
+- AI log hiện có 5 prompt nguồn thực sau lượt cleanup20/10; tối thiểu 6 entries theo rubric vẫn chưa đạt. Không chia prompt thành các entry tưởng tượng.
 
 ## 7. Git và bàn giao
 
 - Repo đích: `https://github.com/NhanHuynhThien/lab3_prm.git`; giữ visibility hiện có, không tự đổi public/private hoặc mời cộng tác viên.
 - Publication đầu tiên vào main theo yêu cầu20/10; feature branches sau dùng prefix `codex/` trừ khi user chỉ định tên khác.
 - Trước push: kiểm tra remote refs, staged diff, ignore rules và secret scan. Không force push hoặc ghi đè history người khác.
-- Commit source, pubspec.lock, required assets, docs/agent instructions và skill lock. Bỏ build/cache, machine-specific paths, signing keys, credentials, generated registrants.
+- Commit source Flutter, pubspec.lock, required platform/font assets và docs/agent instructions. Không commit vendor skills/skill lock, inspector output, tài liệu/ảnh nguồn copy, PDF đề bài, build/cache, scripting bytecode, machine paths, signing keys hoặc generated registrants.
 - Không sửa SDK/dependency vendor ngoài phạm vi để chữa lỗi app. Không viết lại `.agents/skills/` third-party như thể đây là code sản phẩm.
 - Cập nhật README/build-status/checklist/handoff gaps khi behavior thay đổi; report ngắn gọn phần đã làm, tests thực chạy, rủi ro/phần pending và commit/branch khi publish.
 - Repo hiện private; lecturer access/submission rubric vẫn cần được xử lý đúng lúc, không tự báo final submission đã đạt.

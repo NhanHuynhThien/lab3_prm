@@ -14,19 +14,19 @@ Project package `token_ledger`, applicationId `com.tokenledger.token_ledger`, ve
 - Analytics metric cost/token/sessions, purpose ring/legend và account comparison; drilldown history có filters/search.
 - Money micros/parser; unknown metrics được giữ null; budget không phải provider balance.
 - Seed3 accounts/12 sessions, cost$12.84/known tokens 286k; missing cost/token 1 session. Không phải dữ liệu sync.
-- Original logo hexagon T/L: SVG, PNG1024, Flutter painter, Android/PWA icons.
-- Taste-skill13 packages installed; framed-sheet seed1978369971, keep palette/type Lab2. Motion hỗ trợ reduced motion.
+- Original logo hexagon T/L: SVG, Flutter painter và Android/PWA icons; PNG1024 export dư đã bỏ.
+- Taste-skill13 packages installed local-only, gitignored; framed-sheet seed1978369971, keep palette/type Lab2. Motion hỗ trợ reduced motion.
 - Tests16; analyzer sạch và web release build đã pass ở lượt scaffold19/10. Verification20/10 được ghi trong test-report/log riêng khi chạy thật.
 
 ## Nguồn phải đọc
 
 1. `docs/architecture.md`: data flow và invariants actual code.
-2. `docs/lab2-ui-reference.md`: tokens,8-screen mapping, portable snapshots.
+2. `docs/lab2-ui-reference.md`: tokens,8-screen mapping và link Figma gốc.
 3. `docs/build-status.md`, `docs/test-report.md`: evidence và giới hạn.
 4. `docs/TASK_CHECKLIST.md`: backlog đầy đủ; gates Firebase chưa đạt.
 5. `docs/firebase-pending.md`: điều kiện nối backend sau.
 
-Source Lab2 đã snapshot 20 PNG +3 text files, hashes trong `docs/references/lab2/provenance.json`. Không cần absolute machine path để đọc tham chiếu sau clone. Figma gốc có link trong README; live annotations vẫn pending.
+Đã bỏ các ảnh/text Lab2 copy và report/log inspector khỏi Git theo yêu cầu cleanup20/10. Tham chiếu UI nằm ở docs/lab2-ui-reference.md và Figma gốc. Runtime chỉ cần fonts; logo được vẽ bằng Flutter painter và launcher icons nằm trong platform sources.
 
 ## Chưa làm — không báo nhầm đã xong
 

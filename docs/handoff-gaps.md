@@ -16,4 +16,4 @@
 
 ## Portability sau publication 20/10
 
-Handoff, final design system và screen spec gốc đã snapshot dưới `docs/references/lab2/`;20 PNG final/QA/states/components ở `assets/design/lab2/`. README dùng link trong repo để fresh clone không phụ thuộc thư mục Lab2 cạnh bên. Text snapshots có thể giữ đường dẫn lịch sử của repo gốc; bản điều hướng hiện hành là [lab2-ui-reference](lab2-ui-reference.md).
+Repo dùng [lab2-ui-reference](lab2-ui-reference.md) và Figma gốc thay các bản copy ảnh/text nguồn. Flutter build chỉ đọc source/font/platform assets; không phụ thuộc sibling Lab2 hoặc bộ skill local.

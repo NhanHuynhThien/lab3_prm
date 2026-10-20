@@ -8,7 +8,7 @@ Ngày 19/10/2026. Đọc cùng [Implementation plan](IMPLEMENTATION_PLAN.md). Ch
 
 ## Cập nhật docs/agent 20/10/2026
 
-Đã thêm root AGENTS.md, `.agents/` context/workflows, docs index/architecture và bộ Lab2 reference độc lập. DESIGN-02 có snapshot 20 PNG và3 text nguồn với SHA-256. Không đánh RELEASE-13 hoặc PR-review tasks done chỉ vì initial push: chưa có PR/review/merge hay Firebase evidence.
+Đã thêm root AGENTS.md, `.agents/` context/workflows, docs index/architecture và bộ Lab2 reference độc lập. Bộ snapshot được tạo ở lượt trước, sau đó bỏ khỏi Git theo yêu cầu cleanup; DESIGN-02 hiện dùng bảng mapping/tokens và Figma reference. Không đánh RELEASE-13 hoặc PR-review tasks done chỉ vì initial push: chưa có PR/review/merge hay Firebase evidence.
 
 ## Quy tắc thực hiện
 
@@ -30,7 +30,7 @@ Dependency: tài liệu plan hiện tại. Exit gate: mapping đủ 8 màn / 3 f
 - [ ] SCOPE-05 Chốt terminology account/provider/product/model/session/quota/auth token và dùng nhất quán.
 - [ ] SCOPE-06 Xác nhận USD là currency P0; VND/FX để P1 nếu có nhu cầu.
 - [ ] DESIGN-01 Xem đủ 8 final360,8 QA 412 và state/component PNG trong Lab2; ghi nguồn/version.
-- [x] DESIGN-02 Chép snapshot cần thiết vào `assets/design/lab2/`, giữ manifest/source references; cấu hình không bundle evidence dư vào APK.
+- [x] DESIGN-02 Đối chiếu core Lab2, giữ mapping/tokens trong `docs/lab2-ui-reference.md`; không bundle tài liệu/ảnh nguồn copy hoặc tooling vào app.
 - [ ] DESIGN-03 Tạo `docs/handoff-gaps.md` từ HG01–HG10, mỗi gap có resolution và verification còn thiếu.
 - [ ] DESIGN-04 Tạo `docs/design-change-log.md` ghi thay chủ đề, flow, tab labels, form fields, login/profile/FCM/export và khác biệt Android.
 - [ ] DESIGN-05 Chuẩn bị annotated mockup8 màn TokenLedger từ core Lab2; không redesign palette/font/layout tùy ý.
@@ -134,10 +134,10 @@ Dependency: G3. Exit gate: F1 tạo/sửa/xóa usage và tổng đúng, kể c�
 - [ ] USAGE-11 S05: lịch sử nhóm ngày, filter account/purpose/time, list pagination không ảnh hưởng tổng kỳ.
 - [x] USAGE-12 S11: detail nguồn/cost/tokens + Edit/Delete, confirm delete và phản ánh realtime.
 - [ ] USAGE-13 VM tests save fail/retry/draft/pending; lỗi permission/network giữ dữ liệu form.
-- [ ] SEED-01 Tạo seed versioned đúng mục9; tokens input/output cộng ra50k/100k, cost$0.20/$0.40.
+- [ ] SEED-01 Tạo seed versioned đúng mục9; đối chiếu baseline hiện tại Claude121k/$5.68, Codex141k/$5.86, Gemini24k/$1.30; bổ sung owner/version khi nối Firebase.
 - [ ] SEED-02 Seed account unknown1 phiên, account rỗng CRUD Test, user B dataset khác; isolate isDemo.
 - [ ] SEED-03 Reset chỉ xóa demo thuộc UID, cập nhật counters đúng; seed lặp không nhân đôi và không xóa real data.
-- [ ] USAGE-14 Kiểm chứng thêm10k/$0.05 → known160k/$0.65, sửa thành$0.07 →$0.67, xóa →$0.60.
+- [ ] USAGE-14 Kiểm chứng thêm10k/$0.05 → known296k/$12.89, sửa thành$0.07 →$12.91, xóa → baseline286k/$12.84.
 - [ ] GATE-04 F1 happy/error/recovery + usage CRUD đạt trên Firestore thật; commit flow/calculator/tests.
 
 ## G5 — Phân tích theo account và công việc (P0)

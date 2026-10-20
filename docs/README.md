@@ -7,7 +7,7 @@ Cập nhật 20/10/2026. Tài liệu chia trạng thái thực tế và mục ti
 1. [README dự án](../README.md): clone/chạy local, chức năng và limitations.
 2. [Build status](build-status.md): source/visual đã có, phần chưa kiểm chứng.
 3. [Kiến trúc hiện hành](architecture.md): models/services/ViewModels/projections/data flow.
-4. [Nguồn UI Lab2](lab2-ui-reference.md): token/mapping/ảnh gốc portable.
+4. [Nguồn UI Lab2](lab2-ui-reference.md): token/mapping/source Figma.
 5. [Checklist](TASK_CHECKLIST.md): làm tiếp theo dependency và evidence gates.
 
 ## Danh mục
@@ -20,13 +20,13 @@ Cập nhật 20/10/2026. Tài liệu chia trạng thái thực tế và mục ti
 | [Build status](build-status.md) | Local scaffold, design direction, visual review | App local hoạt động; Firebase pending |
 | [Design change log](design-change-log.md) | Mapping và khác biệt với StudentPay | Log local; live Figma update pending |
 | [Handoff gaps](handoff-gaps.md) | Khoảng trống spec và resolution | Phân biệt đã sửa và còn thiếu |
-| [Lab2 reference](lab2-ui-reference.md) |20 PNG +3 text snapshots và provenance | Copy nguyên bản 20/10 |
+| [Lab2 reference](lab2-ui-reference.md) | Mapping/tokens/Figma gốc | Không giữ bản copy lịch sử trong source |
 | [Test report](test-report.md) |16 unit/widget tests và giới hạn coverage | Không phải MobAI/Firebase evidence |
-| [AI implementation log](implementation-ai-log.md) | Prompt thật/output/verify/decision |4 entries; chưa đủ 6 theo rubric |
+| [AI implementation log](implementation-ai-log.md) | Prompt thật/output/verify/decision |5 entries; chưa đủ 6 theo rubric |
 | [Firebase pending](firebase-pending.md) | Điểm nối và thứ tự tích hợp | Chưa có project/config/SDK |
-| [Logo](../assets/brand/README.md) | Mark/source/icons/font license | Có asset SVG/PNG/native icons |
+| [Logo](../assets/brand/README.md) | Mark/source/icons/font license | Source SVG/painter và native icons |
 | [AGENTS.md](../AGENTS.md) | Quy tắc làm việc trong repo | Entry point agent |
-| [Agent workspace](../.agents/README.md) | Context/workflows/installed skills | Có13 skills và lockfile |
+| [Agent workspace](../.agents/README.md) | Context/workflows/installed skills | Context/workflows; skills cài local, gitignored |
 
 ## Deliverables đề yêu cầu chưa có
 
