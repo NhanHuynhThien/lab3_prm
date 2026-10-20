@@ -1,8 +1,13 @@
 import '../models/ledger.dart';
+import 'reporting_calendar.dart';
 
 /// Deliberately fictional manual entries. These are not provider prices or balances.
-LedgerData createDemoSeed(DateTime now) {
-  final monthStart = DateTime(now.year, now.month);
+LedgerData createDemoSeed(
+  DateTime now, {
+  String timezone = 'Asia/Ho_Chi_Minh',
+}) {
+  now = ReportingCalendar.at(now, timezone);
+  final monthStart = ReportingCalendar.wall(timezone, now.year, now.month, 1);
   final accounts = [
     AIAccount(
       id: 'claude',
@@ -12,12 +17,18 @@ LedgerData createDemoSeed(DateTime now) {
       billingMode: BillingMode.subscription,
       plan: 'Cá nhân',
       budgetMicros: 20000000,
-      createdAt: monthStart,
+      createdAt: ReportingCalendar.instantUtc(monthStart),
+      isDemo: true,
+      dataSource: DataSource.demo,
+      timezone: timezone,
       quota: QuotaSnapshot(
+        source: DataSource.demo,
         window: '5 giờ',
         usedPercent: 65,
-        observedAt: now,
-        resetAt: now.add(const Duration(hours: 3)),
+        observedAt: ReportingCalendar.instantUtc(now),
+        resetAt: ReportingCalendar.instantUtc(
+          now.add(const Duration(hours: 3)),
+        ),
       ),
     ),
     AIAccount(
@@ -28,12 +39,16 @@ LedgerData createDemoSeed(DateTime now) {
       billingMode: BillingMode.subscription,
       plan: 'Học tập',
       budgetMicros: 25000000,
-      createdAt: monthStart,
+      createdAt: ReportingCalendar.instantUtc(monthStart),
+      isDemo: true,
+      dataSource: DataSource.demo,
+      timezone: timezone,
       quota: QuotaSnapshot(
+        source: DataSource.demo,
         window: 'Hàng tuần',
         usedPercent: 40,
-        observedAt: now,
-        resetAt: now.add(const Duration(days: 3)),
+        observedAt: ReportingCalendar.instantUtc(now),
+        resetAt: ReportingCalendar.instantUtc(now.add(const Duration(days: 3))),
       ),
     ),
     AIAccount(
@@ -44,7 +59,10 @@ LedgerData createDemoSeed(DateTime now) {
       billingMode: BillingMode.api,
       plan: 'API',
       budgetMicros: 5000000,
-      createdAt: monthStart,
+      createdAt: ReportingCalendar.instantUtc(monthStart),
+      isDemo: true,
+      dataSource: DataSource.demo,
+      timezone: timezone,
     ),
   ];
   final specs = <(String, String, Purpose, int?, int?)>[
@@ -75,13 +93,20 @@ LedgerData createDemoSeed(DateTime now) {
         accountId: s.$1,
         title: s.$2,
         purpose: s.$3,
-        occurredAt: occurred,
+        occurredAt: ReportingCalendar.instantUtc(occurred),
         inputTokens: input,
         outputTokens: s.$4 == null ? null : s.$4! - input!,
         costMicros: s.$5,
+        dataSource: DataSource.demo,
+        isDemo: true,
+        costBasis: s.$5 == null ? CostBasis.unknown : CostBasis.manual,
         note: 'Dữ liệu demo giả định, không phải số liệu đồng bộ từ nhà cung cấp.',
       ),
     );
   }
-  return LedgerData(accounts: accounts, sessions: sessions);
+  return LedgerData(
+    accounts: accounts,
+    sessions: sessions,
+    reportingTimezone: timezone,
+  );
 }

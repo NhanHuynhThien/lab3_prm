@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'services/ledger_repository.dart';
 import 'viewmodels/ledger_viewmodel.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  final preferences = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(
       overrides: [
         ledgerRepositoryProvider.overrideWithValue(
-          LocalLedgerRepository(preferences),
+          LocalLedgerRepository.open(),
         ),
       ],
       child: const TokenLedgerApp(),

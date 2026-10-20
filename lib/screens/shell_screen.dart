@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/common.dart';
+import '../widgets/storage_recovery.dart';
 import 'accounts_screen.dart';
 import 'analytics_screen.dart';
 import 'dashboard_screen.dart';
@@ -25,6 +26,15 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     value: 1,
     duration: AppMotion.medium,
   );
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _tabFade.stop();
+      _tabFade.value = 1;
+    }
+  }
+
   @override
   void dispose() {
     _tabFade.dispose();
@@ -54,14 +64,8 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     final ledger = ref.watch(ledgerProvider);
     final wide = MediaQuery.sizeOf(context).width >= AppSpace.wide;
     final page = ledger.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => Center(
-        child: ErrorFeedback(
-          message:
-              'Dữ liệu local không đọc được. Không gian hiện tại chưa bị ghi đè. $e',
-          retry: () => ref.invalidate(ledgerProvider),
-        ),
-      ),
+      loading: () => const LoadingFeedback(),
+      error: (e, st) => Center(child: StorageRecovery(error: e)),
       data: (_) => IndexedStack(
         index: _index,
         children: [
@@ -76,6 +80,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
       ),
     );
     final content = FadeTransition(
+      key: const ValueKey('tab-transition'),
       opacity: _tabFade.drive(CurveTween(curve: AppMotion.curve)),
       child: page,
     );
@@ -174,122 +179,139 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
 
   Widget _sidebar(BuildContext context) => SizedBox(
     width: AppSpace.sidebar,
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 16, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const BrandLockup(),
-          const SizedBox(height: 36),
-          const Padding(
-            padding: EdgeInsets.only(left: 12, bottom: 12),
-            child: Text(
-              'Không gian làm việc',
-              style: TextStyle(color: AppColors.muted),
-            ),
-          ),
-          ...List.generate(
-            4,
-            (i) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Material(
-                color: _index == i ? AppColors.surface : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () => _selectTab(i),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 14,
+    child: LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: IntrinsicHeight(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const BrandLockup(),
+                  const SizedBox(height: 36),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 12, bottom: 12),
+                    child: Text(
+                      'Không gian làm việc',
+                      style: TextStyle(color: AppColors.muted),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          icons[i],
-                          size: 21,
-                          color: _index == i
-                              ? AppColors.primary
-                              : AppColors.muted,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            labels[i],
-                            style: TextStyle(
-                              fontWeight: _index == i
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
+                  ),
+                  ...List.generate(
+                    4,
+                    (i) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Material(
+                        color: _index == i
+                            ? AppColors.surface
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        child: ActionSurface(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => _selectTab(i),
+                          selected: _index == i,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 14,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  icons[i],
+                                  size: 21,
+                                  color: _index == i
+                                      ? AppColors.primary
+                                      : AppColors.muted,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    labels[i],
+                                    style: TextStyle(
+                                      fontWeight: _index == i
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const HistoryScreen(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.history_rounded, size: 20),
+                    label: const Text('Lịch sử sử dụng'),
+                  ),
+                  const Spacer(),
+                  Panel(
+                    color: AppColors.soft,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.storage_outlined,
+                          color: AppColors.primary,
+                          size: 22,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Dữ liệu trên thiết bị',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Bạn có thể thêm, sửa và xóa dữ liệu demo. Firebase chưa kết nối.',
+                          style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
                     ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      const CircleAvatar(
+                        backgroundColor: AppColors.disabled,
+                        child: Icon(
+                          Icons.person_outline,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Không gian demo',
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            Text(
+                              'Local workspace',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          TextButton.icon(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(builder: (_) => const HistoryScreen()),
-            ),
-            icon: const Icon(Icons.history_rounded, size: 20),
-            label: const Text('Lịch sử sử dụng'),
-          ),
-          const Spacer(),
-          Panel(
-            color: AppColors.soft,
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.storage_outlined,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Dữ liệu trên thiết bị',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Bạn có thể thêm, sửa và xóa dữ liệu demo. Firebase chưa kết nối.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              const CircleAvatar(
-                backgroundColor: AppColors.disabled,
-                child: Icon(Icons.person_outline, color: AppColors.primary),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Không gian demo',
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    Text(
-                      'Local workspace',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     ),
   );

@@ -1,8 +1,10 @@
-# Test report — Flutter local scaffold
+# Test report — Flutter local và lịch sử verification
 
-Cập nhật20/10/2026. Kết quả là unit/widget tests của Flutter, chưa phải MobAI/Firebase/Android integration evidence.
+Hiện trạng sau upgrade P0 local21/10/2026:33 lib/14 test files; full200/200 tests pass140s, analyzer sạch, format47 files0 changed. Mục upgrade cuối file ghi môi trường/build/evidence/giới hạn. Các bảng16/38/106/142/168 tests và A03–A06 docs-only bên dưới là lịch sử, không phải kết quả runtime hiện hành.
 
-## Coverage hiện có
+Lịch sử scaffold20/10/2026. Kết quả là unit/widget tests của Flutter, chưa phải MobAI/Firebase/Android integration evidence.
+
+## Coverage tại scaffold19–20/10 (lịch sử)
 
 | Suite | Tests | Kiểm tra |
 |---|---:|---|
@@ -30,3 +32,127 @@ Cần clean build rồi chạy pub get, format/analyze/test và web release buil
 Google Auth/Firestore/rules/FCM/Remote Config/Crashlytics/DebugView, PDF cloud, provider sync,10 MobAI scripts/healing/bug exercise, AI PR review, Android APK/device tests và full Figma fidelity/accessibility.
 
 Kết quả clean verification20/10/2026: pub get thành công; format28 files không thay đổi; analyzer No issues found;16/16 tests pass; web release build thành công sau khi bỏ brand directory khỏi bundle. Đã xác minh output không có assets/brand, font Inter vẫn hiện diện. Sau verification chạy Flutter clean để bỏ output/cache local. Không commit artifacts sinh từ compile.
+
+## Local form safety — 21/10/2026
+
+Môi trường thực kiểm tra: Windows10, Flutter3.47.4 / Dart3.13.3 (khác phiên bản lịch sử20/10), Android SDK build-tools36.0.0, JBR25 từ Android Studio. `flutter doctor -v`: No issues found, licenses accepted. `ANDROID_HOME` của shell cũ trỏ đường dẫn không tồn tại, nhưng Flutter tìm được SDK hợp lệ; lệnh Android trong lượt này dùng SDK đã tìm thấy, không đổi biến môi trường hệ thống.
+
+`flutter pub get` thành công, không nâng dependency; `flutter analyze --no-pub`: No issues found. `flutter test --no-pub --reporter expanded`: **38/38 pass**, gồm7 calculator,5 VM,5 widget/navigation,21 form safety. Đây là lần chạy mới21/10, không sửa thời gian của kết quả cũ.
+
+Coverage mới: ba form account/usage/quota có clean/dirty Back, continue/discard và system Back ở widget binding; save failure giữ draft, retry và blocking khi pending; account/usage retry cùng ID; quota retry giữ cùng account; archived usage edit nhưng chặn new/move; purpose round trip; long alias;12 tổ hợp form×width360/412×text scale1/2 với keyboard inset300dp trên viewport800dp. Footer được assert nằm trên keyboard và cao>=48dp. Widget keyboard inset là mô phỏng, không thay kiểm bàn phím native.
+
+Lượt test đầu phát hiện billing dropdown overflow360dp; đã sửa và rerun pass. Test form safety đầu19/19 pass, sau đó bổ sung quota retry/long alias và chạy full38/38. Không có MobAI/Firebase/rules tests trong lượt này.
+
+### Android build và giới hạn native — 21/10/2026
+
+- `flutter build apk --debug`: thành công, Gradle assembleDebug707 giây. Lần build đầu tự cài SDK Platform35/36 và CMake3.22.1 theo dependency requirements/licenses sẵn có; không chỉnh SDK/vendor source.
+- Output local `build/app/outputs/flutter-apk/app-debug.apk`,157.209.241 bytes; SHA256 `03B1BCB4E4ADD43620A8701C8652910CFA78A8D06552B32C2E8086FB6C4080E6`. Build/cache được ignore, gồm cache `android/.kotlin/` phát sinh lần build Android đầu.
+- AVD Pixel7/API34 có sẵn bị SettingsProvider crash vì `settings_global.xml` không có fallback, reboot loop; không wipe/sửa dữ liệu AVD gốc.
+- Thử AVD QA riêng bằng system image API34/x86_64 đã cài, cold boot/software GPU và ADB reconnect/loopback; vẫn offline. Ổ C thiếu chỗ cho partition mặc định, đã thử QA trên ổ D; không claim cài/chạy app thành công.
+- **Chưa đạt native smoke:** install/launch, CRUD/restart persistence và bàn phím thật còn cần thiết bị Android kết nối hoặc AVD hoạt động. Không có thiết bị vật lý trong lượt này. SDK có sẵn không đồng nghĩa emulator/native test pass.
+- Đã xem ảnh widget render360×800 bằng font Inter/MaterialIcons thật cho usage form với keyboard inset và discard dialog. Script/ảnh QA chỉ nằm trong build/`.taste-skill/` bị ignore, không phải ảnh native/browser hoặc full Figma fidelity. Format30 files không đổi, diff whitespace sạch; không chạy lại web release vì không thay dependency/assets/bootstrap.
+
+## B03–B07 — kết quả cuối và audit21/10/2026
+
+Môi trường: cùng Flutter3.47.4/Dart3.13.3 trên Windows; không chạy emulator theo yêu cầu người dùng. Tăng từ38 lên106 tests,30 lib source files và8 test files. Chỉ bổ sung dependency trực tiếp characters1.4.1 vốn đã có trong lockfile, không nâng dependency/SDK.
+
+| Suite | Tests | Scope |
+|---|---:|---|
+| calculator_test.dart |8| Totals/null/zero/period/parser/JSON/quota/seed và UTC→local display |
+| ledger_viewmodel_test.dart |5| CRUD/persistence/save fail/archive/history |
+| widget_test.dart |5| Navigation360/412/768/1440 và usage form |
+| form_safety_test.dart |21| Ba form, draft/Back/save retry/keyboard/text scale/long alias |
+| ledger_stability_test.dart |24| VM validation/bounds/Unicode, quota bypass, archived mutations, UUID/concurrency/reload/dispose |
+| local_repository_test.dart |27| JSON/schema/type/date/enum/references/duplicates, init/read/write failures, backup/recovery, UTC/zero/null round trip |
+| live_clock_test.dart |10| Clock boundaries, exact reset, pause/resume/timer disposal, UTC/local calendar/edit and budget null/0/overrun |
+| local_flows_test.dart |6| Archived list/detail/history/edit/delete/restore360/412, recovery Retry/cancel/confirm/fail, double tap/forced route removal |
+
+Final checks thực chạy: `flutter pub get` thành công; `dart format --output=none --set-exit-if-changed lib test`:38 files,0 changed; `flutter analyze --no-pub`:No issues found; `flutter test --no-pub --reporter expanded`:**106/106 pass**; `flutter build web --release --no-wasm-dry-run`:Built build/web (JS compile41,6s). Các lượt trung gian phát hiện/correct timer lifetime, lifecycle fixture transitions và scroll fixture chọn nhầm TextField scrollable; kết quả cuối đã rerun toàn suite.
+
+Audit bổ sung: sửa action archived bị ẩn trong sheet; bảo vệ lỗi mở SharedPreferences trước render; chặn saveAccount bypass quota time; dừng timer/projections khi unused; kiểm UTC/local date và year đúng cả khi edit; giữ integer micros chính xác và Unicode grapheme limits đúng Flutter. Không có schema migration: schemaVersion1/key chính giữ nguyên, valid data round trip; unreadable data chỉ được thay sau confirmation và backup raw thành công.
+
+Web preview `http://127.0.0.1:4191/?demo=1`:server chạy, HTTP200 và flutter_bootstrap.js hiện diện. Browser inventory chỉ có MCP Apps, không có Chrome/IAB để điều khiển, nên chưa có browser interaction/console verification. Render QA riêng màn recovery360/412×800 với font Inter/MaterialIcons thật đã xem ảnh, không overflow/clipping thấy được;2 render checks tạm không tính vào106 tests. Script/ảnh/log ở build/`.taste-skill/`, không commit.
+
+Không rebuild APK ở lượt B03–B07; APK ở phần lịch sử phía trên thuộc source trước các thay đổi này. Native/MobAI/Firebase/Figma fidelity không được suy từ web/widget checks. Chưa test multi-window writes, IANA/custom cycles hoặc cloud backup vì ngoài local scope; snapshot persistence vẫn có giới hạn này.
+
+
+## B08–B10 final audit —21/10/2026
+
+Môi trường: Windows, Flutter3.47.4 stable/Dart3.13.3; local SharedPreferences contract/repository fixtures. Không chạy emulator, thiết bị Android, Chrome/IAB, MobAI hoặc Firebase. Lượt này không nâng dependencies/thêm runtime assets. Build APK trước đây không đại diện source UI mới.
+
+| Check | Kết quả thực |
+|---|---|
+| dart format --output=none --set-exit-if-changed lib test |40 files,0 changed |
+| flutter analyze --no-pub | No issues found |
+| flutter test --no-pub --concurrency=1 --dart-define=UI_AUDIT_IMAGES=true --reporter expanded |142/142 pass, khoảng65s; chạy tuần tự để giảm RAM |
+| flutter build web --release --no-wasm-dry-run | Built build/web, JS compile38.2s; dependency resolution thành công, không upgrade lockfile |
+
+10 suites: calculator8, ledger VM5, navigation/widget5, form safety21, stability24, local repository27, live clock10, local flows6, UI audit30, component audit6.106 tests trước giữ regression;36 tests mới có scope theo [fidelity draft](fidelity-check.md).
+
+UI audit:24 cases×12 màn=288 screen instances, thêm24 usage sheets;4 viewport360/412/768/1440×800 logical px, DPR1, scale1/1.3/2, SafeArea24dp, seed và stress data hợp lệ.6 keyboard cases chạy3 forms=18 scenarios, inset300dp, focus field cuối và CTA không bị che.6 gallery cases kiểm9 families/selected/pressed/focus/filled/error/disabled/loading/dialog và targets48/52. Tests tải Inter/MaterialIcons thật; xuất và xem ảnh12 màn tại360/412/1440, stress360 chữ2.0, gallery360/412. Artifacts/logs local ignored dưới .taste-skill/b08-b10, không commit.
+
+Các vấn đề tìm và sửa: bar chart overflow chữ2; sidebar desktop overflow1.3/2; legend số tiền lớn; donut caption không vừa; AppBar title cắt trên dù không RenderFlex; helper/error3 dòng cắt hướng dẫn. Title bounds assertion tiếp tục bắt font rounding1.3 thiếu0.4px, đã thêm4dp khoảng thở và rerun full pass. Không bỏ assertion hoặc giảm text scale. Các lỗi fixture riêng: alias ban đầu vượt80 được thay bằng80 hợp lệ; finder `.last` thay đổi khi lazy scroll được thay bằng field keys; gallery dialog được cuộn giữa viewport trước tap.
+
+B08 đối chiếu mapping/token/spec đã lưu trong repo. Sibling Lab2/bộ ảnh gốc/skill UI không có trong checkout; chưa kiểm8 ảnh gốc hoặc cập nhật live Figma. Ảnh là Flutter test-engine render, không phải screenshot CanvasKit/Android; simulated keyboard không thay native IME evidence. B11 accessibility đầy đủ, B12 flow states đầy đủ, B13 Figma/brand và F11–F13 final fidelity vẫn pending. Firebase/FCM/PDF/Notifications/Reports vẫn pending. Chưa commit/push.
+
+## B11–B13 final audit —21/10/2026
+
+Môi trường Windows/Flutter3.47.4 stable/Dart3.13.3, Inter/MaterialIcons thật trong UI tests; local repository fixtures. Không emulator/Android/MobAI/Firebase/Chrome/IAB run trong lượt này. Không thêm package hoặc runtime assets, không upgrade dependencies. Source31 lib/12 test files;43 Dart files format.
+
+Bộ mới: accessibility_states_test.dart23 cases và brand_audit_test.dart3 cases, thêm26 vào142 regression trước =168. Bao gồm numeric contrast pairs, Flutter androidTapTargetGuideline/labeledTapTargetGuideline/textContrastGuideline trên Purpose/4 tab360/412, Tab+Enter/selected/focus outline, chart dates/USD/single semantics, dynamic disableAnimations giữ scroll/search/metric, route/dialog noAnimation, busy tĩnh không công bố50%, saving focus lock. State tests: cold load/error/Retry, reload5 forms/screens giữ draft/search, dirty Back khi load error, not-found account/session/disabled/empty, reset/clear cancel/fail/pending/retry/success360/412, confirmed action double tap/fail/retry/dispose. Existing archived usage/recovery/validation/money/time tests giữ nguyên assertion, restore confirmation test chọn action label rõ nghĩa mới.
+
+Brand: SVG contract/canonical painter probes, premultiplied raster diff<8/255 với5 Android densities/favicon/PWA192/512; maskable alpha/safe circle/top glyph position, grapheme initials và semantics không phải official provider logo. Dung sai antialias không phải pixel-perfect claim. Xem assets/brand/README.md.
+
+Rà lại tìm và sửa: RangePicker regular text không đạt pixel contrast guideline (đã dùng label semibold); custom rows thiếu button/selected/focus; retry visual chưa disabled lúc recovery; route cold/reload requireValue; uncontrolled search reset khi Retry; saving chỉ chặn pointer còn keyboard; repeated confirmations/dispose; stale edit có thể resurrect phiên đã xóa. Rà semantics thêm phát hiện busy static50% có thể bị đọc nhầm là completion progress, đã exclude indicator semantics và kiểm value trống. Các lỗi fixture được sửa riêng: SemanticsHandle dispose trước Flutter end-of-test verification, generic SegmentedButton finder, reset Navigator giữa screen fixtures. Không bỏ assertion/giảm scale hoặc tạo dữ liệu giả để qua gate.
+
+Figma live evidence: đọc page1:3, xem8 final360, annotate nodes59:2/49/78/121/160/202/236/279; tạo page233:2/board233:3,16 auto-layout handoff cards,52 created IDs trả về. Đã xem screenshot board840×2402, không có clipping. [Link Figma](https://www.figma.com/design/C7FiWYzVXUS8G2cnK5AGos/PRM393-Lab2-SE192382_SE192336?node-id=233-3), từng frame/node ở fidelity-check.md. Original StudentPay geometry/text giữ nguyên; annotations không thay bộ mockup TokenLedger/final fidelity hoặc giảng viên approval.
+
+Local images đã xuất bằng full suite với UI_AUDIT_IMAGES=true/UI_AUDIT_OUTPUT=.taste-skill/b11-b13 và xem ảnh mobile/desktop/gallery; sau đó chỉ chỉnh semantics busy/transition delegate không đổi pixels Android và rerun full final. Full UI matrix288 screen instances + usage sheets/keyboard giữ từ B10. Logs .taste-skill/b11-b13-*.log và images ignored. Không dùng ảnh Flutter engine làm browser/native screenshot. Kết quả cuối bên dưới áp dụng source sau rà semantics quota/budget.
+
+
+### Kết quả cuối B11–B13
+
+| Check | Kết quả thực trên source cuối |
+|---|---|
+| `dart format --output=none --set-exit-if-changed lib test` |43 files,0 changed |
+| `flutter analyze --no-pub` | No issues found,15.6s |
+| `flutter test --no-pub --concurrency=1 --reporter expanded` |168/168 pass,108s; log b11-b13-verified.log |
+| `flutter build web --release --no-wasm-dry-run` | Built build/web, JS compile51.4s; log b11-b13-web-final.log |
+| Docs/Git checks | Local Markdown links0 thiếu;93 task IDs không trùng; diff --check sạch |
+
+Rà cuối bổ sung semantic value cho quota thiếu/quá reset và budget chưa đặt để không đọc thành measured0%;23 accessibility/state tests gồm regression này. Không đổi quota/budget/cost data. Full suite12 files: calculator8 + ledger VM5 + navigation5 + form safety21 + stability24 + repository27 + clock10 + local flows6 + UI audit30 + component6 + accessibility/states23 + brand3 =168. Browser/native/MobAI/Firebase không được suy ra từ các kết quả trên; không emulator, không commit/push.
+
+## A03–A06 — audit tài liệu ngày21/10/2026
+
+Môi trường: Windows/PowerShell, repo hiện tại; Codex đọc docs/source/tests và Git thực. Không thay Dart/assets/dependencies/platform runtime; không chạy Flutter/test/build hoặc emulator ở lượt này. Kết quả168 tests/analyzer/web build ở mục B11–B13 vẫn là evidence lịch sử gần nhất, không phải kết quả tạo mới.
+
+- 20 Markdown dự án (docs, root, agent và brand): local links không hỏng, code fences cân bằng, không có absolute machine paths trong nội dung hướng dẫn.
+- 93 roadmap IDs và196 checklist IDs không trùng; A03–A06 tick, A01/A02/A07 vẫn chưa tick; HG01–HG10 giữ nghĩa gốc và có resolution/verification pending.
+- AI log có10 prompt nguồn thực; thêm đúng một Entry10 cho yêu cầu A03–A06. Việc đáp ứng chất lượng rubric vẫn cần đối chiếu.
+- SHA256 của79 file runtime (lib/test/platform/assets/pubspec, bỏ Markdown/build/cache) không đổi so với đầu lượt; không ghi đè các thay đổi B01–B13 chưa commit.
+- `git diff --check` exit0. Audit scripts/baseline chỉ ở tooling local ignored, không phải source sản phẩm hoặc evidence nộp đã publish.
+- `git ls-remote --heads origin` thành công: remote main4aeb7b719b95c0b4aa21f02bc0f05329b909cdf2, cùng HEAD/local main; branch thực codex/local-form-safety. Chưa commit/push B/A; không suy quyền người chấm hoặc reviewed PR từ kết quả refs.
+
+Đã sửa các thiếu sót tài liệu: file có sẵn nhưng checkbox còn “tạo”, gate ghi “chưa thực hiện” dù đã có local, task checked gộp donut slice/multi-window/source/realtime chưa implement, context còn SDK thiếu/Git trống/16 tests/Figma pending, và checklist gaps thiếu mã HG gốc. SD01–SD08 giữ P0 còn thiếu cùng quyết định/lý do/test dự kiến; không thêm pricing engine hoặc giả backend. A03–A06 đạt phạm vi quyết định/chuẩn hóa; toàn A và G0–G9 chưa đạt nghiệm thu.
+
+## P0 local sau A04 — verification cuối21/10/2026
+
+Scope: thực hiện bốn bước model/migration → form/quota → cycle/timezone → analytics/history theo yêu cầu “làm cho tôi.”. Windows/PowerShell, Flutter3.47.4/Dart3.13.3;33 lib/14 test files. Không chạy emulator/native/Firebase/MobAI. Branch codex/local-form-safety, toàn bộ thay đổi vẫn working tree, chưa commit/push; không gán SHA nền cho source mới.
+
+- `flutter pub add timezone`, rồi `flutter pub get`: thành công; timezone0.11.2 + http1.6.0/http_parser4.1.2 transitive, không nâng dependency cũ. App chỉ import database Dart offline/calendar; không gọi HTTP/provider API.
+- `flutter analyze`: No issues found, lượt cuối8.3s. `dart format --output=none --set-exit-if-changed lib test`:47 files0 changed, exit0.
+- `flutter test --no-pub --concurrency=1 --reporter expanded`: **200/200 pass140s**, exit0 trên source cuối.20 schema_v2 cases +12 scope_forms cases mới;168 regressions cũ giữ ý nghĩa, cập nhật fixture/schema/unit/UTC/source/nhãn kỳ khi contract đã thay đổi.
+- Full199 trước case mặc định account theo nguồn: pass175s với `UI_AUDIT_IMAGES=true`, xuất ảnh vào tooling local ignored. Đã xem ảnh Flutter thật: analytics360, account detail412, history360, dashboard1440 và account form360 chữ2; glyph mũi tên Inter thiếu đã sửa thành Material icon trước lượt199 có ảnh này. Full200 sau đó giữ cùng ma trận nhưng không xuất ảnh lặp.
+- Ma trận24 scenarios:360/412/768/1440×800 ×scale1/1.3/2 ×seed/stress, thêm6 form keyboard/SafeArea cases; gallery/accessibility/state/brand suites tiếp tục pass. Đây là Flutter-engine render/guidelines, không phải browser, Android TalkBack/IME, MobAI hay final Figma fidelity.
+
+Coverage mới: backup-first v1→v2, corrupt/future version không seed/overwrite, backup/replace fail+Retry, concurrent reload/migration/save ordering; UTC/native instant và immutable createdAt/retry clock; null/known0/source/cost-basis/immutable collections/model/defaults/clear/dirty Back. Quota upsert theo key/tên/rename giữ key, nhiều windows0/100/stale độc lập/source/note/delete/not-found. IANA/UTC/device, cycle31/leap/year/DST23h/25h, cycle history/combined filters khớp budget. Demo/manual/legacy isolation cả metadata budget, reset/clear giữ dữ liệu khác/collision IDs, provider/day-group/timezone/settings retry/donut/initial metric và default account tránh ghi nhầm seed; form fail/retry360/412 giữ fields.
+
+Lượt thử đầu có14 failures: assertions cũ so representation DateTime thay vì instant, fixture one-window/source/schema cũ, vertical-scroll finder và lỗi clearDemo sync-Future contract. Đã sửa đúng contract/implementation, không xóa assertion để che lỗi. Các test mới tiếp tục bắt UTC alias, TZDateTime.toLocal theo tz.local, metadata budget/source, createdAt và account suggestion; đã có fixes/regression. Một số lượt full đang chạy được dừng khi audit còn thay đổi source, không tính là pass; chỉ các lượt đã hoàn tất ở trên được báo đạt.
+
+Logs/scripts/images/fingerprint ở .taste-skill ignored; không commit output inspector/compiled tooling hoặc source PDF/Lab2 copies. Final Figma chưa cập nhật field mới; Google/Firestore/services/PDF/reports/auth routes và Android/MobAI/submission vẫn pending theo scope. Pricing estimates/numeric quota allowances không được làm giả.
+
+Web final: `flutter build web --release --no-pub --no-wasm-dry-run` exit0, JS compile57.7s, Built build/web. Kiểm bundling timezone/database/font/icons thành công; không phải browser interaction/console audit, Wasm hoặc Android evidence. SHA25683 file runtime không đổi so với fingerprint trước full200, kể cả sau web build. Kiểm21 Markdown:0 local links hỏng, fences cân bằng, không machine paths;93 roadmap IDs/196 checklist IDs không trùng; AI log11 entries thật. `git diff --check` exit0. Runtime và docs đã được rà lại; không có requirement Firebase/native/final fidelity nào được tick theo kết quả local.
+
+## Audit checkpoint local —21/10/2026
+
+Git/docs-only, không sửa runtime. Candidate102 files,91 text files: secret-pattern/machine-path scan không phát hiện; không file cấm hoặc file>2MB. Ignore probes xác nhận tooling/build/local.properties/generated registrant/credentials bị loại.83 runtime hashes khớp bộ200 tests/analyzer/format/web JS build đã ghi ở trên; không chạy lại Flutter. Markdown hiện có12 AI entries (entry12 Git-only); kiểm links/fences/IDs/portability và staged diff whitespace trước commit. Commit local trên codex/local-form-safety, chưa push; SHA dùng git log -1 --oneline. Không claim audit toàn bộ history, reviewed PR hoặc native/backend evidence.

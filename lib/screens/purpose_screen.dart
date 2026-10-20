@@ -25,7 +25,7 @@ class PurposeScreen extends StatelessWidget {
               child: Material(
                 color: p == selected ? AppColors.soft : AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
-                child: InkWell(
+                child: ActionSurface(
                   borderRadius: BorderRadius.circular(20),
                   onTap: () => Navigator.pop(context, p),
                   child: Padding(

@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/usage_calculator.dart';
+import '../widgets/data_scope_picker.dart';
+import 'usage_form_screen.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/reporting_viewmodel.dart';
 import '../widgets/charts.dart';
 import '../widgets/common.dart';
+import '../widgets/ledger_feedback.dart';
+import '../viewmodels/ledger_viewmodel.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
 
@@ -16,9 +20,15 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 }
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
-  UsageMetric _metric = UsageMetric.cost;
+  UsageMetric? _selectedMetric;
+  UsageMetric get _metric =>
+      _selectedMetric ??
+      UsageCalculator.preferredMetric(ref.read(filteredSessionsProvider));
   @override
   Widget build(BuildContext context) {
+    final feedback = ledgerFeedback(ref.watch(ledgerProvider), 'Phân tích');
+    if (feedback != null) return feedback;
+    ref.watch(filteredSessionsProvider);
     final projection = ref.watch(analyticsProjectionProvider(_metric));
     final summary = projection.summary;
     final shares = projection.shares;
@@ -35,6 +45,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           'Phân tích sử dụng',
           'Công việc nào đang dùng nhiều nguồn lực AI nhất?',
         ),
+        const DataScopePicker(),
+        const SizedBox(height: 16),
         const RangePicker(),
         const SizedBox(height: 16),
         SingleChildScrollView(
@@ -44,7 +56,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 .map((m) => ButtonSegment(value: m, label: Text(m.label)))
                 .toList(),
             selected: {_metric},
-            onSelectionChanged: (s) => setState(() => _metric = s.first),
+            onSelectionChanged: (s) =>
+                setState(() => _selectedMetric = s.first),
           ),
         ),
         const SizedBox(height: 24),
@@ -54,9 +67,16 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             children: [
               SectionTitle('Theo mục đích · ${_metric.label.toLowerCase()}'),
               if (total == 0)
-                const EmptyFeedback(
+                EmptyFeedback(
                   title: 'Chưa có số liệu cho chỉ số này',
                   message: 'Bạn có thể đổi sang số phiên hoặc bổ sung dữ liệu sử dụng.',
+                  action: 'Ghi sử dụng',
+                  onAction: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const UsageFormScreen(),
+                    ),
+                  ),
                 )
               else
                 LayoutBuilder(
@@ -64,7 +84,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     final legend = Column(
                       children: shares
                           .map(
-                            (p) => InkWell(
+                            (p) => ActionSurface(
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute<void>(
@@ -76,38 +96,46 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 12,
                                 ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color:
-                                            PurposeRing.colors[shares
-                                                .indexOf(p)
-                                                .clamp(0, 3)],
-                                        shape: BoxShape.circle,
+                                child: AdaptivePair(
+                                  breakpoint: 220,
+                                  leading: Row(
+                                    children: [
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              PurposeRing.colors[shares
+                                                  .indexOf(p)
+                                                  .clamp(0, 3)],
+                                          shape: BoxShape.circle,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(child: Text(p.purpose.label)),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '${(p.value / total * 100).toStringAsFixed(1)}%',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall,
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Text(
-                                      format(p.value),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelLarge,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(Icons.chevron_right, size: 18),
-                                  ],
+                                      const SizedBox(width: 12),
+                                      Expanded(child: Text(p.purpose.label)),
+                                    ],
+                                  ),
+                                  trailing: Wrap(
+                                    spacing: 12,
+                                    runSpacing: 8,
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    children: [
+                                      Text(
+                                        '${(p.value / total * 100).toStringAsFixed(1)}%',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                      Text(
+                                        format(p.value),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelLarge,
+                                      ),
+                                      const Icon(Icons.chevron_right, size: 18),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -115,9 +143,20 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                           .toList(),
                     );
                     final ring = Semantics(
+                      excludeSemantics: true,
                       label:
                           'Tổng ${format(total)}. Chi tiết từng mục đích ở danh sách.',
-                      child: PurposeRing(shares: shares, center: format(total)),
+                      child: PurposeRing(
+                        shares: shares,
+                        center: format(total),
+                        onSelected: (share) => Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) =>
+                                HistoryScreen(purpose: share.purpose),
+                          ),
+                        ),
+                      ),
                     );
                     return c.maxWidth >= 660
                         ? Row(
@@ -138,6 +177,11 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               const SizedBox(height: 16),
               Text(
+                'Chi phí thực do bạn xác nhận: ${money(summary.actualCostMicros)} · Nhập tay: ${money(summary.manualCostMicros)} · Chưa phân loại: ${money(summary.unspecifiedCostMicros)}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
                 '${summary.unknownCost} phiên thiếu chi phí · ${summary.unknownTokens} phiên thiếu token. Không tính dữ liệu thiếu là 0.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
@@ -154,7 +198,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 final a = comparison.account;
                 final s = comparison.summary;
                 final value = comparison.value;
-                return InkWell(
+                return ActionSurface(
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute<void>(
@@ -193,6 +237,36 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               }),
               if (projection.comparisons.isEmpty)
                 const Text('Chưa có tài khoản để so sánh.'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        Panel(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SectionTitle('Theo nhà cung cấp'),
+              if (projection.providers.isEmpty)
+                const Text('Chưa có phiên trong kỳ và nguồn đã chọn.'),
+              ...projection.providers.map(
+                (p) => ActionSurface(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => HistoryScreen(provider: p.provider),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: AdaptivePair(
+                      leading: Text(p.provider),
+                      trailing: Text(
+                        '${format(p.value)} · ${p.summary.count} phiên',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

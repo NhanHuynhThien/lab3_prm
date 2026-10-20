@@ -1,6 +1,6 @@
 # Agent instructions — TokenLedger / PRM393 Lab 3
 
-Cập nhật 20/10/2026. Áp dụng cho toàn repo. Đây là hướng dẫn làm việc; [`.agents/project-context.md`](.agents/project-context.md) giữ trạng thái dự án và [`.agents/workflows.md`](.agents/workflows.md) giữ quy trình. Yêu cầu trực tiếp mới của người dùng có ưu tiên cao hơn các quyết định cũ ở đây.
+Cập nhật21/10/2026. Áp dụng cho toàn repo. Đây là hướng dẫn làm việc; [`.agents/project-context.md`](.agents/project-context.md) giữ trạng thái dự án và [`.agents/workflows.md`](.agents/workflows.md) giữ quy trình. Yêu cầu trực tiếp mới của người dùng có ưu tiên cao hơn các quyết định cũ ở đây.
 
 ## 1. Đọc trước khi sửa
 
@@ -21,6 +21,7 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - Dashboard quản lý dữ liệu cá nhân local; chưa có admin đa user, quyền role hoặc provider sync.
 - Không tự thêm chat AI, payment, cookie scraping hoặc backend secret để làm giả integration.
 - Không chủ động tạo agent phụ; chỉ delegation nếu người dùng yêu cầu rõ hoặc một skill áp dụng yêu cầu rõ.
+- Theo yêu cầu21/10: không khởi động, tạo hoặc sửa emulator vì máy yếu. Dùng Flutter tests và web preview; native device verification hoãn, không coi đây là blocker phải sửa máy ảo.
 
 ## 3. Kiến trúc và giới hạn lớp
 
@@ -45,18 +46,18 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - Không cộng quota% giữa accounts hoặc suy quota từ usage sessions.
 - Usage đã lưu không đổi accountId. Account có sessions không hard-delete; archive giữ lịch sử và chặn tạo session mới.
 - Cost seed là dữ liệu giả định, không phải pricing hiện hành. Thêm integration/pricing phải có nguồn, scope và thời gian.
-- Local timezone/tháng dương lịch là giới hạn demo; thay cycle/timezone phải có tests biên kỳ.
+- Schema2 lưu timestamps UTC; reporting timezone IANA/cycle account đã có. Dữ liệu migrate giữ device, dữ liệu mới mặc định Asia/Ho_Chi_Minh; thay cycle/timezone phải có tests biên kỳ/DST.
 
 ## 5. UI kế thừa Lab2
 
 - Nguồn tham chiếu: `docs/lab2-ui-reference.md` và Figma gốc; implementation token hiện tại nằm trong `lib/theme/app_theme.dart`. Không copy lại ảnh/tài liệu lịch sử vào runtime assets.
 - Giữ Inter, primary#006C49, background#FAF8FF, mint#E8F7EF, card radius20, control12, spacing4/8/12/16/24/32, touch>=48dp, CTA52dp.
 - Mobile giữ 4 destinations: Tổng quan/Tài khoản/Phân tích/Cá nhân. Desktop có sidebar mở rộng; không ép giao diện web vào điện thoại.
-- Xem và đọc skill UI phù hợp trước khi áp dụng; bộ skill đã cài trong `.agents/skills/` là local tooling và được gitignore. Fresh clone không cần bộ skill hoặc Node để build Flutter.
+- Xem và đọc skill UI phù hợp trước khi áp dụng; bộ skill từng cài trong `.agents/skills/` là local tooling và được gitignore; checkout hiện tại không có thư mục này. Fresh clone không cần bộ skill hoặc Node để build Flutter.
 - Existing direction: framed-sheet, seed1978369971. Giữ palette/type Lab2; các quy tắc skill mâu thuẫn yêu cầu kế thừa phải được ghi ngoại lệ có lý do, không thay nguồn thiết kế âm thầm.
 - Logo gốc SVG/Flutter painter và icons phải cùng geometry. Không trình bày chữ cái provider avatar như logo chính thức.
 - Motion dùng AppMotion và tôn trọng system disableAnimations; không thêm loop decoration hoặc animation che data lỗi.
-- Sửa UI phải update design log, kiểm tra360/412dp và desktop khi liên quan. Live Figma chưa annotate; không báo đã đồng bộ nếu chưa thao tác.
+- Sửa UI phải update design log, kiểm tra360/412dp và desktop khi liên quan. B13 đã annotate8 original frames và trang handoff bổ sung (link trong fidelity-check); không suy annotations thành bộ mockup/final fidelity đã đạt.
 
 ## 6. Verification và bằng chứng
 
@@ -66,7 +67,7 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - Browser inspector taste-skill không hiểu Dart/CanvasKit DOM. Khi dùng phải đánh giá ảnh render + Flutter tests; không thêm hidden h1 để qua gate giả. Output inspector là local artifact, không commit.
 - Android SDK chưa có ở lần doctor19/10; trước khi claim APK/device test cần xác minh lại toolchain. Không claim web test thay Android/MobAI.
 - Không tạo `.mob`, AI review findings, prompt logs hoặc console screenshots giả. Mỗi evidence ghi môi trường/thời gian và scope thật.
-- AI log hiện có 5 prompt nguồn thực sau lượt cleanup20/10; tối thiểu 6 entries theo rubric vẫn chưa đạt. Không chia prompt thành các entry tưởng tượng.
+- AI log có12 prompt nguồn thực đến checkpoint local ngày21/10 (entry12 là Git-only); vẫn cần đối chiếu scope/chất lượng theo rubric trước nộp. Không chia prompt thành các entry tưởng tượng.
 
 ## 7. Git và bàn giao
 

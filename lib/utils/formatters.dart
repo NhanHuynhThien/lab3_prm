@@ -1,6 +1,18 @@
-String money(int? micros, {int decimals = 2}) => micros == null
-    ? 'Chưa biết'
-    : '${micros < 0 ? '−' : ''}\$${(micros.abs() / 1000000).toStringAsFixed(decimals)}';
+import '../services/reporting_calendar.dart';
+
+String money(int? micros, {int decimals = 2}) {
+  if (micros == null) return 'Chưa biết';
+  RangeError.checkValueInInterval(decimals, 0, 6, 'decimals');
+  const powers = [1, 10, 100, 1000, 10000, 100000, 1000000];
+  final divisor = powers[6 - decimals];
+  final rounded = (micros.abs() + divisor ~/ 2) ~/ divisor;
+  final whole = rounded ~/ powers[decimals];
+  final fraction = decimals == 0
+      ? ''
+      : '.${(rounded % powers[decimals]).toString().padLeft(decimals, '0')}';
+  return '${micros < 0 ? '−' : ''}\$$whole$fraction';
+}
+
 String compactTokens(int? value) {
   if (value == null) return 'Chưa biết';
   if (value >= 1000000) return '${(value / 1000000).toStringAsFixed(1)}M';
@@ -10,10 +22,16 @@ String compactTokens(int? value) {
   return '$value';
 }
 
-String shortDate(DateTime date) =>
-    '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
-String shortTime(DateTime date) =>
-    '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+String shortDate(DateTime date, {String timezone = 'device'}) {
+  final local = ReportingCalendar.at(date, timezone);
+  return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}';
+}
+
+String shortTime(DateTime date, {String timezone = 'device'}) {
+  final local = ReportingCalendar.at(date, timezone);
+  return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+}
+
 int? parseUsd(String raw) {
   if (raw.trim().isEmpty) return null;
   final match = RegExp(r'^(\d{1,7})(?:[.,](\d{1,6}))?$').firstMatch(raw.trim());
@@ -24,6 +42,12 @@ int? parseUsd(String raw) {
       int.parse((match.group(2) ?? '').padRight(6, '0'));
 }
 
-String usdInput(int? micros) => micros == null
-    ? ''
-    : (micros / 1000000).toStringAsFixed(6).replaceFirst(RegExp(r'\.?0+$'), '');
+String usdInput(int? micros) {
+  if (micros == null) return '';
+  final whole = micros.abs() ~/ 1000000;
+  final fraction = (micros.abs() % 1000000)
+      .toString()
+      .padLeft(6, '0')
+      .replaceFirst(RegExp(r'0+$'), '');
+  return '${micros < 0 ? '-' : ''}$whole${fraction.isEmpty ? '' : '.$fraction'}';
+}

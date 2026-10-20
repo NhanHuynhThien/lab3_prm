@@ -80,7 +80,12 @@ void main() {
     final copy = LedgerData.fromJson(data.toJson());
     expect(copy.accounts.first.quota!.remainingPercent, 35);
     expect(copy.sessions.last.costMicros, isNull);
-    expect(copy.sessions.first.occurredAt, data.sessions.first.occurredAt);
+    expect(
+      copy.sessions.first.occurredAt.isAtSameMomentAs(
+        data.sessions.first.occurredAt,
+      ),
+      isTrue,
+    );
   });
   test('quota becomes stale at reset, without inventing a reset allowance', () {
     final quota = createDemoSeed(now).accounts.first.quota!;
@@ -95,4 +100,13 @@ void main() {
       12,
     );
   });
+  test(
+    'UTC timestamps display the same local calendar date/time as projections',
+    () {
+      final local = DateTime(2027, 1, 1, 0, 15);
+      expect(shortDate(local.toUtc()), '01/01');
+      expect(shortTime(local.toUtc()), '00:15');
+      expect(shortDate(DateTime(2028, 2, 29, 23, 59).toUtc()), '29/02');
+    },
+  );
 }

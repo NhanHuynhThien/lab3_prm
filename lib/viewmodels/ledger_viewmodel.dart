@@ -1,52 +1,121 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/ledger.dart';
 import '../services/demo_seed.dart';
+import '../services/ledger_id.dart';
+import '../services/ledger_validation.dart';
 import '../services/ledger_repository.dart';
 import '../services/usage_calculator.dart';
+import 'live_clock_viewmodel.dart';
+
+export 'live_clock_viewmodel.dart' show clockProvider, nowProvider;
 
 final ledgerRepositoryProvider = Provider<LedgerRepository>(
   (ref) => throw UnimplementedError('Override at bootstrap'),
 );
 final ledgerProvider = AsyncNotifierProvider<LedgerViewModel, LedgerData>(
   LedgerViewModel.new,
+  retry: (count, error) =>
+      null, // Local failures stay visible until explicit Retry.
 );
-final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
 class LedgerViewModel extends AsyncNotifier<LedgerData> {
   bool _writing = false;
+  int _loadEpoch = 0;
+  Future<void>? _pendingWrite;
+  final _ids = LedgerIdGenerator();
   LedgerRepository get _repository => ref.read(ledgerRepositoryProvider);
+
   @override
   Future<LedgerData> build() async {
-    final stored = await _repository.load();
-    if (stored != null) return stored;
-    final seed = createDemoSeed(ref.read(clockProvider)());
-    await _repository.save(seed);
+    final epoch = ++_loadEpoch;
+    final repository = ref.watch(ledgerRepositoryProvider);
+    final now = ref.read(clockProvider)();
+    // A reload must not read an old snapshot while our previous save is pending.
+    if (_pendingWrite != null) await _pendingWrite;
+    final stored = await repository.load();
+    if (stored != null) {
+      LedgerValidation.snapshot(stored);
+      return stored;
+    }
+    final seed = createDemoSeed(now);
+    if (ref.mounted && epoch == _loadEpoch) {
+      await _persist(seed, repository.save);
+    }
     return seed;
   }
 
-  Future<void> _commit(LedgerData next) async {
+  Future<void> _persist(
+    LedgerData next,
+    Future<void> Function(LedgerData) write,
+  ) async {
     if (_writing) {
       throw StateError('Đang lưu thay đổi trước. Vui lòng thử lại.');
     }
+    LedgerValidation.snapshot(next);
     _writing = true;
+    final done = Completer<void>();
+    _pendingWrite = done.future;
     try {
-      await _repository.save(next);
-      state = AsyncData(next);
+      await write(next);
     } finally {
       _writing = false;
+      _pendingWrite = null;
+      done.complete();
     }
   }
 
-  String newId() => ref.read(clockProvider)().microsecondsSinceEpoch.toString();
+  LedgerData get _data {
+    if (state.isLoading || !state.hasValue) {
+      throw StateError('Dữ liệu chưa sẵn sàng. Hãy thử tải lại.');
+    }
+    return state.requireValue;
+  }
+
+  Future<void> _commit(LedgerData next) async {
+    final repository = _repository;
+    final epoch = _loadEpoch;
+    _data; // Ordinary mutations cannot overwrite unreadable storage.
+    await _persist(next, repository.save);
+    if (ref.mounted && epoch == _loadEpoch) state = AsyncData(next);
+  }
+
+  String newId() {
+    String id;
+    do {
+      id = _ids.next();
+    } while (state.asData?.value.account(id) != null ||
+        (state.asData?.value.sessions.any((s) => s.id == id) ?? false));
+    return id;
+  }
+
   Future<void> saveAccount(AIAccount account) async {
-    if (account.alias.trim().isEmpty || account.alias.length > 80) {
-      throw ArgumentError('Tên tài khoản cần 1–80 ký tự.');
+    LedgerValidation.account(account);
+    final data = _data;
+    final previous = data.account(account.id);
+    if (previous != null &&
+        !previous.createdAt.isAtSameMomentAs(account.createdAt)) {
+      throw ArgumentError('Không đổi thời điểm tạo tài khoản.');
     }
-    if (account.budgetMicros != null && account.budgetMicros! < 0) {
-      throw ArgumentError('Ngân sách không được âm.');
+    if (previous == null &&
+        account.createdAt.isAfter(ref.read(clockProvider)())) {
+      throw ArgumentError('Thời điểm tạo không được ở tương lai.');
     }
-    final data = state.requireValue;
+    if (previous != null &&
+        (previous.isDemo != account.isDemo ||
+            previous.dataSource != account.dataSource)) {
+      throw ArgumentError('Không đổi nhãn dữ liệu demo của tài khoản.');
+    }
+    for (final quota in account.quotaWindows) {
+      final old = previous?.quotaWindows
+          .where((q) => q.windowKey == quota.windowKey)
+          .firstOrNull;
+      final same =
+          old != null && old.toJson().toString() == quota.toJson().toString();
+      if (!same) LedgerValidation.quota(quota, now: ref.read(clockProvider)());
+    }
     await _commit(
       data.copyWith(
         accounts: [...data.accounts.where((a) => a.id != account.id), account],
@@ -55,13 +124,14 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
   }
 
   Future<void> archiveAccount(String id, bool archive) async {
-    final account = state.requireValue.account(id);
+    final account = _data.account(id);
     if (account == null) throw StateError('Không tìm thấy tài khoản.');
     await saveAccount(account.copyWith(archived: archive));
   }
 
   Future<void> deleteAccount(String id) async {
-    final data = state.requireValue;
+    final data = _data;
+    if (data.account(id) == null) throw StateError('Không tìm thấy tài khoản.');
     if (data.sessions.any((s) => s.accountId == id)) {
       throw StateError(
         'Tài khoản còn phiên sử dụng. Hãy lưu trữ hoặc xóa các phiên trước.',
@@ -73,29 +143,20 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
   }
 
   Future<void> saveUsage(UsageSession session) async {
-    final data = state.requireValue;
+    LedgerValidation.usage(session, now: ref.read(clockProvider)());
+    final data = _data;
     final account = data.account(session.accountId);
-    if (account == null || account.archived) {
-      throw StateError('Chọn tài khoản đang hoạt động.');
-    }
-    if (session.title.trim().isEmpty || session.title.length > 120) {
-      throw ArgumentError('Tên công việc cần 1–120 ký tự.');
-    }
-    for (final value in [
-      session.inputTokens,
-      session.outputTokens,
-      session.costMicros,
-    ]) {
-      if (value != null && value < 0) {
-        throw ArgumentError('Số liệu không được âm.');
-      }
-    }
-    if ((session.inputTokens == null) != (session.outputTokens == null)) {
-      throw ArgumentError('Nhập cả input và output, hoặc để trống cả hai.');
-    }
     final previous = data.sessions.where((s) => s.id == session.id).firstOrNull;
     if (previous != null && previous.accountId != session.accountId) {
       throw StateError('Không đổi tài khoản của phiên đã lưu.');
+    }
+    if (previous != null &&
+        (previous.dataSource != session.dataSource ||
+            previous.isDemo != session.isDemo)) {
+      throw ArgumentError('Không đổi nguồn hoặc nhãn demo của phiên lịch sử.');
+    }
+    if (account == null || (account.archived && previous == null)) {
+      throw StateError('Chọn tài khoản đang hoạt động.');
     }
     await _commit(
       data.copyWith(
@@ -104,28 +165,148 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     );
   }
 
-  Future<void> deleteUsage(String id) => _commit(
-    state.requireValue.copyWith(
-      sessions: state.requireValue.sessions.where((s) => s.id != id).toList(),
-    ),
-  );
-  Future<void> updateQuota(String accountId, QuotaSnapshot quota) async {
-    final now = ref.read(clockProvider)();
-    if (quota.usedPercent < 0 ||
-        quota.usedPercent > 100 ||
-        !quota.resetAt.isAfter(now)) {
-      throw ArgumentError(
-        'Quota cần 0–100% và thời điểm reset trong tương lai.',
-      );
+  Future<void> deleteUsage(String id) async {
+    final data = _data;
+    if (!data.sessions.any((s) => s.id == id)) {
+      throw StateError('Không tìm thấy phiên sử dụng.');
     }
-    await saveAccount(
-      state.requireValue.account(accountId)!.copyWith(quota: quota),
+    await _commit(
+      data.copyWith(sessions: data.sessions.where((s) => s.id != id).toList()),
     );
   }
 
-  Future<void> resetDemo() =>
-      _commit(createDemoSeed(ref.read(clockProvider)()));
-  Future<void> clearDemo() => _commit(LedgerData(accounts: [], sessions: []));
+  Future<void> updateQuota(
+    String accountId,
+    QuotaSnapshot quota, {
+    bool requireExisting = false,
+  }) async {
+    LedgerValidation.quota(quota, now: ref.read(clockProvider)());
+    final account = _data.account(accountId);
+    if (account == null) throw StateError('Không tìm thấy tài khoản.');
+    if (requireExisting &&
+        !account.quotaWindows.any((q) => q.windowKey == quota.windowKey)) {
+      throw StateError(
+        'Cửa sổ hạn mức đã bị xóa. Quay lại chi tiết để thêm mới.',
+      );
+    }
+    final matching =
+        account.quotaWindows
+            .where((q) => q.windowKey == quota.windowKey)
+            .firstOrNull ??
+        account.quotaWindows
+            .where(
+              (q) =>
+                  q.window.trim().toLowerCase() ==
+                  quota.window.trim().toLowerCase(),
+            )
+            .firstOrNull;
+    await saveAccount(
+      account.copyWith(
+        quota: matching == null
+            ? quota
+            : quota.copyWith(windowKey: matching.windowKey),
+      ),
+    );
+  }
+
+  Future<void> deleteQuota(String accountId, String windowKey) async {
+    final account = _data.account(accountId);
+    if (account == null ||
+        !account.quotaWindows.any((q) => q.windowKey == windowKey)) {
+      throw StateError('Không tìm thấy cửa sổ hạn mức.');
+    }
+    await saveAccount(
+      account.copyWith(
+        quotaWindows: account.quotaWindows
+            .where((q) => q.windowKey != windowKey)
+            .toList(),
+      ),
+    );
+  }
+
+  Future<void> setReportingTimezone(String zone) async =>
+      _commit(_data.copyWith(reportingTimezone: zone.trim()));
+
+  LedgerData _withoutDemo() {
+    final data = _data;
+    final sessions = data.sessions.where((s) => !s.isDemo).toList();
+    return data.copyWith(
+      // Retain any demo account that has a non-demo legacy/manual reference.
+      accounts: data.accounts
+          .where((a) => !a.isDemo || sessions.any((s) => s.accountId == a.id))
+          .toList(),
+      sessions: sessions,
+    );
+  }
+
+  Future<void> resetDemo() async {
+    final retained = _withoutDemo();
+    final seed = createDemoSeed(ref.read(clockProvider)());
+    final ids = {
+      for (final a in seed.accounts)
+        a.id: retained.account(a.id) == null ? a.id : newId(),
+    };
+    final accounts = [
+      for (final a in seed.accounts)
+        AIAccount(
+          id: ids[a.id]!,
+          alias: a.alias,
+          provider: a.provider,
+          product: a.product,
+          billingMode: a.billingMode,
+          plan: a.plan,
+          createdAt: a.createdAt,
+          budgetMicros: a.budgetMicros,
+          isDemo: true,
+          dataSource: DataSource.demo,
+          timezone: a.timezone,
+          quotaWindows: a.quotaWindows,
+        ),
+    ];
+    final sessions = [
+      for (final s in seed.sessions)
+        UsageSession(
+          id: retained.sessions.any((old) => old.id == s.id) ? newId() : s.id,
+          accountId: ids[s.accountId]!,
+          title: s.title,
+          purpose: s.purpose,
+          occurredAt: s.occurredAt,
+          inputTokens: s.inputTokens,
+          outputTokens: s.outputTokens,
+          costMicros: s.costMicros,
+          costBasis: s.costBasis,
+          dataSource: DataSource.demo,
+          isDemo: true,
+          note: s.note,
+        ),
+    ];
+    await _commit(
+      retained.copyWith(
+        accounts: [...retained.accounts, ...accounts],
+        sessions: [...retained.sessions, ...sessions],
+      ),
+    );
+  }
+
+  Future<void> clearDemo() async => _commit(_withoutDemo());
+
+  /// Called only by the confirmed recovery action, after a load error.
+  Future<void> recoverDemo() async {
+    if (!state.hasError || state.error is! LedgerStorageException) {
+      throw StateError('Chỉ khôi phục ở trạng thái lỗi đọc dữ liệu local.');
+    }
+    final repository = _repository;
+    if (repository is! RecoverableLedgerRepository) {
+      throw StateError('Kho dữ liệu này không hỗ trợ khôi phục an toàn.');
+    }
+    final epoch = _loadEpoch;
+    final seed = createDemoSeed(ref.read(clockProvider)());
+    await _persist(
+      seed,
+      (repository as RecoverableLedgerRepository).replaceUnreadable,
+    );
+    if (ref.mounted && epoch == _loadEpoch) state = AsyncData(seed);
+  }
 }
 
 class DemoSessionViewModel extends Notifier<bool> {
@@ -148,11 +329,41 @@ class RangeViewModel extends Notifier<UsageRange> {
 final rangeProvider = NotifierProvider<RangeViewModel, UsageRange>(
   RangeViewModel.new,
 );
-final filteredSessionsProvider = Provider<List<UsageSession>>((ref) {
+final filteredSessionsProvider = Provider.autoDispose<List<UsageSession>>((
+  ref,
+) {
   final data = ref.watch(ledgerProvider).asData?.value;
   return UsageCalculator.filter(
     data?.sessions ?? [],
-    ref.watch(clockProvider)(),
+    ref.watch(nowProvider),
     range: ref.watch(rangeProvider),
+    timezone: data?.reportingTimezone ?? 'device',
+    scope: ref.watch(effectiveDataScopeProvider),
   );
+});
+
+class DataScopeViewModel extends Notifier<DataScope?> {
+  @override
+  DataScope? build() => null;
+  void select(DataScope scope) => state = scope;
+}
+
+final dataScopeProvider = NotifierProvider<DataScopeViewModel, DataScope?>(
+  DataScopeViewModel.new,
+);
+final effectiveDataScopeProvider = Provider.autoDispose<DataScope>((ref) {
+  final selected = ref.watch(dataScopeProvider);
+  if (selected != null) return selected;
+  final data = ref.watch(ledgerProvider).asData?.value;
+  if ((data?.sessions.any((s) => DataScope.manual.includes(s)) ?? false) ||
+      (data?.accounts.any((a) => a.dataSource == DataSource.manual) ?? false)) {
+    return DataScope.manual;
+  }
+  if ((data?.sessions.any((s) => DataScope.legacy.includes(s)) ?? false) ||
+      (data?.accounts.any((a) => a.dataSource == DataSource.legacy) ?? false)) {
+    return DataScope.legacy;
+  }
+  return data?.accounts.any((a) => a.isDemo) == true
+      ? DataScope.demo
+      : DataScope.manual;
 });

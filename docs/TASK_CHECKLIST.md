@@ -1,8 +1,22 @@
 # TokenLedger — Checklist triển khai Lab 3
 
-Ngày 19/10/2026. Đọc cùng [Implementation plan](IMPLEMENTATION_PLAN.md). Checklist này là backlog, **đã cập nhật những task local scaffold hoàn thành; các gate Firebase và bài nộp vẫn pending**. Người dùng đã cho phép đổi chức năng theo chủ đề quản lý token; việc chấp nhận theo rubric vẫn cần xác nhận với giảng viên.
+## Checkpoint local —21/10/2026
 
-## Cập nhật scaffold 19/10/2026
+Theo yêu cầu “bước 1. bắt đầu làm”, checkpoint chứa B01–B13/A03–A06 và P0 local trên branch `codex/local-form-safety`; xem SHA bằng `git log -1 --oneline`. Đây là commit local, chưa push. Các đoạn “chưa commit” bên dưới ghi trạng thái ở lần thực hiện trước checkpoint.
+
+Audit candidate102 files: không phát hiện secret theo các pattern đã kiểm, file cấm hoặc file lớn hơn2MB; build/cache, local properties, generated registrant và tooling vẫn ignored.83 file runtime khớp fingerprint của full200 tests/analyzer/format/web JS build gần nhất, nên không chạy lại Flutter chỉ để commit. Đây không phải secret audit toàn bộ lịch sử Git hoặc AI PR review. Firebase, native/MobAI và final fidelity vẫn pending; không chạy emulator.
+
+Cập nhật21/10/2026. Đọc cùng [Implementation plan](IMPLEMENTATION_PLAN.md). Checklist này là backlog, **đã cập nhật những task local scaffold hoàn thành; các gate Firebase và bài nộp vẫn pending**. Người dùng đã cho phép đổi chức năng theo chủ đề quản lý token; việc chấp nhận theo rubric vẫn cần xác nhận với giảng viên.
+
+## Hiện trạng A03–A06 ngày21/10
+
+[Scope decisions](scope-decisions.md) chốt manual/USD/P1/P2, thuật ngữ và gaps SD01–SD08. B01–B14 đã đạt local/annotation scope,168 tests baseline B11–B13; bộ200 tests sau A04 xem test-report; Firebase/native/MobAI/final fidelity/submission vẫn chưa đạt. Các mục gộp local/backend giữ chưa tick nếu phần bắt buộc còn thiếu. Gate table cuối file ghi phần đã có và còn pending; chưa commit/push lượt B/A.
+
+## P0 local sau A04 —21/10
+
+[Upgrade](local-p0-upgrade.md): SD01–SD05 và phần local SD08 đã code: schema2/migration backup/retry, model/defaults/multi-quota/source/cost basis/cycle/IANA, source isolation và demo-safe reset, provider/donut/history/day grouping. Task có backend/counters/server/rules vẫn chưa tick; local fields không thay G3–G6. Full suite/analyzer/web kết quả thực ở test-report. Figma mới chưa annotate field này; final fidelity/native/MobAI vẫn pending.
+
+## Lịch sử scaffold 19/10/2026
 
 Đã tạo Flutter Android/web, MVVM/Riverpod, logo và local CRUD/dashboard/animation. Firebase pending theo yêu cầu; checkbox hoàn thành chỉ xác nhận phạm vi local, không chứng minh Firestore/Auth/evidence Lab3. Chi tiết ở `build-status.md`, `test-report.md` và `firebase-pending.md`. Các gate G1/G3/G6 chưa đạt vì cần Firebase thật.
 
@@ -26,33 +40,33 @@ Dependency: tài liệu plan hiện tại. Exit gate: mapping đủ 8 màn / 3 f
 - [ ] SCOPE-01 Đọc lại PDF17 trang và đánh dấu yêu cầu theo bảng rubric mục12 của plan.
 - [ ] SCOPE-02 Xác nhận cá nhân hay nhóm, StudentID/repo name, deadline và số commit/ngày `[N]` với giảng viên.
 - [ ] SCOPE-03 Trình mapping StudentPay → TokenLedger cho giảng viên; lưu phản hồi thật về đổi chủ đề/nghiệp vụ.
-- [ ] SCOPE-04 Chốt P0: manual usage/quota, account metadata; P1 import; P2 provider sync.
-- [ ] SCOPE-05 Chốt terminology account/provider/product/model/session/quota/auth token và dùng nhất quán.
-- [ ] SCOPE-06 Xác nhận USD là currency P0; VND/FX để P1 nếu có nhu cầu.
+- [x] SCOPE-04 Chốt P0: manual usage/quota, account metadata; P1 import; P2 provider sync. Xem scope-decisions.md; không loại Firebase P0 khỏi kế hoạch.
+- [x] SCOPE-05 Chốt terminology account/provider/product/model/session/quota/auth token; định nghĩa trong scope-decisions.md. Model/provenance đã có ở schema2 sau A04; không suy model từ tên provider.
+- [x] SCOPE-06 Xác nhận USD là currency P0; VND/FX để P1 nếu có nhu cầu.
 - [ ] DESIGN-01 Xem đủ 8 final360,8 QA 412 và state/component PNG trong Lab2; ghi nguồn/version.
 - [x] DESIGN-02 Đối chiếu core Lab2, giữ mapping/tokens trong `docs/lab2-ui-reference.md`; không bundle tài liệu/ảnh nguồn copy hoặc tooling vào app.
-- [ ] DESIGN-03 Tạo `docs/handoff-gaps.md` từ HG01–HG10, mỗi gap có resolution và verification còn thiếu.
-- [ ] DESIGN-04 Tạo `docs/design-change-log.md` ghi thay chủ đề, flow, tab labels, form fields, login/profile/FCM/export và khác biệt Android.
+- [x] DESIGN-03 Tạo `docs/handoff-gaps.md` từ HG01–HG10, mỗi gap có resolution và verification còn thiếu.
+- [x] DESIGN-04 Đã có `docs/design-change-log.md`: thay chủ đề/flow/tab/form/login demo/profile/platform; FCM/export chưa implement và còn trong plan/firebase-pending, không claim thiết kế cuối đã xong.
 - [ ] DESIGN-05 Chuẩn bị annotated mockup8 màn TokenLedger từ core Lab2; không redesign palette/font/layout tùy ý.
-- [ ] DESIGN-06 Cập nhật hoặc annotate Figma, lưu link/node/screenshot thật trong change log.
+- [x] DESIGN-06 Cập nhật hoặc annotate Figma, lưu link/node/screenshot thật trong change log.
 - [ ] DESIGN-07 Bổ sung thiết kế S09–S14 theo component cũ; trạng thái loading/empty/error, form keyboard và Back.
 - [ ] DESIGN-08 Duyệt screen/route map4 tab,3 flow và nhánh error/recovery theo mục4 plan.
-- [ ] DOC-01 Bắt đầu `docs/implementation-ai-log.md`; ghi entry thật từ các lượt AI sử dụng, không dựng lại lịch sử.
+- [x] DOC-01 Bắt đầu `docs/implementation-ai-log.md`; ghi entry thật từ các lượt AI sử dụng, không dựng lại lịch sử.
 - [ ] GATE-00 Commit docs/scope/design mapping; ghi rõ quyết định nào còn chờ giảng viên.
 
 ## G1 — Flutter, Firebase và vertical slice đăng nhập (P0)
 
 Dependency: scope/design direction; cần Google test account và Firebase project riêng. Exit gate: app Android chạy, Google Sign-In vào app rỗng và sign-out thật.
 
-- [ ] SETUP-01 Kiểm tra Flutter/Dart/Android SDK/JDK/toolchain bằng `flutter doctor`; ghi version và lỗi cần sửa.
+- [x] SETUP-01 Đã kiểm `flutter doctor -v`21/10: Flutter3.47.4/Dart3.13.3, Android SDK/licenses hợp lệ; evidence lịch sử trong test-report.md. Không chạy lại ở lượt docs.
 - [x] SETUP-02 Tạo Flutter Android project trong Lab3, không thay đổi repo Lab2; chọn applicationId ổn định.
-- [ ] SETUP-03 Tạo branch `codex/tokenledger-lab3`; giữ lịch sử commit theo từng stage.
+- [ ] SETUP-03 Giữ lịch sử commit theo từng stage. Nhánh thực `codex/local-form-safety` (quy ước codex/); tên `codex/tokenledger-lab3` trước đây chỉ là dự kiến. B01–B13/A03–A06 chưa commit, chưa đủ stage history.
 - [x] SETUP-04 Xác minh package versions tương thích; chọn Riverpod duy nhất, commit lockfile.
 - [x] SETUP-05 Tạo skeleton MVVM theo mục7, conventions model/service/ViewModel/view và typed failures.
 - [ ] SETUP-06 Tạo Firebase project riêng và bật Analytics; đăng ký Android app đúng package.
 - [ ] SETUP-07 Chạy FlutterFire configuration; kiểm tra `firebase_options.dart`/`google-services.json` đúng project.
 - [ ] SETUP-08 Bật Google provider, thêm debug SHA-1; cấu hình signing certificate bổ sung nếu cần APK khác.
-- [ ] SETUP-09 Chạy emulator có Google Play services hoặc thiết bị Android thật; kiểm tra kết nối.
+- [ ] SETUP-09 Khi có thiết bị Android thật, kiểm tra kết nối/Google Play services. Native hoãn theo yêu cầu; không chạy/tạo/sửa emulator.
 - [ ] SETUP-10 Tạo Google test account riêng, không ghi credentials vào code/docs/logs.
 - [ ] AUTH-01 Viết AuthService, auth state provider và LoginViewModel; SDK calls chỉ ở service.
 - [ ] AUTH-02 Làm Login UI theo tokens, loading/cancel/error/retry thật.
@@ -61,7 +75,7 @@ Dependency: scope/design direction; cần Google test account và Firebase proje
 - [ ] AUTH-05 Logout hủy listeners/state/draft và xử lý FCM device binding trước khi về Login.
 - [ ] AUTH-06 Test Google success/cancel, offline lỗi, logout/Back và sign-in user B không thấy cache A.
 - [ ] SPIKE-01 Thử upload1 PDF nhỏ lên storage dự kiến và mở URL trên Android; lưu kết quả/cấu hình không secret.
-- [ ] SPIKE-02 Cài/thử MobAI nhận emulator sớm; nếu không dùng được, ghi blocker và báo giảng viên trước đổi công cụ.
+- [ ] SPIKE-02 Xác minh MobAI/tool target khả dụng khi có môi trường phù hợp; không bật emulator theo yêu cầu hiện hành. Ghi giới hạn và cần xác nhận giảng viên trước thay evidence bắt buộc.
 - [ ] GATE-01 App chạy project Firebase thật, login/logout đạt; commit setup/auth và ghi evidence.
 
 ## G2 — Design system và navigation (P0)
@@ -71,17 +85,17 @@ Dependency: G1. Exit gate: component gallery và8 screen shells đúng core Lab2
 - [ ] UI-01 Tạo `lib/theme/` chứa đủ semantic colors cuối trong Lab2 `design/DESIGN.md`.
 - [x] UI-02 Bundle/cấu hình Inter có tiếng Việt; map6 text styles, min text14sp.
 - [x] UI-03 Tạo spacing/radius/elevation/touch/CTA size tokens; chỉ thêm extension có design log.
-- [ ] UI-04 Build AppButton variants default/pressed/disabled/loading, CTA52dp, target>= 48dp.
-- [ ] UI-05 Build AppTextField/AmountField default/focused/filled/error/disabled, helper text có semantics.
+- [x] UI-04 Build AppButton variants default/pressed/disabled/loading, CTA52dp, target>= 48dp.
+- [x] UI-05 Build AppTextField/AmountField default/focused/filled/error/disabled, helper text có semantics.
 - [x] UI-06 Build SummaryCard/ProgressCard và list row dùng icon/title/subtitle/trailing metric.
-- [x] UI-07 Build header/back,4 tab bottom nav, giữ selected state và tab stacks.
+- [x] UI-07 Build header/back,4 tab bottom nav, giữ selected/tab state bằng IndexedStack. Full router/auth/deep links còn UI-11.
 - [x] UI-08 Build Dialog/Spinner/Empty/Error feedback variants; Retry giữ context/draft.
 - [x] UI-09 Build PurposeTile grid3 cột và selectable row kế thừa Category/Member layout.
-- [ ] UI-10 Thêm component gallery để kiểm tra9 families và variants; không dùng gallery thay screens thật.
+- [x] UI-10 Thêm component gallery để kiểm tra9 families và variants; không dùng gallery thay screens thật.
 - [ ] UI-11 Tạo router S01–S10 cùng sheet/detail routes S11–S14, auth guard và not-found fallback.
-- [ ] UI-12 Dùng SafeArea/system bars Android; content cuộn, không vẽ status bar iOS trong app.
-- [ ] UI-13 Test keyboard/inset, text scale1.3/2.0, chuỗi dài, tiền lớn, target48dp ở360/412dp.
-- [ ] UI-14 Chụp baseline theme/component/screens; ghi ngoại lệ layout/platform vào fidelity draft.
+- [x] UI-12 Dùng SafeArea/system bars Android; content cuộn, không vẽ status bar iOS trong app.
+- [x] UI-13 Test keyboard/inset, text scale1.3/2.0, chuỗi dài, tiền lớn, target48dp ở360/412dp.
+- [x] UI-14 Chụp baseline theme/component/screens; ghi ngoại lệ layout/platform vào fidelity draft.
 - [ ] GATE-02 Không import Firebase trong screens/widgets; token/component audit đạt; commit UI foundation.
 
 ## G3 — Account, quota và Firestore protection (P0)
@@ -101,13 +115,13 @@ Dependency: G2 + Firestore project. Exit gate: F3 CRUD/query/realtime thật, qu
 - [ ] RULE-05 Emulator tests owner A/B, unauth, field sai, số âm, đổi owner/accountId, reference sai và counter tamper.
 - [ ] RULE-06 Deploy rules/indexes project thật; lưu output/ảnh console không secret.
 - [ ] ACCOUNT-01 S06: list, summary, empty CTA, realtime, error/retry; không cộng% quota giữa account.
-- [ ] ACCOUNT-02 S07: provider/product/alias/plan/budget/cycle/default purposes, validation và saving state.
+- [ ] ACCOUNT-02 S07: provider/product/alias/plan/budget/cycle/default purposes, validation và saving state. Local đã đủ fields/model/timezone sau A04; backend còn pending.
 - [ ] ACCOUNT-03 S08: detail, purpose summary placeholder theo data thật, budget/quota sections và thao tác edit/archive.
 - [ ] ACCOUNT-04 Account create/update/list/detail thật; reload app vẫn có dữ liệu; delete account rỗng thật.
 - [ ] ACCOUNT-05 Account có usage chỉ archive trong luồng mặc định; hard delete yêu cầu xử lý usage trước.
 - [ ] QUOTA-01 S12 nhập snapshot theo window/unit, observedAt/resetAt/source; không yêu cầu token nếu chỉ biết%.
 - [x] QUOTA-02 Hiển thị unknown/stale/vượt ngân sách bằng chữ+icon; reset qua thời điểm không tự hiện100%.
-- [ ] QUOTA-03 Cập nhật snapshot cùng window thay current value, không cộng snapshot; giữ các window độc lập.
+- [x] QUOTA-03 Local schema2: cập nhật snapshot cùng window thay current value, giữ key khi rename, source/note và windows độc lập; xóa đúng window và chặn resurrect từ form cũ. Backend converter/owner path còn DATA-03/04.
 - [ ] ACCOUNT-06 Test alias dài, account trùng provider, budget0/null/âm, cycle invalid, quota 0/100/null/stale.
 - [ ] GATE-03 F3 đạt với user A/B, console data/rules evidence thật; commit accounts/quota/rules.
 
@@ -118,21 +132,21 @@ Dependency: G3. Exit gate: F1 tạo/sửa/xóa usage và tổng đúng, kể c�
 - [ ] CALC-01 Implement UsageCalculator thuần, normalize input/output/cache không double count.
 - [ ] CALC-02 Phân biệt tokens0/null và cost actual/estimated/unknown; không dùng0 thay mọi null.
 - [ ] CALC-03 Tiền integer micros; pricing snapshot; rounding một lần mỗi usage; reported ưu tiên estimate.
-- [ ] CALC-04 Period `[start,end)` UTC quy đổi timezone; used/remaining/excess, không clamp mất số vượt.
+- [ ] CALC-04 Period `[start,end)` UTC quy đổi timezone; used/remaining/excess, không clamp mất số vượt. Local IANA/cycle/DST/budget đã có sau A04; query backend còn pending.
 - [ ] CALC-05 Coverage: known token/cost count và unknown count; quota snapshots không suy từ usage logs.
 - [ ] CALC-06 Unit tests null/zero, precedence, rounding, overrun, percent/window, date boundaries, chart denominator0.
 - [ ] USAGE-01 Implement UsageService transaction create/delete + counter, update hợp lệ, stable client operation ID.
-- [x] USAGE-02 Khóa accountId khi edit P0; error validation nếu cố đổi; không làm lệch account counters.
-- [ ] USAGE-03 S02: account/workTitle/purpose/model/date/note, token/cost modes, preview nguồn số liệu.
-- [x] USAGE-04 S03:9 purposes, selected state, Back không mất draft; default chỉ là gợi ý có thể đổi.
+- [x] USAGE-02 Khóa accountId khi edit P0; error validation nếu cố đổi. Local VM/storage đã kiểm; backend counters còn USAGE-01/C12.
+- [ ] USAGE-03 S02: account/workTitle/purpose/model/date/note, token/cost modes, preview nguồn số liệu. Local form/model/source/basis đã có; backend confirmation còn USAGE-07.
+- [x] USAGE-04 S03 local:9 purposes, selected state, Back không mất draft. Default purposes/model theo account đã có sau A04, chỉ gợi ý và được đổi; không viết lại phiên cũ.
 - [ ] USAGE-05 Validation cả paste: title bắt buộc, token integer không âm, USD decimal hợp lệ, ngày theo policy.
 - [x] USAGE-06 Chưa có account → tạo account → quay form với draft và account mới được chọn.
 - [ ] USAGE-07 Save có validating/saving/pendingSync/saved/failed; chỉ server-confirmed mới thông báo saved.
 - [ ] USAGE-08 Double tap/retry/timeout dùng cùng ID, không có phiên trùng; pending network không bị báo fail/success sai.
-- [ ] USAGE-09 Back khi form đổi có xác nhận bỏ draft; chọn purpose xong giữ input/model/date/note.
+- [ ] USAGE-09 Back khi form đổi có xác nhận bỏ draft; chọn purpose xong giữ input/model/date/note. Local21/10: account/usage/quota guard và purpose round trip đã test; Model/defaults đã bổ sung sau A04; backend còn theo scope kế hoạch.
 - [x] USAGE-10 S01: card ngân sách, progress, latest rows, CTA; unknown coverage rõ, không có “token tổng còn lại” giả.
 - [ ] USAGE-11 S05: lịch sử nhóm ngày, filter account/purpose/time, list pagination không ảnh hưởng tổng kỳ.
-- [x] USAGE-12 S11: detail nguồn/cost/tokens + Edit/Delete, confirm delete và phản ánh realtime.
+- [ ] USAGE-12 S11: detail nguồn/cost/tokens + Edit/Delete, confirm delete và phản ánh realtime. Local detail/CRUD/confirmation/provenance SD05 đã có; Firestore realtime còn thiếu.
 - [ ] USAGE-13 VM tests save fail/retry/draft/pending; lỗi permission/network giữ dữ liệu form.
 - [ ] SEED-01 Tạo seed versioned đúng mục9; đối chiếu baseline hiện tại Claude121k/$5.68, Codex141k/$5.86, Gemini24k/$1.30; bổ sung owner/version khi nối Firebase.
 - [ ] SEED-02 Seed account unknown1 phiên, account rỗng CRUD Test, user B dataset khác; isolate isDemo.
@@ -147,8 +161,8 @@ Dependency: G4. Exit gate: F2 drilldown đúng tập dữ liệu, shared totals 
 - [ ] ANALYSIS-01 S04 chọn kỳ và metric cost/token/session; cùng nguồn normalized dataset với S01/S08.
 - [ ] ANALYSIS-02 Group theo purpose/account/provider, không gộp khác đơn vị hoặc actual+estimated thành 2 lần chi phí.
 - [x] ANALYSIS-03 Donut và legend giữ style Lab2, có text/value/unit/coverage; denominator0 ra Empty.
-- [x] ANALYSIS-04 Tap slice/legend mở S05 đúng filter/time/account; Back giữ filter và scroll context.
-- [x] ANALYSIS-05 S08 cho biết account dùng purpose nào, số phiên, token đã biết, cost đã biết, remaining và quota windows.
+- [x] ANALYSIS-04 Local: sector donut/legend/account/provider mở đúng history/filter/time/source; Back giữ context. Có widget regression sector/provider, backend gate chưa đạt.
+- [x] ANALYSIS-05 Local S08: purpose/session/known token/cost/remaining cùng cycle account và nhiều quota windows/source/note/stale độc lập. Firestore realtime/backend còn G3.
 - [x] ANALYSIS-06 Kết luận mô tả chỉ từ usage đã ghi; không khẳng định năng lực agent/tiết kiệm chi phí khi thiếu dữ liệu.
 - [ ] ANALYSIS-07 Month empty → CTA ghi usage; loading/network error có retry giữ filter.
 - [x] ANALYSIS-08 Test legend total bằng summary; filter boundary; unknown excludes khỏi denominator đúng cách.
@@ -288,17 +302,37 @@ Dependency: capability discovery + thiết kế bảo mật + phạm vi giảng 
 
 ## Bảng theo dõi gate
 
-Điền khi làm; dấu `—` nghĩa là chưa có evidence, không phải pass.
+Cập nhật21/10 từ source/docs/log đã có; kiểm bởi Codex trong lượt A03–A06. Không gate nào đã nghiệm thu đầy đủ. Cột commit không gán SHA nền4aeb7b7 cho source chưa commit; evidence local xem test-report/fidelity/scope decisions. Không chạy lại tests/build ở lượt docs.
 
 | Gate | Trạng thái | Commit | Evidence | Người kiểm / ngày |
 |---|---|---|---|---|
-| G0 Scope/design | Chưa thực hiện | — | — | — |
-| G1 Setup/Auth | Chưa thực hiện | — | — | — |
-| G2 Core UI | Chưa thực hiện | — | — | — |
-| G3 Accounts/quota/rules | Chưa thực hiện | — | — | — |
-| G4 Usage/calculator | Chưa thực hiện | — | — | — |
-| G5 Analytics | Chưa thực hiện | — | — | — |
-| G6 Firebase/PDF | Chưa thực hiện | — | — | — |
-| G7 MobAI/regression | Chưa thực hiện | — | — | — |
-| G8 Review/fidelity | Chưa thực hiện | — | — | — |
-| G9 Submission | Chưa thực hiện | — | — | — |
+| G0 Scope/design | A03–A06/mapping/log/annotation đã có; lecturer scope/full mockups chưa đạt | Chưa commit giai đoạn | scope-decisions.md; handoff-gaps.md; fidelity-check.md | Codex /21/10/2026 |
+| G1 Setup/Auth | Toolchain/skeleton local đã có; Auth/Firebase pending | Chưa commit giai đoạn | test-report.md; firebase-pending.md | Codex /21/10/2026 |
+| G2 Core UI | Local tokens/components/layout/states đã kiểm; router/auth/full fidelity chưa đủ | Chưa commit giai đoạn | fidelity-check.md; test-report.md | Codex /21/10/2026 |
+| G3 Accounts/quota/rules | Local CRUD/archive/multi-window/source/cycle; Firestore/rules pending | Chưa commit giai đoạn | architecture.md; scope-decisions.md SD03/SD07 | Codex /21/10/2026 |
+| G4 Usage/calculator | Local schema2/CRUD/validation/retry/calculator/source isolation đã có; transactions/UID pending | Chưa commit giai đoạn | test-report.md; scope-decisions.md SD01/04/05 | Codex /21/10/2026 |
+| G5 Analytics | Local totals/coverage/filter/provider/day-group/cycle/drilldown có; backend chưa đủ | Chưa commit giai đoạn | architecture.md; scope-decisions.md SD08 | Codex /21/10/2026 |
+| G6 Firebase/PDF | Chưa tích hợp; pending theo yêu cầu | Chưa commit giai đoạn | firebase-pending.md | Codex /21/10/2026 |
+| G7 MobAI/regression | 200 tests local đã pass; MobAI/rules/integration chưa thực hiện | Chưa commit giai đoạn | test-report.md | Codex /21/10/2026 |
+| G8 Review/fidelity | Local audit/annotation có; AI PR review/full fidelity chưa đạt | Chưa commit giai đoạn | fidelity-check.md; design-change-log.md | Codex /21/10/2026 |
+| G9 Submission | Chưa đủ P0, current APK/access/report/video/PR chưa đạt | Chưa commit giai đoạn | APP_COMPLETION_ROADMAP.md mục G | Codex /21/10/2026 |
+
+## Lịch sử B03–B07 local stability —21/10/2026
+
+Theo yêu cầu người dùng: B03–B07 trong [roadmap hợp nhất](APP_COMPLETION_ROADMAP.md) đã code và audit lại đủ local scope. Validation/Unicode/micros/date, archived history UI, corrupt storage/recovery backup, UUID/concurrency/reload/dispose và reactive clock/resume đã có regression coverage. Format/analyzer sạch,106/106 tests pass, web release JS build pass. Không tick các task Firestore/rules/Firebase hoặc gates submission theo kết quả local.
+
+Không chạy emulator vì cấu hình máy theo yêu cầu mới; native/device test hoãn, không phải blocker để tiếp tục local UI/tests. Firebase vẫn pending. B08–B13 và các yêu cầu giảng viên/backend còn tiếp tục theo dependencies.
+
+
+## Lịch sử B08–B10 local audit —21/10/2026
+
+UI-04/UI-05 dùng Material themes và SaveButton/InputDecorationTheme + validators chung thay vì tạo facade chỉ đổi tên AppButton/AmountField; states có trong form thật và gallery QA. UI-10 gallery9 families nằm trong test/component_audit_test.dart, không phải màn sản phẩm. UI-12/UI-13/UI-14 đã kiểm phạm vi Flutter engine: SafeArea24dp, keyboard300dp,360/412×800, text1/1.3/2, long names/max values và ảnh hiện hành; không tick thay native, screen-reader hoặc full fidelity gates. Tại lượt B08–B10, DESIGN-01/05/06 và F11–F13 còn chờ; B13 sau đó hoàn tất DESIGN-06 annotation, chưa full QA412/mockup/final acceptance.
+
+B08–B10 có mapping8 màn + màn phụ theo scope trong fidelity-check.md. Full142/142 tests pass; analyzer/format sạch. Các thiếu sót quan sát được ở chart/sidebar/legend/donut/appbar/helper đã sửa và có regression. Firebase pending, Notifications/Reports chưa implement, không tạo placeholder integration giả; không chạy emulator theo user. B11–B13 còn lại.
+
+
+## B11–B13 local/annotation audit —21/10/2026
+
+B11/B12 có implementation và automated accessibility/state tests; semantics/Tab+Enter/focus/contrast/targets, reduced motion giữ tab/filter/scroll, reload errors/Retry giữ draft/search, not-found/disabled và destructive confirmations. B13/ DESIGN-06: đã dùng Figma Plugin API annotate8 final360 và tạo trang handoff16 cards có link/node thật trong fidelity-check.md. Không thay original StudentPay visuals. Source Lab2 ảnh final360 đã xem trực tiếp qua Figma, QA412 mới đọc metadata; DESIGN-01 vẫn chờ toàn bộ QA412/state/component images, DESIGN-05 chưa có8 mockup TokenLedger hoàn chỉnh.
+
+168 tests gồm26 tests mới (accessibility/states23, brand3); không dùng kết quả local để tick Firebase/native/MobAI hoặc final fidelity GATE/F11–F13. Giữ ngoại lệ kế thừa Lab2 palette/Inter/radius; Notifications/Reports pending không tạo trạng thái giả. Native TalkBack/IME hoãn theo user, không emulator/commit/push.

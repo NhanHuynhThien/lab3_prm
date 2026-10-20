@@ -46,6 +46,29 @@ abstract final class AppMotion {
       MediaQuery.disableAnimationsOf(context) ? Duration.zero : value;
 }
 
+class MotionAwareTransitions extends PageTransitionsBuilder {
+  const MotionAwareTransitions({
+    this.delegate = const FadeForwardsPageTransitionsBuilder(),
+  });
+  final PageTransitionsBuilder delegate;
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => MediaQuery.disableAnimationsOf(context)
+      ? child
+      : delegate.buildTransitions(
+          route,
+          context,
+          animation,
+          secondaryAnimation,
+          child,
+        );
+}
+
 ThemeData buildAppTheme() {
   const base = TextStyle(
     fontFamily: 'Inter',
@@ -125,15 +148,30 @@ ThemeData buildAppTheme() {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(48, AppSpace.touch),
         foregroundColor: AppColors.text,
-        side: const BorderSide(color: AppColors.line),
+        side: const BorderSide(color: AppColors.border),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpace.controlRadius),
         ),
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        minimumSize: const Size(AppSpace.touch, AppSpace.touch),
+      ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        minimumSize: const Size(AppSpace.touch, AppSpace.touch),
+      ),
+    ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: SegmentedButton.styleFrom(
+        minimumSize: const Size(AppSpace.touch, AppSpace.touch),
+      ),
+    ),
     inputDecorationTheme: InputDecorationTheme(
-      helperMaxLines: 3,
-      errorMaxLines: 3,
+      helperMaxLines: 12,
+      errorMaxLines: 12,
       filled: true,
       fillColor: AppColors.surface,
       contentPadding: const EdgeInsets.all(16),
@@ -154,7 +192,14 @@ ThemeData buildAppTheme() {
       backgroundColor: AppColors.surface,
       indicatorColor: AppColors.soft,
       height: 80,
-      labelTextStyle: WidgetStatePropertyAll(base.copyWith(fontSize: 14)),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => base.copyWith(
+          fontSize: 14,
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w600
+              : FontWeight.w400,
+        ),
+      ),
     ),
     dividerTheme: const DividerThemeData(
       color: AppColors.line,
@@ -170,9 +215,15 @@ ThemeData buildAppTheme() {
     ),
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
-        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
-        TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
-        TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
+        TargetPlatform.android: MotionAwareTransitions(),
+        TargetPlatform.iOS: MotionAwareTransitions(
+          delegate: ZoomPageTransitionsBuilder(),
+        ),
+        TargetPlatform.macOS: MotionAwareTransitions(
+          delegate: ZoomPageTransitionsBuilder(),
+        ),
+        TargetPlatform.windows: MotionAwareTransitions(),
+        TargetPlatform.linux: MotionAwareTransitions(),
       },
     ),
   );
