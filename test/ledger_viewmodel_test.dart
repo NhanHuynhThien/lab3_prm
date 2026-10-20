@@ -105,4 +105,58 @@ void main() {
     await container.read(ledgerProvider.notifier).deleteAccount('empty');
     expect(repository.data!.account('empty'), isNull);
   });
+
+  test(
+    'archived account allows editing history but never a new usage',
+    () async {
+      final data = await container.read(ledgerProvider.future);
+      final original = data.sessions.firstWhere((s) => s.accountId == 'codex');
+      final vm = container.read(ledgerProvider.notifier);
+      await vm.archiveAccount('codex', true);
+      await vm.saveUsage(
+        UsageSession(
+          id: original.id,
+          accountId: original.accountId,
+          title: 'Updated historical work',
+          purpose: original.purpose,
+          occurredAt: original.occurredAt,
+          inputTokens: original.inputTokens,
+          outputTokens: original.outputTokens,
+          costMicros: original.costMicros,
+          dataSource: original.dataSource,
+          isDemo: original.isDemo,
+          costBasis: original.costBasis,
+        ),
+      );
+      expect(repository.data!.sessions.length, data.sessions.length);
+      expect(
+        repository.data!.sessions.firstWhere((s) => s.id == original.id).title,
+        'Updated historical work',
+      );
+      await expectLater(
+        vm.saveUsage(
+          UsageSession(
+            id: 'new-archived',
+            accountId: 'codex',
+            title: 'Blocked',
+            purpose: Purpose.code,
+            occurredAt: original.occurredAt,
+          ),
+        ),
+        throwsStateError,
+      );
+      await expectLater(
+        vm.saveUsage(
+          UsageSession(
+            id: original.id,
+            accountId: 'claude',
+            title: 'Moved',
+            purpose: Purpose.code,
+            occurredAt: original.occurredAt,
+          ),
+        ),
+        throwsStateError,
+      );
+    },
+  );
 }

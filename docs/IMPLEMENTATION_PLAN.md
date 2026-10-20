@@ -2,6 +2,8 @@
 
 Ngày lập: 19/10/2026. Trạng thái cập nhật: đã có Flutter local scaffold, logo/dashboard/animation và tests; Firebase vẫn pending theo yêu cầu. Xem `build-status.md`/`test-report.md`; phần dưới là kế hoạch đầy đủ còn tiếp tục triển khai.
 
+Quyết định kỹ thuật A03–A06 ngày21/10: [scope decisions](scope-decisions.md) phân biệt implementation local, P0 còn thiếu và giới hạn estimate. Các schema/flows dưới đây vẫn là mục tiêu; không suy đã có trong source.
+
 ## 1. Quyết định sản phẩm và cách dùng tài liệu
 
 **TokenLedger** là ứng dụng Flutter Android giúp một người quản lý nhiều tài khoản/công cụ AI: Claude, Codex và các công cụ khác. Với mỗi tài khoản, người dùng biết đã dùng cho công việc gì, bao nhiêu token hoặc hạn mức, chi phí bao nhiêu, còn bao nhiêu ngân sách và khi nào reset.
@@ -146,7 +148,7 @@ S09–S14 dùng chung design system; thêm log/Figma. Ưu tiên sheet/section ch
 1. Overview → “Ghi sử dụng” → S02. Nếu chưa có account: giải thích và mở S07, lưu xong quay lại form.
 2. Chọn account đang active; product/model điền theo account nhưng cho sửa model nếu phù hợp.
 3. Nhập tên công việc bắt buộc, ví dụ “Sửa lỗi Google Sign-In”, chọn purpose qua S03, chọn thời điểm.
-4. Mode token: nhập input/output token không âm; ít nhất tổng >0. Mode không biết token: để token null, có thể nhập chi phí thực hoặc chỉ ghi công việc. Không ép thuê bao phải có token giả.
+4. Mode token: nhập cả input/output token không âm; 0 là số liệu đã ghi nhận hợp lệ, không dùng0 thay cho chưa biết. Mode không biết token: để cả hai null, có thể nhập chi phí thực hoặc chỉ ghi công việc. Policy local được thống nhất21/10 với null-vs-zero invariant và tests; không ép tổng>0 làm mất phiên ghi nhận0 thật.
 5. Chi phí chọn một nguồn: nhập số thực tế đã biết; tính ước tính từ pricing snapshot; hoặc chưa biết. Xem preview đơn vị và nhãn nguồn trước lưu.
 6. Validate → Save disabled/loading khi request đang chạy → ghi Firestore theo client-generated ID ổn định → chỉ báo đã lưu khi server xác nhận.
 7. Quay Overview/account detail, listener tính lại tổng; mở lại lịch sử thấy chính phiên vừa tạo. Analytics phát một lần khi save thành công.

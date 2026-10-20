@@ -1,12 +1,12 @@
 # Firebase pending — điểm nối sau local scaffold
 
-Ngày 19/10/2026. Theo yêu cầu người dùng, **không tạo hoặc cấu hình Firebase trong lượt build này**. Không có project, Firebase identifiers, SDK Firebase, credentials hay rules deploy.
+Cập nhật21/10/2026. Theo yêu cầu người dùng, **không tạo hoặc cấu hình Firebase trong lượt build này**. Không có project, Firebase identifiers, SDK Firebase, credentials hay rules deploy.
 
 ## Đã chuẩn bị
 
 - Models Dart thuần, VM không truy cập SDK; `LedgerRepository` tách khỏi Views.
 - `ledgerRepositoryProvider` được override tại `main.dart` bằng `LocalLedgerRepository`.
-- Local storage schemaVersion 1; cost integer USD micros; null khác0; source local demo hiển thị trong UI.
+- Local storage schemaVersion2 với backup-first migration1→2; cost integer USD micros/null-vs-zero; model/defaults/multi-quota/cycle/IANA và source manual/demo/legacy đã có. Xem [local P0 upgrade](local-p0-upgrade.md). Chưa có owner UID hoặc stream/backend isolation.
 - Profile hiển thị trạng thái pending rõ ràng; nút Google không giả đăng nhập.
 
 ## Khi tiếp tục

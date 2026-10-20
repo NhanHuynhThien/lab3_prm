@@ -9,6 +9,8 @@ import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/reporting_viewmodel.dart';
 import '../widgets/charts.dart';
 import '../widgets/common.dart';
+import '../widgets/data_scope_picker.dart';
+import '../widgets/ledger_feedback.dart';
 import 'account_detail_screen.dart';
 import 'history_screen.dart';
 import 'usage_form_screen.dart';
@@ -37,7 +39,10 @@ class RangePicker extends ConsumerWidget {
             children: [
               const Icon(Icons.calendar_today_outlined, size: 18),
               const SizedBox(width: 8),
-              Text(ref.watch(rangeProvider).label),
+              Text(
+                ref.watch(rangeProvider).label,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
               const SizedBox(width: 8),
               const Icon(Icons.expand_more, size: 18),
             ],
@@ -55,7 +60,10 @@ class DashboardScreen extends ConsumerWidget {
   final VoidCallback onAccounts, onAnalytics;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final data = ref.watch(ledgerProvider).requireValue;
+    final state = ref.watch(ledgerProvider);
+    final feedback = ledgerFeedback(state, 'Tổng quan');
+    if (feedback != null) return feedback;
+    final data = state.requireValue;
     final projection = ref.watch(dashboardProjectionProvider);
     final sessions = projection.sessions;
     final summary = projection.summary;
@@ -84,10 +92,7 @@ class DashboardScreen extends ConsumerWidget {
           spacing: 12,
           runSpacing: 12,
           crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            RangePicker(),
-            StatusTag('Dữ liệu demo · Nhập tay', neutral: true),
-          ],
+          children: [RangePicker(), DataScopePicker()],
         ),
         const SizedBox(height: 24),
         LayoutBuilder(
@@ -98,7 +103,7 @@ class DashboardScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ngân sách còn lại · Tháng ${now.month}',
+                    'Ngân sách còn lại · Kỳ hiện tại',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 8),
@@ -112,6 +117,9 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   AnimatedProgress(
                     value: budget == 0 ? 0 : spent / budget,
+                    semanticValue: budgetAccounts.isEmpty
+                        ? 'Chưa đặt ngân sách'
+                        : null,
                     color: remaining < 0 ? AppColors.danger : AppColors.primary,
                   ),
                   const SizedBox(height: 12),
@@ -121,7 +129,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Ngân sách tự đặt, không phải số dư nhà cung cấp.',
+                    'Ngân sách từng kỳ tài khoản theo nguồn đã chọn; không phải số dư nhà cung cấp.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -285,6 +293,7 @@ class DashboardScreen extends ConsumerWidget {
                       .take(4)
                       .map(
                         (s) => UsageRow(
+                          timezone: data.reportingTimezone,
                           session: s,
                           account: data.account(s.accountId),
                           onTap: () => showUsageDetail(context, s),
@@ -374,16 +383,18 @@ class QuotaRow extends StatelessWidget {
     required this.now,
     this.onTap,
     this.compact = false,
+    this.quota,
   });
   final AIAccount account;
+  final QuotaSnapshot? quota;
   final DateTime now;
   final VoidCallback? onTap;
   final bool compact;
   @override
   Widget build(BuildContext context) {
-    final q = account.quota;
+    final q = quota ?? account.quota;
     final stale = q?.isStale(now) ?? false;
-    return InkWell(
+    return ActionSurface(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
@@ -395,7 +406,7 @@ class QuotaRow extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    account.product,
+                    quota == null ? account.product : q!.window,
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                 ),
@@ -412,12 +423,17 @@ class QuotaRow extends StatelessWidget {
             SizedBox(height: compact ? 6 : 8),
             AnimatedProgress(
               value: q == null || stale ? 0 : q.usedPercent / 100,
+              semanticValue: q == null
+                  ? 'Chưa có dữ liệu quota'
+                  : stale
+                  ? 'Quota đã quá reset; cần cập nhật'
+                  : 'Đã dùng ${q.usedPercent}%',
             ),
             SizedBox(height: compact ? 4 : 6),
             Text(
               q == null
                   ? 'Thêm quota từ trang tài khoản'
-                  : '${q.window} · Nhập tay lúc ${shortTime(q.observedAt)}',
+                  : '${q.window}${quota == null && account.quotaWindows.length > 1 ? ' · +${account.quotaWindows.length - 1} cửa sổ khác' : ''} · ${q.source.label} lúc ${shortTime(q.observedAt)}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -430,15 +446,17 @@ class QuotaRow extends StatelessWidget {
 class UsageRow extends StatelessWidget {
   const UsageRow({
     super.key,
+    this.timezone = 'device',
     required this.session,
     required this.account,
     required this.onTap,
   });
   final UsageSession session;
+  final String timezone;
   final AIAccount? account;
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => ActionSurface(
     onTap: onTap,
     borderRadius: BorderRadius.circular(8),
     child: Padding(
@@ -448,39 +466,43 @@ class UsageRow extends StatelessWidget {
           Icon(purposeIcon(session.purpose), size: 22, color: AppColors.muted),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  session.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${account?.product ?? 'Tài khoản đã xóa'} · ${session.purpose.label} · ${shortDate(session.occurredAt)}',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+            child: AdaptivePair(
+              breakpoint: 200,
+              leading: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    session.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${account?.product ?? 'Tài khoản đã xóa'} · ${session.purpose.label} · ${shortDate(session.occurredAt, timezone: timezone)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              trailing: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    session.costMicros == null
+                        ? '—'
+                        : money(session.costMicros),
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    session.knownTokens == null
+                        ? 'Chưa biết'
+                        : '${compactTokens(session.knownTokens)} token',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                session.costMicros == null ? '—' : money(session.costMicros),
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                session.knownTokens == null
-                    ? 'Chưa biết'
-                    : '${compactTokens(session.knownTokens)} token',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
           ),
         ],
       ),

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/app_theme.dart';
+import '../services/reporting_calendar.dart';
+import '../widgets/data_scope_picker.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/reporting_viewmodel.dart';
 import '../widgets/common.dart';
+import '../widgets/ledger_feedback.dart';
 import 'account_form_screen.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
@@ -17,7 +20,10 @@ class AccountDetailScreen extends ConsumerWidget {
   final String accountId;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final data = ref.watch(ledgerProvider).requireValue;
+    final state = ref.watch(ledgerProvider);
+    final feedback = ledgerFeedback(state, 'Tài khoản');
+    if (feedback != null) return feedback;
+    final data = state.requireValue;
     final a = data.account(accountId);
     if (a == null) {
       return const ContentPage(
@@ -28,7 +34,7 @@ class AccountDetailScreen extends ConsumerWidget {
         ),
       );
     }
-    final now = ref.watch(clockProvider)();
+    final now = ref.watch(nowProvider);
     final projection = ref.watch(accountProjectionProvider(a.id));
     final summary = projection.summary;
     final allCount = projection.totalSessions;
@@ -38,6 +44,18 @@ class AccountDetailScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
+          const DataScopePicker(),
+          const SizedBox(height: 16),
+          Text(
+            '${a.isDemo ? 'Tài khoản demo' : 'Tài khoản theo dõi'} · ${ReportingCalendar.zoneLabel(a.timezone)} · Kỳ bắt đầu ngày ${a.cycleStartDay}',
+          ),
+          if (a.defaultModelId != null)
+            Text('Model gợi ý: ${a.defaultModelId}'),
+          if (a.defaultPurposes.isNotEmpty)
+            Text(
+              'Mục đích gợi ý: ${a.defaultPurposes.map((p) => p.label).join(', ')}',
+            ),
+          const SizedBox(height: 16),
           Row(
             children: [
               ProviderAvatar(a, size: 48),
@@ -76,21 +94,27 @@ class AccountDetailScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ngân sách còn lại · Tháng ${now.month}',
+                  'Ngân sách còn lại · Kỳ hiện tại · Theo nguồn đã chọn',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
+                if (projection.periodStart != null)
+                  Text(
+                    'Từ ${ReportingCalendar.dayKey(projection.periodStart!, a.timezone)} đến trước ${ReportingCalendar.dayKey(projection.periodEnd!, a.timezone)}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 const SizedBox(height: 8),
                 Text(
                   a.budgetMicros == null
                       ? 'Chưa đặt ngân sách'
-                      : money(a.budgetMicros! - summary.costMicros),
+                      : money(projection.remainingBudgetMicros),
                   style: Theme.of(context).textTheme.displaySmall,
                 ),
                 const SizedBox(height: 16),
                 AnimatedProgress(
-                  value: a.budgetMicros == null || a.budgetMicros == 0
-                      ? 0
-                      : summary.costMicros / a.budgetMicros!,
+                  value: projection.budgetProgress,
+                  semanticValue: a.budgetMicros == null
+                      ? 'Chưa đặt ngân sách'
+                      : null,
                 ),
                 const SizedBox(height: 12),
                 Text(
@@ -113,20 +137,46 @@ class AccountDetailScreen extends ConsumerWidget {
               children: [
                 SectionTitle(
                   'Hạn mức đã ghi nhận',
-                  action: 'Cập nhật',
+                  action: 'Thêm cửa sổ',
                   onAction: () => Navigator.push(
                     context,
                     MaterialPageRoute<void>(
-                      builder: (_) => QuotaFormScreen(account: a),
+                      builder: (_) =>
+                          QuotaFormScreen(account: a, newWindow: true),
                     ),
                   ),
                 ),
-                QuotaRow(account: a, now: now),
-                if (a.quota != null)
+                if (a.quotaWindows.isEmpty) QuotaRow(account: a, now: now),
+                for (final q in a.quotaWindows) ...[
+                  QuotaRow(
+                    account: a,
+                    quota: q,
+                    now: now,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => QuotaFormScreen(account: a, quota: q),
+                      ),
+                    ),
+                  ),
                   Text(
-                    'Reset: ${shortDate(a.quota!.resetAt)} lúc ${shortTime(a.quota!.resetAt)} · Nguồn: nhập tay',
+                    'Quan sát ${shortDate(q.observedAt)} ${shortTime(q.observedAt)} · Reset ${shortDate(q.resetAt)} ${shortTime(q.resetAt)} · giờ thiết bị',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  if (q.sourceLabel.isNotEmpty) Text('Nguồn: ${q.sourceLabel}'),
+                  if (q.note.isNotEmpty) Text(q.note),
+                  ConfirmedActionButton(
+                    label: 'Xóa cửa sổ ${q.window}',
+                    icon: Icons.delete_outline,
+                    destructive: true,
+                    title: 'Xóa cửa sổ hạn mức?',
+                    message: 'Chỉ xóa snapshot này; không thay usage hoặc các cửa sổ khác.',
+                    onConfirm: () => ref
+                        .read(ledgerProvider.notifier)
+                        .deleteQuota(a.id, q.windowKey),
+                  ),
+                  const Divider(),
+                ],
                 const SizedBox(height: 8),
                 Text(
                   'Không tự quy đổi hạn mức thuê bao thành số token.',
@@ -142,7 +192,7 @@ class AccountDetailScreen extends ConsumerWidget {
               children: [
                 const SectionTitle('Dùng cho công việc gì?'),
                 if (shares.isEmpty)
-                  const Text('Chưa có công việc trong tháng này.'),
+                  const Text('Chưa có công việc trong kỳ này.'),
                 ...shares.map(
                   (p) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -180,58 +230,37 @@ class AccountDetailScreen extends ConsumerWidget {
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute<void>(
-                builder: (_) => HistoryScreen(accountId: a.id),
+                builder: (_) =>
+                    HistoryScreen(accountId: a.id, useAccountCycle: true),
               ),
             ),
             icon: const Icon(Icons.history),
             label: const Text('Lịch sử tài khoản'),
           ),
           const SizedBox(height: 24),
-          TextButton.icon(
-            onPressed: () async {
-              if (!await confirmAction(
-                context,
-                a.archived ? 'Khôi phục tài khoản?' : 'Lưu trữ tài khoản?',
-                a.archived ? 'Tài khoản sẽ có thể ghi phiên mới.' : 'Lịch sử được giữ nguyên. Tài khoản không nhận phiên mới.',
-              )) {
-                return;
-              }
-              try {
-                await ref
-                    .read(ledgerProvider.notifier)
-                    .archiveAccount(a.id, !a.archived);
-              } catch (e) {
-                if (context.mounted) showMessage(context, e.toString());
-              }
-            },
-            icon: Icon(
-              a.archived ? Icons.unarchive_outlined : Icons.archive_outlined,
-            ),
-            label: Text(
-              a.archived ? 'Khôi phục tài khoản' : 'Lưu trữ tài khoản',
-            ),
+          ConfirmedActionButton(
+            label: a.archived ? 'Khôi phục tài khoản' : 'Lưu trữ tài khoản',
+            icon: a.archived
+                ? Icons.unarchive_outlined
+                : Icons.archive_outlined,
+            title: a.archived ? 'Khôi phục tài khoản?' : 'Lưu trữ tài khoản?',
+            message: a.archived
+                ? 'Tài khoản sẽ có thể ghi phiên mới.'
+                : 'Lịch sử được giữ nguyên. Tài khoản không nhận phiên mới.',
+            onConfirm: () => ref
+                .read(ledgerProvider.notifier)
+                .archiveAccount(a.id, !a.archived),
           ),
           if (allCount == 0)
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-              onPressed: () async {
-                if (!await confirmAction(
-                  context,
-                  'Xóa ${a.alias}?',
-                  'Tài khoản rỗng sẽ bị xóa khỏi dữ liệu trên thiết bị.',
-                  confirm: 'Xóa tài khoản',
-                )) {
-                  return;
-                }
-                try {
-                  await ref.read(ledgerProvider.notifier).deleteAccount(a.id);
-                  if (context.mounted) Navigator.pop(context);
-                } catch (e) {
-                  if (context.mounted) showMessage(context, e.toString());
-                }
-              },
-              icon: const Icon(Icons.delete_outline),
-              label: const Text('Xóa tài khoản rỗng'),
+            ConfirmedActionButton(
+              label: 'Xóa tài khoản rỗng',
+              icon: Icons.delete_outline,
+              destructive: true,
+              title: 'Xóa ${a.alias}?',
+              message: 'Tài khoản rỗng sẽ bị xóa khỏi dữ liệu trên thiết bị. Không thể hoàn tác.',
+              onConfirm: () =>
+                  ref.read(ledgerProvider.notifier).deleteAccount(a.id),
+              onSuccess: () => Navigator.pop(context),
             ),
         ],
       ),

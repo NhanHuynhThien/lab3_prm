@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../utils/formatters.dart';
+import '../widgets/data_scope_picker.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/reporting_viewmodel.dart';
 import '../widgets/common.dart';
+import '../widgets/ledger_feedback.dart';
 import 'account_detail_screen.dart';
 import 'account_form_screen.dart';
 
@@ -16,11 +18,21 @@ class AccountsScreen extends ConsumerStatefulWidget {
 
 class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   String _search = '';
+  final _searchController = TextEditingController();
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   bool _archived = false;
   @override
   Widget build(BuildContext context) {
-    final data = ref.watch(ledgerProvider).requireValue;
-    final now = ref.watch(clockProvider)();
+    final state = ref.watch(ledgerProvider);
+    final feedback = ledgerFeedback(state, 'Tài khoản AI');
+    if (feedback != null) return feedback;
+    final data = state.requireValue;
+    final now = ref.watch(nowProvider);
     final accounts = data.accounts
         .where(
           (a) =>
@@ -47,6 +59,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             label: const Text('Thêm tài khoản'),
           ),
         ),
+        const DataScopePicker(),
+        const SizedBox(height: 16),
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -54,6 +68,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             SizedBox(
               width: 320,
               child: TextField(
+                controller: _searchController,
                 decoration: const InputDecoration(
                   hintText: 'Tìm tài khoản hoặc nhà cung cấp',
                   prefixIcon: Icon(Icons.search_rounded),
@@ -89,7 +104,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             ),
           ),
         ...accounts.map((a) {
-          final summary = ref.watch(accountProjectionProvider(a.id)).summary;
+          final projection = ref.watch(accountProjectionProvider(a.id));
+          final summary = projection.summary;
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Panel(
@@ -141,23 +157,22 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                         'Token đã ghi',
                         compactTokens(summary.tokens),
                       ),
-                      _AccountFact('Ngân sách tháng', money(a.budgetMicros)),
+                      _AccountFact('Ngân sách kỳ', money(a.budgetMicros)),
                       _AccountFact('Số phiên', '${summary.count}'),
                     ],
                   ),
                   const SizedBox(height: 20),
                   AnimatedProgress(
-                    value: a.budgetMicros == null || a.budgetMicros == 0
-                        ? 0
-                        : summary.costMicros / a.budgetMicros!,
+                    value: projection.budgetProgress,
+                    semanticValue: a.budgetMicros == null
+                        ? 'Chưa đặt ngân sách'
+                        : null,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    a.quota == null
+                    a.quotaWindows.isEmpty
                         ? 'Quota: chưa có dữ liệu'
-                        : a.quota!.isStale(now)
-                        ? 'Quota: cần cập nhật'
-                        : 'Quota ${a.quota!.window}: còn ${a.quota!.remainingPercent}% · Nhập tay',
+                        : '${a.quotaWindows.length} cửa sổ quota · ${a.quotaWindows.where((q) => q.isStale(now)).length} cần cập nhật · Xem chi tiết',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

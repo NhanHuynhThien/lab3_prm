@@ -15,15 +15,17 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _working = false;
   Future<void> _reset(bool empty) async {
-    if (!await confirmAction(
-      context,
-      empty ? 'Xóa dữ liệu demo?' : 'Khôi phục dữ liệu mẫu?',
-      'Tất cả tài khoản và phiên trong không gian local này sẽ được ${empty ? 'xóa' : 'thay bằng dữ liệu mẫu'}. Thao tác không thể hoàn tác.',
-    )) {
-      return;
-    }
+    if (_working) return;
     setState(() => _working = true);
     try {
+      if (!await confirmAction(
+            context,
+            empty ? 'Xóa dữ liệu demo?' : 'Khôi phục dữ liệu mẫu?',
+            'Chỉ dữ liệu được gắn nhãn demo sẽ được ${empty ? 'xóa' : 'thay bằng dữ liệu mẫu'}. Dữ liệu nhập tay và dữ liệu cũ chưa phân loại được giữ nguyên. Thao tác không thể hoàn tác.',
+          ) ||
+          !mounted) {
+        return;
+      }
       final vm = ref.read(ledgerProvider.notifier);
       if (empty) {
         await vm.clearDemo();
@@ -33,7 +35,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       if (mounted) {
         showMessage(
           context,
-          empty ? 'Đã xóa dữ liệu local.' : 'Đã khôi phục dữ liệu mẫu.',
+          empty ? 'Đã xóa dữ liệu demo.' : 'Đã khôi phục dữ liệu mẫu.',
         );
       }
     } catch (e) {
@@ -137,16 +139,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ],
             ),
             if (_working)
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(top: 16),
-                child: LinearProgressIndicator(),
+                child: Semantics(
+                  liveRegion: true,
+                  label: 'Đang cập nhật dữ liệu local',
+                  excludeSemantics: true,
+                  child: LinearProgressIndicator(
+                    value: MediaQuery.disableAnimationsOf(context) ? .5 : null,
+                  ),
+                ),
               ),
           ],
         ),
       ),
       const SizedBox(height: 24),
       OutlinedButton.icon(
-        onPressed: () => ref.read(demoSessionProvider.notifier).leave(),
+        onPressed: _working
+            ? null
+            : () => ref.read(demoSessionProvider.notifier).leave(),
         icon: const Icon(Icons.logout),
         label: const Text('Thoát không gian demo'),
       ),

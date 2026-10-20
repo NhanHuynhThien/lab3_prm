@@ -30,7 +30,7 @@ void main() {
       await tester.ensureVisible(find.text('Mở không gian demo'));
       await tester.tap(find.text('Mở không gian demo'));
       await tester.pumpAndSettle();
-      expect(find.text('Ngân sách còn lại · Tháng 10'), findsOneWidget);
+      expect(find.text('Ngân sách còn lại · Kỳ hiện tại'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.tap(
         find.text(width >= 1000 ? 'Tài khoản AI' : 'Tài khoản').last,
