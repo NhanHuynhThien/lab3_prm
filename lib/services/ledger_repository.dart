@@ -19,7 +19,7 @@ abstract interface class RecoverableLedgerRepository {
   Future<void> replaceUnreadable(LedgerData data);
 }
 
-/// Firebase stays pending. A Firestore adapter can replace this interface later.
+/// Local snapshot contract only. CloudLedgerRepository uses streams/atomic CRUD.
 abstract interface class LedgerRepository {
   Future<LedgerData?> load();
   Future<void> save(LedgerData data);

@@ -22,6 +22,11 @@ final ledgerProvider = AsyncNotifierProvider<LedgerViewModel, LedgerData>(
 );
 
 class LedgerViewModel extends AsyncNotifier<LedgerData> {
+  bool get isCloud => false;
+  int? accountRevision(String id) => null;
+  int? usageRevision(String id) => null;
+  int? quotaRevision(String accountId, String key) => null;
+  int? get settingsRevision => null;
   bool _writing = false;
   int _loadEpoch = 0;
   Future<void>? _pendingWrite;
@@ -91,7 +96,7 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     return id;
   }
 
-  Future<void> saveAccount(AIAccount account) async {
+  Future<void> saveAccount(AIAccount account, {int? expectedRevision}) async {
     LedgerValidation.account(account);
     final data = _data;
     final previous = data.account(account.id);
@@ -142,7 +147,7 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     );
   }
 
-  Future<void> saveUsage(UsageSession session) async {
+  Future<void> saveUsage(UsageSession session, {int? expectedRevision}) async {
     LedgerValidation.usage(session, now: ref.read(clockProvider)());
     final data = _data;
     final account = data.account(session.accountId);
@@ -179,6 +184,7 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     String accountId,
     QuotaSnapshot quota, {
     bool requireExisting = false,
+    int? expectedRevision,
   }) async {
     LedgerValidation.quota(quota, now: ref.read(clockProvider)());
     final account = _data.account(accountId);
@@ -224,8 +230,10 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     );
   }
 
-  Future<void> setReportingTimezone(String zone) async =>
-      _commit(_data.copyWith(reportingTimezone: zone.trim()));
+  Future<void> setReportingTimezone(
+    String zone, {
+    int? expectedRevision,
+  }) async => _commit(_data.copyWith(reportingTimezone: zone.trim()));
 
   LedgerData _withoutDemo() {
     final data = _data;

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/app_theme.dart';
+import '../models/auth_session.dart';
+import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/common.dart';
@@ -13,7 +15,9 @@ import 'history_screen.dart';
 import 'profile_screen.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
-  const ShellScreen({super.key});
+  const ShellScreen({super.key, this.user, this.onOpenDemo, this.onLeaveDemo});
+  final AuthUser? user;
+  final VoidCallback? onOpenDemo, onLeaveDemo;
   @override
   ConsumerState<ShellScreen> createState() => _ShellScreenState();
 }
@@ -62,22 +66,33 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
   @override
   Widget build(BuildContext context) {
     final ledger = ref.watch(ledgerProvider);
+    final restored = widget.user == null
+        ? null
+        : ref.watch(authSessionProvider).asData?.value;
+    final user = restored?.uid == widget.user?.uid ? restored : widget.user;
     final wide = MediaQuery.sizeOf(context).width >= AppSpace.wide;
-    final page = ledger.when(
-      loading: () => const LoadingFeedback(),
-      error: (e, st) => Center(child: StorageRecovery(error: e)),
-      data: (_) => IndexedStack(
-        index: _index,
-        children: [
+    Widget guarded(Widget child) => ledger.hasValue && !ledger.isLoading
+        ? child
+        : ledger.hasError
+        ? Center(child: StorageRecovery(error: ledger.error!))
+        : const LoadingFeedback();
+    final page = IndexedStack(
+      index: _index,
+      children: [
+        guarded(
           DashboardScreen(
             onAccounts: () => _selectTab(1),
             onAnalytics: () => _selectTab(2),
           ),
-          const AccountsScreen(),
-          const AnalyticsScreen(),
-          const ProfileScreen(),
-        ],
-      ),
+        ),
+        guarded(const AccountsScreen()),
+        guarded(const AnalyticsScreen()),
+        ProfileScreen(
+          user: user,
+          onOpenDemo: widget.onOpenDemo,
+          onLeaveDemo: widget.onLeaveDemo,
+        ),
+      ],
     );
     final content = FadeTransition(
       key: const ValueKey('tab-transition'),
@@ -105,7 +120,12 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               const Spacer(),
-                              const StatusTag('Demo local', neutral: true),
+                              StatusTag(
+                                widget.user == null
+                                    ? 'Demo local'
+                                    : 'Firestore',
+                                neutral: true,
+                              ),
                               const SizedBox(width: 16),
                               IconButton(
                                 tooltip: 'Cá nhân & trạng thái kết nối',
@@ -268,12 +288,16 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Dữ liệu trên thiết bị',
+                          widget.user == null
+                              ? 'Dữ liệu trên thiết bị'
+                              : 'Dữ liệu cá nhân trên cloud',
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Bạn có thể thêm, sửa và xóa dữ liệu demo. Firebase chưa kết nối.',
+                          widget.user == null
+                              ? 'Bạn có thể thêm, sửa và xóa dữ liệu demo. Sandbox không tự tải lên cloud.'
+                              : 'Tài khoản AI, usage và quota lưu riêng cho bạn. Số liệu do bạn nhập tay.',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -295,11 +319,15 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Không gian demo',
+                              widget.user == null
+                                  ? 'Không gian demo'
+                                  : 'Tài khoản Google',
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             Text(
-                              'Local workspace',
+                              widget.user == null
+                                  ? 'Local workspace'
+                                  : 'Cloud workspace',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],

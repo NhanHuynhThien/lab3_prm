@@ -1,5 +1,23 @@
 # TokenLedger — Checklist triển khai Lab 3
 
+## Cloud workspace/rules —21/10/2026, mục3–5
+
+Đã nối4 tab với Firestore theo UID, CloudLedgerViewModel dùng4 streams ghép nhất quán, full-dataset reporting, CRUD/quota/settings atomic, revision từ lúc mở form, last-good/cache/pending/error/retry giữ draft/filter. Mỗi UID/demo có ProviderContainer/Navigator riêng, root auth action coordinator dùng chung; logout/change UID dọn state/listeners/routes, không seed/upload local vào cloud. Factory tắt Firestore disk persistence. [Workspace hướng dẫn](firestore-workspace.md) ghi thiết kế và manual checks.
+
+Rules default deny/owner/schema/relations/counters/quota labels/receipts đã code và deploy với5 indexes vào tokenledger-lab3/(default), Standard/asia-southeast1. Rules Test API142 cases pass (mocks trước/sau, không emulator/doc writes), live source hash khớp local và unauth GET403. Index readiness xem test-report, không suy deploy accepted thành READY. Full299 Flutter tests pass162s, analyzer sạch, web release48.3s;46 lib/22 test Dart files (2 helpers).25 tests VM/workspace mới;15 Auth tests cập nhật giữ assertions. Native/A-B thật/SDK transactions qua mạng/F1–F3 manual gates vẫn cần nghiệm thu. FCM/RC/Crash/Analytics SDK/PDF/Figma sync chưa làm. Không emulator/billing/commit/push.
+
+
+## Firestore foundation —21/10/2026, mục1–2
+
+Đã thêm cloud_firestore7.0.0, thiết kế envelope/paths theo UID, CloudLedgerRepository streams/atomic CRUD và SDK adapter cho account/usage/quota. Counters/revisions/quota label reservations và operation receipts commit cùng transaction, không upload snapshot local.35 tests repository mới pass; full regression274 tests pass138s trước lần siết receipt/path validation cuối, sau đó35 tests liên quan pass lại; analyzer sạch và web build xem test-report. Source44 lib/20 test Dart files, gồm2 support helpers. [Data contract](firestore-data-contract.md) ghi mapping/invariants/query/indexes và lifecycle. Chưa nối UI/VM, chưa viết/deploy rules/indexes hoặc kiểm database thật; các backend gates còn pending. Không emulator, billing, telemetry hoặc publication.
+
+Người dùng báo Google web login/reload/logout và Authentication Users đã thành công, đồng thời đã tạo Firestore. Đây là xác nhận người dùng; native/Play services/release cert và Firestore integration chưa được kiểm bởi agent.
+
+
+## Firebase/Auth C01–C03 —21/10/2026
+
+Người dùng đã cho phép tiếp tục Firebase và cung cấp config project `tokenledger-lab3`. Core/Auth/Google SDK, service/VM, loading/cancel/error/Retry, auth guard/Profile và sandbox demo đã có code. Google provider/localhost và debug SHA được kiểm trực tiếp qua API/CLI; không gọi ledger trước auth hoặc đưa seed vào dữ liệu cloud. Profile authenticated hiện identity thật từ SDK, dữ liệu Firestore chưa nối. Full239 tests pass140s, analyzer sạch, web JS build45.3s; Gradle processDebugGoogleServices pass112s, không build APK/chạy máy ảo. [Auth setup](firebase-auth-setup.md) ghi source/flows/config/evidence và manual OAuth/native còn cần kiểm; GATE-01 chưa đạt. Không đổi billing, bật Analytics SDK hoặc các services ngoài Auth. Làm trên main sau PR#1; lượt này chưa commit/push.
+
 ## Checkpoint local —21/10/2026
 
 Theo yêu cầu “bước 1. bắt đầu làm”, checkpoint chứa B01–B13/A03–A06 và P0 local trên branch `codex/local-form-safety`; xem SHA bằng `git log -1 --oneline`. Đây là commit local, chưa push. Các đoạn “chưa commit” bên dưới ghi trạng thái ở lần thực hiện trước checkpoint.
@@ -67,14 +85,14 @@ Dependency: scope/design direction; cần Google test account và Firebase proje
 - [ ] SETUP-03 Giữ lịch sử commit theo từng stage. Nhánh thực `codex/local-form-safety` (quy ước codex/); tên `codex/tokenledger-lab3` trước đây chỉ là dự kiến. B01–B13/A03–A06 chưa commit, chưa đủ stage history.
 - [x] SETUP-04 Xác minh package versions tương thích; chọn Riverpod duy nhất, commit lockfile.
 - [x] SETUP-05 Tạo skeleton MVVM theo mục7, conventions model/service/ViewModel/view và typed failures.
-- [ ] SETUP-06 Tạo Firebase project riêng và bật Analytics; đăng ký Android app đúng package.
-- [ ] SETUP-07 Chạy FlutterFire configuration; kiểm tra `firebase_options.dart`/`google-services.json` đúng project.
-- [ ] SETUP-08 Bật Google provider, thêm debug SHA-1; cấu hình signing certificate bổ sung nếu cần APK khác.
+- [x] SETUP-06 Tạo Firebase project riêng và bật Analytics; đăng ký Android app đúng package.
+- [x] SETUP-07 Chạy FlutterFire configuration; kiểm tra `firebase_options.dart`/`google-services.json` đúng project.
+- [x] SETUP-08 Bật Google provider, thêm debug SHA-1; cấu hình signing certificate bổ sung nếu cần APK khác.
 - [ ] SETUP-09 Khi có thiết bị Android thật, kiểm tra kết nối/Google Play services. Native hoãn theo yêu cầu; không chạy/tạo/sửa emulator.
 - [ ] SETUP-10 Tạo Google test account riêng, không ghi credentials vào code/docs/logs.
-- [ ] AUTH-01 Viết AuthService, auth state provider và LoginViewModel; SDK calls chỉ ở service.
-- [ ] AUTH-02 Làm Login UI theo tokens, loading/cancel/error/retry thật.
-- [ ] AUTH-03 Auth guard chặn mọi route/data khi chưa login; deep link không bypass guard.
+- [x] AUTH-01 Viết AuthService, auth state provider và LoginViewModel; SDK calls chỉ ở service.
+- [x] AUTH-02 Làm Login UI theo tokens, loading/cancel/error/retry thật.
+- [x] AUTH-03 Auth guard chặn mọi route/data khi chưa login; deep link không bypass guard.
 - [ ] AUTH-04 Tạo/update user profile tối thiểu; Profile đọc tên/email/avatar thật.
 - [ ] AUTH-05 Logout hủy listeners/state/draft và xử lý FCM device binding trước khi về Login.
 - [ ] AUTH-06 Test Google success/cancel, offline lỗi, logout/Back và sign-in user B không thấy cache A.
@@ -108,26 +126,28 @@ Dependency: G2 + Firestore project. Exit gate: F3 CRUD/query/realtime thật, qu
 
 - [ ] DATA-01 Viết model AIAccount/UsageSession/QuotaWindow/User/Report/Notification/Device và Firestore converters.
 - [ ] DATA-02 Chốt field allowlists/enums/null semantics/schemaVersion và validation bounds theo plan.
-- [ ] DATA-03 Implement FirestoreService/AccountService/QuotaService; không truy cập SDK từ ViewModel/view.
+- [x] DATA-03 Implement FirestoreService/AccountService/QuotaService; không truy cập SDK từ ViewModel/view.
 - [ ] DATA-04 Tạo accounts/usage_sessions/quota_windows/report/notification/device paths dưới UID.
-- [ ] DATA-05 Query active accounts sorted updatedAt; realtime listener và auto-dispose theo UID.
-- [ ] DATA-06 Viết account usageCount transaction contract; chặn counter thay đổi độc lập.
-- [ ] RULE-01 Viết `firebase/firestore.rules`: default deny, auth/owner cho từng collection.
-- [ ] RULE-02 Validate create/update types/range/allowed keys; owner/createdAt immutable, account relation hợp lệ.
-- [ ] RULE-03 Dùng transaction/getAfter kiểm tra create/delete usage và account usageCount nhất quán.
-- [ ] RULE-04 Hard delete chỉ cho account rỗng, test race create usage vs delete account không để orphan.
+- [x] DATA-05 Query active accounts sorted updatedAt; realtime listener và auto-dispose theo UID.
+- [x] DATA-06 Viết account usageCount transaction contract; repository không expose counter setter, child/counter/receipt atomic. Rules getAfter/counter/receipt đã thêm và được Rules Test API kiểm; MVCC fake races riêng không thay server contention test. RULE-05 emulator và GATE-03 manual vẫn chưa đạt.
+- [x] RULE-01 Viết `firebase/firestore.rules`: default deny, auth/owner cho từng collection.
+- [x] RULE-02 Validate create/update types/range/allowed keys; owner/createdAt immutable, account relation hợp lệ.
+- [x] RULE-03 Dùng transaction/getAfter kiểm tra create/delete usage và account usageCount nhất quán.
+- [x] RULE-04 Hard delete chỉ cho account rỗng, test race create usage vs delete account không để orphan.
 - [ ] RULE-05 Emulator tests owner A/B, unauth, field sai, số âm, đổi owner/accountId, reference sai và counter tamper.
-- [ ] RULE-06 Deploy rules/indexes project thật; lưu output/ảnh console không secret.
-- [ ] ACCOUNT-01 S06: list, summary, empty CTA, realtime, error/retry; không cộng% quota giữa account.
-- [ ] ACCOUNT-02 S07: provider/product/alias/plan/budget/cycle/default purposes, validation và saving state. Local đã đủ fields/model/timezone sau A04; backend còn pending.
-- [ ] ACCOUNT-03 S08: detail, purpose summary placeholder theo data thật, budget/quota sections và thao tác edit/archive.
+- [x] RULE-06 Deploy rules/indexes project thật; lưu output/ảnh console không secret.
+- [x] ACCOUNT-01 S06: list, summary, empty CTA, realtime, error/retry; không cộng% quota giữa account.
+- [x] ACCOUNT-02 S07: provider/product/alias/plan/budget/cycle/default purposes, validation và saving state. Local fields/model/timezone sau A04 được dùng lại với cloud CRUD và form revisions; manual acceptance còn chờ.
+- [x] ACCOUNT-03 S08: detail, purpose summary placeholder theo data thật, budget/quota sections và thao tác edit/archive.
 - [ ] ACCOUNT-04 Account create/update/list/detail thật; reload app vẫn có dữ liệu; delete account rỗng thật.
-- [ ] ACCOUNT-05 Account có usage chỉ archive trong luồng mặc định; hard delete yêu cầu xử lý usage trước.
-- [ ] QUOTA-01 S12 nhập snapshot theo window/unit, observedAt/resetAt/source; không yêu cầu token nếu chỉ biết%.
+- [x] ACCOUNT-05 Account có usage chỉ archive trong luồng mặc định; hard delete yêu cầu xử lý usage trước.
+- [x] QUOTA-01 S12 nhập snapshot theo window/unit, observedAt/resetAt/source; không yêu cầu token nếu chỉ biết%.
 - [x] QUOTA-02 Hiển thị unknown/stale/vượt ngân sách bằng chữ+icon; reset qua thời điểm không tự hiện100%.
-- [x] QUOTA-03 Local schema2: cập nhật snapshot cùng window thay current value, giữ key khi rename, source/note và windows độc lập; xóa đúng window và chặn resurrect từ form cũ. Backend converter/owner path còn DATA-03/04.
+- [x] QUOTA-03 Local schema2: cập nhật snapshot cùng window thay current value, giữ key khi rename, source/note và windows độc lập; xóa đúng window và chặn resurrect từ form cũ. Backend ledger converter/owner path đã nối; các entity khác trong DATA-04 còn pending.
 - [ ] ACCOUNT-06 Test alias dài, account trùng provider, budget0/null/âm, cycle invalid, quota 0/100/null/stale.
 - [ ] GATE-03 F3 đạt với user A/B, console data/rules evidence thật; commit accounts/quota/rules.
+
+RULE-01–04/06 tick phần code/rules simulations/deploy; RULE-04 race là MVCC fake + rules state validation, chưa phải server race thật. RULE-05 giữ pending vì không emulator;142 Rules Test API cases là evidence thay thế riêng, không giả mạo emulator. ACCOUNT-01–03/05/QUOTA-01 và USAGE-13 có cloud UI/service tests; ACCOUNT-04/GATE-03/04 cần manual user CRUD/reload/A-B. Xem firestore-workspace.md/test-report.md.
 
 ## G4 — Usage và tính toán (P0)
 
@@ -139,7 +159,7 @@ Dependency: G3. Exit gate: F1 tạo/sửa/xóa usage và tổng đúng, kể c�
 - [ ] CALC-04 Period `[start,end)` UTC quy đổi timezone; used/remaining/excess, không clamp mất số vượt. Local IANA/cycle/DST/budget đã có sau A04; query backend còn pending.
 - [ ] CALC-05 Coverage: known token/cost count và unknown count; quota snapshots không suy từ usage logs.
 - [ ] CALC-06 Unit tests null/zero, precedence, rounding, overrun, percent/window, date boundaries, chart denominator0.
-- [ ] USAGE-01 Implement UsageService transaction create/delete + counter, update hợp lệ, stable client operation ID.
+- [x] USAGE-01 Service implementation: FirestoreLedgerRepository transaction create/delete usage + counter, update immutable accountId, stable operation ID/receipt và revision checks.35 service tests mới; UI/rules/project integration còn pending.
 - [x] USAGE-02 Khóa accountId khi edit P0; error validation nếu cố đổi. Local VM/storage đã kiểm; backend counters còn USAGE-01/C12.
 - [ ] USAGE-03 S02: account/workTitle/purpose/model/date/note, token/cost modes, preview nguồn số liệu. Local form/model/source/basis đã có; backend confirmation còn USAGE-07.
 - [x] USAGE-04 S03 local:9 purposes, selected state, Back không mất draft. Default purposes/model theo account đã có sau A04, chỉ gợi ý và được đổi; không viết lại phiên cũ.
@@ -151,7 +171,7 @@ Dependency: G3. Exit gate: F1 tạo/sửa/xóa usage và tổng đúng, kể c�
 - [x] USAGE-10 S01: card ngân sách, progress, latest rows, CTA; unknown coverage rõ, không có “token tổng còn lại” giả.
 - [ ] USAGE-11 S05: lịch sử nhóm ngày, filter account/purpose/time, list pagination không ảnh hưởng tổng kỳ.
 - [ ] USAGE-12 S11: detail nguồn/cost/tokens + Edit/Delete, confirm delete và phản ánh realtime. Local detail/CRUD/confirmation/provenance SD05 đã có; Firestore realtime còn thiếu.
-- [ ] USAGE-13 VM tests save fail/retry/draft/pending; lỗi permission/network giữ dữ liệu form.
+- [x] USAGE-13 VM tests save fail/retry/draft/pending; lỗi permission/network giữ dữ liệu form.
 - [ ] SEED-01 Tạo seed versioned đúng mục9; đối chiếu baseline hiện tại Claude121k/$5.68, Codex141k/$5.86, Gemini24k/$1.30; bổ sung owner/version khi nối Firebase.
 - [ ] SEED-02 Seed account unknown1 phiên, account rỗng CRUD Test, user B dataset khác; isolate isDemo.
 - [ ] SEED-03 Reset chỉ xóa demo thuộc UID, cập nhật counters đúng; seed lặp không nhân đôi và không xóa real data.

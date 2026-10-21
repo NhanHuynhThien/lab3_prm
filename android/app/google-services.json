@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "306832186195",
+    "project_id": "tokenledger-lab3",
+    "storage_bucket": "tokenledger-lab3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:306832186195:android:74cc79579e088cba1fdfa6",
+        "android_client_info": {
+          "package_name": "com.tokenledger.token_ledger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "306832186195-aqdlglusoimm8hl1uhnvo85q6e8eiepr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tokenledger.token_ledger",
+            "certificate_hash": "8b57ebaa72afac165f212babb4765d9b93fc6b7d"
+          }
+        },
+        {
+          "client_id": "306832186195-5necjfncu417gihpu7dhfcvqj1ae1qoe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkeDtXF1fuz2eSTVP7PKLPhFsy6G1d_to"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "306832186195-5necjfncu417gihpu7dhfcvqj1ae1qoe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

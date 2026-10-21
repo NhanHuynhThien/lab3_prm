@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/ledger_repository.dart';
 import '../viewmodels/ledger_viewmodel.dart';
+import '../viewmodels/cloud_ledger_viewmodel.dart';
 import 'common.dart';
 
 class StorageRecovery extends ConsumerStatefulWidget {
@@ -42,9 +43,23 @@ class _StorageRecoveryState extends ConsumerState<StorageRecovery> {
         mainAxisSize: MainAxisSize.min,
         children: [
           ErrorFeedback(
-            message:
-                'Dữ liệu local chưa đọc được; không gian hiện tại chưa bị ghi đè. ${widget.error}',
-            retry: _working ? null : () => ref.invalidate(ledgerProvider),
+            message: ref.read(ledgerProvider.notifier).isCloud
+                ? 'Không đọc được dữ liệu cloud. Demo local không thay thế dữ liệu của bạn. ${widget.error}'
+                : 'Dữ liệu local chưa đọc được; không gian hiện tại chưa bị ghi đè. ${widget.error}',
+            retry: _working
+                ? null
+                : () {
+                    final vm = ref.read(ledgerProvider.notifier);
+                    if (vm is CloudLedgerViewModel) {
+                      vm.retry().catchError((Object error) {
+                        if (context.mounted) {
+                          showMessage(context, error.toString());
+                        }
+                      });
+                    } else {
+                      ref.invalidate(ledgerProvider);
+                    }
+                  },
           ),
           if (widget.error is LedgerStorageException)
             Padding(

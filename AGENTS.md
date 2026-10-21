@@ -16,9 +16,9 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 
 - Ứng dụng tên TokenLedger; Flutter Android là đích Lab3, web phục vụ preview/test.
 - Người dùng cho phép đổi chức năng StudentPay sang quản lý account AI, token/cost/quota và mục đích công việc; giữ core UI Lab2.
-- Firebase được người dùng yêu cầu pending. Chưa tự tạo project, thêm config/secret, deploy rules, bật telemetry hoặc làm Google login giả. Tiếp tục Firebase khi có yêu cầu mới cho phần đó.
-- Login hiện là demo entry, Profile không có user Google thật. `/?demo=1` chỉ là đường preview của bản không có auth.
-- Dashboard quản lý dữ liệu cá nhân local; chưa có admin đa user, quyền role hoặc provider sync.
+- Người dùng21/10 đã tiếp tục Auth và Firestore đến mục3–5. Web Auth do user xác nhận;4-tab cloud/VM/revisions/last-good/retry/lifecycle và rules/indexes đã code/deploy tokenledger-lab3/(default).299 Flutter tests/142 Rules API cases pass; native/SDK CRUD/A-B thật vẫn cần nghiệm thu. FCM/RC/Crash/Analytics SDK/PDF chưa triển khai. Không đổi billing/telemetry ngoài phạm vi mới hoặc làm Google login giả.
+- Login Google dùng AuthService thật; guard đợi userChanges, Profile dùng metadata SDK. `/?demo=1` là sandbox local riêng, không upload seed hoặc bypass backend auth. Authenticated workspace có4 tab/cloud ledger, user mới empty; không dùng local seed giả dữ liệu cloud.
+- Dashboard dùng dữ liệu cloud của UID hoặc local demo tùy workspace; chưa có admin đa user, quyền role hoặc provider sync.
 - Không tự thêm chat AI, payment, cookie scraping hoặc backend secret để làm giả integration.
 - Không chủ động tạo agent phụ; chỉ delegation nếu người dùng yêu cầu rõ hoặc một skill áp dụng yêu cầu rõ.
 - Theo yêu cầu21/10: không khởi động, tạo hoặc sửa emulator vì máy yếu. Dùng Flutter tests và web preview; native device verification hoãn, không coi đây là blocker phải sửa máy ảo.
@@ -31,7 +31,7 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - `lib/viewmodels/ledger_viewmodel.dart`: validations và mutation orchestration.
 - `lib/viewmodels/reporting_viewmodel.dart`: projections/tổng/budget/shares/filter; không đặt công thức tài chính trong widget build.
 - `lib/screens/` và `widgets/`: render state, controller interactions, navigation và component; không truy cập SharedPreferences/Firebase trực tiếp.
-- Repository đang là snapshot load/save. Khi nối Firestore, thiết kế stream/atomic CRUD/owner scoping; không upload toàn snapshot để làm merge backend.
+- Repository local là snapshot load/save; cloud dùng CloudLedgerViewModel/CloudLedgerRepository streams và atomic CRUD, container độc lập theo UID/demo. Giữ last-good/query/draft khi lỗi, hủy listeners/routes/state khi auth đổi. Đọc docs/firestore-workspace.md và docs/firestore-data-contract.md; không upload toàn snapshot để merge backend hoặc tự bật disk persistence.
 - Save thất bại không được publish success hoặc xóa draft. Giữ stable usage ID khi retry, guard double tap/concurrent writes.
 - Giữ IndexedStack/tab state và reduced-motion behavior khi sửa animation/navigation.
 
@@ -67,7 +67,7 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - Browser inspector taste-skill không hiểu Dart/CanvasKit DOM. Khi dùng phải đánh giá ảnh render + Flutter tests; không thêm hidden h1 để qua gate giả. Output inspector là local artifact, không commit.
 - Android SDK chưa có ở lần doctor19/10; trước khi claim APK/device test cần xác minh lại toolchain. Không claim web test thay Android/MobAI.
 - Không tạo `.mob`, AI review findings, prompt logs hoặc console screenshots giả. Mỗi evidence ghi môi trường/thời gian và scope thật.
-- AI log có14 prompt nguồn thực đến publication ngày21/10 (entry12/14 Git-only, entry13 visual/docs); vẫn cần đối chiếu scope/chất lượng theo rubric trước nộp. Không chia prompt thành các entry tưởng tượng.
+- AI log có18 prompt nguồn thực đến Firestore workspace ngày21/10 (entry12/14/18 Git-only, entry13 visual/docs); vẫn cần đối chiếu scope/chất lượng theo rubric trước nộp. Không chia prompt thành các entry tưởng tượng.
 
 ## 7. Git và bàn giao
 

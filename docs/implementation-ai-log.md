@@ -1,6 +1,6 @@
 # AI implementation log — dữ liệu thật của phiên làm việc
 
-Hiện có14 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs) đến21/10; công cụ/kết quả ghi riêng theo từng entry. Không coi entry docs là code evidence nếu rubric không chấp nhận.
+Hiện có18 prompt nguồn thực (entry12/14/18 Git-only, entry13 visual/docs) đến21/10; công cụ/kết quả ghi riêng theo từng entry. Không coi entry docs là code evidence nếu rubric không chấp nhận.
 
 Lịch sử lượt đầu19/10/2026. Tool: Codex; shell/Flutter/Dart; cua_repl IAB; local taste-skill draw/lint/inspect. Không gọi AI provider để phân tích usage trong app. Không có subagent, Firebase console, MobAI hoặc AI PR review trong lượt này.
 
@@ -176,6 +176,65 @@ Ngày21/10/2026. Ngữ cảnh: đưa checkpoint local d4b6167 và toàn bộ tà
 
 Commit docs/visual handoff có kiểm soát; source checkpoint và commit docs cùng đi theo branch. Không force push, merge main, đổi visibility/collaborators hoặc publish ignored artifacts. Kết quả publication xác minh bằng remote branch SHA khớp HEAD và working tree sạch; SHA thật tra Git log/remote refs, không gán SHA baseline cho source mới. Các ghi chú chưa commit/push trong entry trước là trạng thái lịch sử. Git-only không tự thay implementation hoặc reviewed PR evidence.
 
+## Entry15 — Firebase Core/Auth/Google, guard/Profile và verification
+
+Prompt người dùng nguyên văn:
+
+> 1. Dependencies, khởi tạo Firebase: **10–15 phút**.
+> 2. Google Sign-In và xử lý lỗi: **20–35 phút**.
+> 3. Auth guard, Profile, tách demo: **20–30 phút**.
+> 4. Tests, analyze, web build và sửa lỗi: **15–30 phút**.
+>
+> bắt đầu làm các phần này cho tôi.
+
+Ngày21/10/2026. Ngữ cảnh: main sau merge PR#1, user tự tạo tokenledger-lab3/config/SHA/Google provider và cho phép tiếp tục Firebase; không emulator hoặc thay billing. Tools shell/apply_patch/Python/Dart/Flutter/Gradle/Firebase CLI, web docs chính thức, Auth config GET, view_image và CUA browser inventory/IAB thử mở (không có browser). Không subagent; không dùng skill UI vendor. Đọc computer-use SKILL.md khi khảo sát verification, không dùng native sky/control hoặc account login thay user. UI mở rộng Material/Lab2 tokens/source patterns, không đổi palette/IndexedStack.
+
+Output: firebase_core5.0.0/firebase_auth7.0.0/google_sign_in7.2.0; google-services4.5.0, INTERNET permission, giữ config user. AuthUser/AuthFailure, AuthService/Firebase/Google adapters, shared/retry init, typed sanitized errors, native ID token→Firebase credential/web popup trong click, VM busy/retry/mounted và stream identity. AuthGate timeout20s chờ restore, unknown route guard, session-keyed nested navigator tháo old stack/drafts; Profile SDK metadata/HTTPS avatar/fallback/logout, demo local riêng và không upload. Authenticated ledger chưa nối Firestore, không dùng seed để giả backend.
+
+Verification: config GET enabled Google/localhost, CLI SHA đúng; không ghi credential vào output.39 auth tests mới; full239 pass140s/analyzer11.9s/format57 files0 changed/web JS build45.3s. Gradle processDebugGoogleServices pass112s, default_web_client_id/project khớp config;1 worker/heap1536MB, không APK/emulator. HTTP200 release server/có bootstrap rồi dừng. Ảnh Flutter360/412/1440 text1/2 và3 ảnh Login/Profile đã xem, fixture example.test không phải Google thật. Lượt đầu fail/stop vì listener/finder lazy/runAsync fixture; đã sửa giữ assertions, log cuối mới ghi pass. Docs và checklist tách code/config từ live OAuth/native/GATE-01 pending.
+
+Decision: implementation4 phần đã có; C01 setup và C03 guard/Profile code có evidence, C02 còn live OAuth/Play services/cert variants. Không tạo Firebase users giả, Google credentials, Firestore/rules/counters/FCM/RC/Crash/Analytics SDK/PDF hoặc AI PR findings. Không claim browser popup/native/Google account sign-in đã test; không commit/push mới. Xem firebase-auth-setup.md/test-report.md.
+
+## Entry16 — thiết kế dữ liệu và repository Firestore, mục1–2
+
+Prompt người dùng nguyên văn:
+
+> làm mục 1,2 cho tôi.
+
+Ngày21/10/2026. Ngữ cảnh: người dùng đã xác nhận Google web login/reload/logout/Users và tạo Firestore, yêu cầu mục1 thiết kế dữ liệu và mục2 dependency/repository. Đọc README/architecture/build-status/checklist/plan/Lab2 reference/design log/firebase-pending và workflows/context. Tools shell/apply_patch/Python/Dart/Flutter, web docs Firebase chính thức; không skill UI/subagent/emulator/admin SDK/deploy/backend writes.
+
+Output: cloud_firestore7.0.0 và lockfile; plain CloudRecord/CloudSnapshot/AccountQuota/query/failures, CloudLedgerRepository contract riêng snapshot local, Firestore SDK adapter/converters và repository fixed UID. Accounts/usage/quota streams có cache/pending metadata, full interval filters; atomic CRUD/revisions/counters/relation markers/quota label reservations và command receipts cho retry lost acknowledgement/no resurrection. Owner change revoke instance/listeners; lỗi sanitized và writes không publish UI.5 composite indexes ledger/receipt.intent exemption có file, chưa CLI-config/deploy. firestore-data-contract.md mô tả allowlists/mapping/null-vs-zero/UTC/source/cycle/quota và các rules/UI gates còn lại.
+
+Verification:35 tests mới với optimistic fake store local, cấm read sau write, kiểm concurrency/retry/races/schema/currency/UID/metadata/stream lifecycle; không evaluate rules. Full274 tests pass138s; sau siết receipt/path validation chạy lại35 tests liên quan pass. Analyzer/format/web release kết quả cuối xem test-report. Lượt đầu Flutter pub ở sandbox bị treo cache/network, đã dừng và resolve bằng quyền SDK phù hợp; không sửa SDK/vendor. Lint fix dùng Dart private named formals hiện hành, analyzer xác nhận API công khai. Không đổi auth UI/bootstrap/local behavior. Không ghi pass emulator/Android/Firestore project thật.
+
+Decision: C06 contract, DATA-06 client contract và USAGE-01 service code đã có; C07–C12/full G3–G4 còn phần entity/UI/backend verification. Tách cloud khỏi local VM để không tự seed/upload vào user thật. Chưa viết/deploy rules, nối UI/VM, chạy emulator, thay billing/telemetry hoặc commit/push. User-reported web OAuth được ghi rõ provenance, native chưa kiểm.
+
+## Entry17 — tiếp tục đến mục4–5: rules, cloud UI/VM và lifecycle
+
+Prompt người dùng nguyên văn:
+
+> tiếp tục đến 4,5 cho tôi.
+
+Ngày21/10/2026. Ngữ cảnh: mục1–2 repository xong, người dùng cho làm tiếp đến4–5; bước3 rules là dependency cần hoàn thiện. Tools shell/apply_patch/Python/Dart/Flutter/Firebase CLI/Rules Test API/metadata REST/Web docs chính thức/view_image. Không subagents, UI skill vendor, emulator, admin credentials mới, test Google users, billing/telemetry hoặc Git publication.
+
+Output: CloudLedgerViewModel dùng4 owner streams/account-usage-quota-settings, ghép references/counters, full datasets/calculators, last-good/cache/pending/server/error và retry giữ draft/filter. Workspace container/Navigator độc lập UID/demo; auth actions bridge về root để giữ double tap guard. Form revisions/token tạo mới và pending command closure/operation ID giữ nguyên qua lost acknowledgement. Auth/close clear sensitive state; disposed bootstrap/retry không attach listener muộn; factory tắt disk persistence. Rules default deny/schema/owner/counters/getAfter/receipt proof/quota labels; canonical IDs SHA256 lowercase thay base64 JSON chưa deploy. firebase.json config database(default)/rules/indexes được thêm, Flutter config giữ nguyên.
+
+Verification:299 Flutter tests pass162s, gồm25 VM/workspace tests mới và15 Auth tests cập nhật; analyzer sạch18.5s, web release48.3s/format68 files (kết quả cuối đọc test-report).142 Rules Test API cases pass, source hash42f9dcf5d72393a3b5c942c88c7ed76ea4cfdff5458f2ed2e1bc3e0cc31ad86d, có before/after service mocks, không document writes. API phát hiện hex rules uppercase và max1000 expressions; đã sửa lowercase/branch selection rồi rerun pass. Test iterations sửa helper lazy footer/desktop nav/binding và dùng tester.runAsync cho external fixture.close bị treo; giữ nguyên assertions, dừng đúng task test processes, không đụng flutter run của user. UI360/412/1440 text1/2/fonts thật và ảnh fixture Profile đã xem; không coi là console/Google/native evidence.
+
+Deployment: đọc metadata Standard/asia-southeast1/default và prior rules deny-all,0 indexes; deploy riêng firestore:rules,firestore:indexes vào tokenledger-lab3 thành công. Source remote hash khớp local/Rules API; GET không auth403 PERMISSION_DENIED.5 indexes accepted, readiness cuối xem test-report; không đoán READY. Không đọc/ghi user docs hoặc đăng nhập thay người dùng. Không nâng Blaze/bật FCM/RC/Crash/Analytics SDK/PDF.
+
+Decision: mục3–5 code/verification/deploy đã có, app cloud user mới empty và demo riêng; manual authenticated SDK CRUD/reload/user A-B/native/full G3/G4/submission vẫn pending. Không tick emulator task từ remote simulations; Figma cloud chưa sync. Chưa commit/push; giữ các thay đổi Auth/foundation chưa commit của lượt trước.
+
+## Entry18 — publication trực tiếp main
+
+Prompt người dùng nguyên văn:
+
+> push code lên thẳng main cho tôi.
+
+Ngày21/10/2026. Tools Git/shell/Python; không subagent hoặc runtime changes. Người dùng cho phép commit/push Auth/Firestore và tài liệu trực tiếp main. Remote main trước publication khớp HEAD824df0bc6173bb69fe9d7f6e56432385e641afa6. Audit132 candidate files không phát hiện secret theo patterns đã kiểm; Firebase client config là public app identifiers, không phải admin credential.104 runtime hashes giữ nguyên so với bản299 Flutter tests/142 Rules Test API cases/analyzer/format/web build đã kiểm; không chạy lại Flutter cho Git/docs-only. Kiểm local links/fences/IDs/portability, ignore rules và staged diff trước commit. Xác minh kết quả bằng remote main SHA khớp HEAD và working tree sạch; SHA thật xem Git log.
+
+Decision: publication trực tiếp main theo yêu cầu, không force push/PR/visibility change hoặc deploy thêm. Các ghi chú chưa commit/push trước đó là lịch sử. Native/manual authenticated CRUD/A-B và services pending vẫn giữ nguyên; Git-only không thay reviewed PR/submission evidence.
+
 ## Trạng thái theo rubric
 
-Hiện có14 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs), gồm entry implementation/verification B03–B13; cần đối chiếu chất lượng/phạm vi từng entry theo rubric trước nộp, không chỉ đếm số lượng. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.
+Hiện có18 prompt nguồn thực (entry12/14/18 Git-only, entry13 visual/docs), gồm entry implementation/verification B03–B13; cần đối chiếu chất lượng/phạm vi từng entry theo rubric trước nộp, không chỉ đếm số lượng. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.

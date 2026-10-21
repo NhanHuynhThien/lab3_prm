@@ -117,3 +117,7 @@ Verification cuối/môi trường ở test-report. Ảnh QA app mới dưới `
 Đã mở rộng components theo DC29–DC32: model/default purpose chips/cycle/timezone, multi-window quota details, DataScopePicker/settings, provider/cost breakdown, day headings và donut sector. Form vẫn có draft/Retry, CTA/keyboard/focus giữ theo gallery cũ. Không có vendor UI skill local; không cài lại hoặc đổi Lab2 palette/type/radius. Figma B13 chưa cập nhật cho field mới; final fidelity vẫn pending. Kiểm Flutter render/matrix thực cuối ghi trong test-report.md và local-p0-upgrade.md, không dùng ảnh làm native evidence.
 
 Final upgrade checks: full200 tests pass140s, analyzer/format sạch, web JS build57.7s; source33 lib/14 test files. Full199 trước case default-account/source có ảnh Flutter đã xem tại analytics360/account-detail412/history360/dashboard1440 và account-form360 scale2; lỗi glyph arrow đã đổi sang Material icon. Full200 giữ cùng UI matrix, không xuất ảnh lặp. Các ảnh/log local ignored, chưa có kiểm browser/native hoặc đồng bộ Figma cho field mới.
+
+## Delta Auth C01–C03 —21/10
+
+[Auth setup](firebase-auth-setup.md): Login Google thật qua SDK, busy/errors/Retry; root AuthGate và Profile identity/HTTPS avatar tách local sandbox. UI360/412/1440 text1/2 và full239 tests pass; đã xem ảnh login360/profile360/profile412 dùng fixture. Giữ core Lab2/4-tab demo; Figma chưa sync Login/Profile sau Auth, không dùng page08 trước Auth để claim fidelity mới. Không có live OAuth/Android screenshot mới.

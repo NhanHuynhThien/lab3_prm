@@ -1,10 +1,28 @@
 # TokenLedger — Công việc còn lại để hoàn thành app Flutter và Lab3
 
+## Cloud workspace/rules —21/10/2026, mục3–5
+
+Đã nối4 tab với Firestore theo UID, CloudLedgerViewModel dùng4 streams ghép nhất quán, full-dataset reporting, CRUD/quota/settings atomic, revision từ lúc mở form, last-good/cache/pending/error/retry giữ draft/filter. Mỗi UID/demo có ProviderContainer/Navigator riêng, root auth action coordinator dùng chung; logout/change UID dọn state/listeners/routes, không seed/upload local vào cloud. Factory tắt Firestore disk persistence. [Workspace hướng dẫn](firestore-workspace.md) ghi thiết kế và manual checks.
+
+Rules default deny/owner/schema/relations/counters/quota labels/receipts đã code và deploy với5 indexes vào tokenledger-lab3/(default), Standard/asia-southeast1. Rules Test API142 cases pass (mocks trước/sau, không emulator/doc writes), live source hash khớp local và unauth GET403. Index readiness xem test-report, không suy deploy accepted thành READY. Full299 Flutter tests pass162s, analyzer sạch, web release48.3s;46 lib/22 test Dart files (2 helpers).25 tests VM/workspace mới;15 Auth tests cập nhật giữ assertions. Native/A-B thật/SDK transactions qua mạng/F1–F3 manual gates vẫn cần nghiệm thu. FCM/RC/Crash/Analytics SDK/PDF/Figma sync chưa làm. Không emulator/billing/commit/push.
+
+
+## Firestore foundation —21/10/2026, mục1–2
+
+Đã thêm cloud_firestore7.0.0, thiết kế envelope/paths theo UID, CloudLedgerRepository streams/atomic CRUD và SDK adapter cho account/usage/quota. Counters/revisions/quota label reservations và operation receipts commit cùng transaction, không upload snapshot local.35 tests repository mới pass; full regression274 tests pass138s trước lần siết receipt/path validation cuối, sau đó35 tests liên quan pass lại; analyzer sạch và web build xem test-report. Source44 lib/20 test Dart files, gồm2 support helpers. [Data contract](firestore-data-contract.md) ghi mapping/invariants/query/indexes và lifecycle. Chưa nối UI/VM, chưa viết/deploy rules/indexes hoặc kiểm database thật; các backend gates còn pending. Không emulator, billing, telemetry hoặc publication.
+
+Người dùng báo Google web login/reload/logout và Authentication Users đã thành công, đồng thời đã tạo Firestore. Đây là xác nhận người dùng; native/Play services/release cert và Firestore integration chưa được kiểm bởi agent.
+
+
+## Firebase/Auth C01–C03 —21/10/2026
+
+Người dùng đã cho phép tiếp tục Firebase và cung cấp config project `tokenledger-lab3`. Core/Auth/Google SDK, service/VM, loading/cancel/error/Retry, auth guard/Profile và sandbox demo đã có code. Google provider/localhost và debug SHA được kiểm trực tiếp qua API/CLI; không gọi ledger trước auth hoặc đưa seed vào dữ liệu cloud. Profile authenticated hiện identity thật từ SDK, dữ liệu Firestore chưa nối. Full239 tests pass140s, analyzer sạch, web JS build45.3s; Gradle processDebugGoogleServices pass112s, không build APK/chạy máy ảo. [Auth setup](firebase-auth-setup.md) ghi source/flows/config/evidence và manual OAuth/native còn cần kiểm; GATE-01 chưa đạt. Không đổi billing, bật Analytics SDK hoặc các services ngoài Auth. Làm trên main sau PR#1; lượt này chưa commit/push.
+
 Ngày tổng hợp: **20/10/2026**. Đây là danh sách hành động hợp nhất từ toàn bộ Markdown của dự án, dùng để theo dõi phần còn lại mà không phải đọc lại nhiều backlog trùng nhau.
 
 **Kết luận hiện trạng:** app đã có nền tảng Flutter và nghiệp vụ local; chưa hoàn thành bản Lab3 có Firebase, kiểm thử Android và hồ sơ nghiệm thu. Không cần dựng lại app từ đầu. Cần hoàn thiện trải nghiệm, nối backend đúng kiến trúc, kiểm chứng các tích hợp rồi hoàn tất bài nộp.
 
-**Firebase vẫn đang pending theo yêu cầu trước đó.** Việc lập roadmap này không phải yêu cầu bật Firebase, tạo project, deploy hoặc thu thập telemetry. Các công việc phụ thuộc Firebase chỉ triển khai khi người dùng yêu cầu tiếp tục phần đó. Có thể làm trước các công việc local, thiết kế, chuẩn bị Android và đặc tả.
+**Trạng thái mới21/10:** người dùng đã yêu cầu tiếp tục C01–C03, tự tạo project/config. Core/Auth có code theo mục cập nhật trên; Firestore và services ngoài Auth vẫn pending. Đoạn Firebase pending ở các audit trước giữ như lịch sử, không cấm yêu cầu mới này.
 
 **Cập nhật sau A04 ngày21/10:** đã code [local P0 upgrade](local-p0-upgrade.md): SD01–SD05 và analytics/history local SD08. Model/migration2/form/quota windows/cycle/IANA/provenance/source isolation/provider/day grouping/drilldown có implementation; backend trong C/D/E và full nghiệm thu vẫn pending. Không tick D tasks backend chỉ vì phần local đã làm.
 
@@ -133,25 +151,29 @@ A03–A06 hoàn tất21/10 trong [scope decisions](scope-decisions.md): SD01–S
 
 ### C1. Setup, Auth và vòng đời phiên
 
-- [ ] **C01 — Setup thật:** Firebase project riêng, Android package đúng, Analytics/provider và FlutterFire configuration; kiểm tra dependency/API hiện hành trước code. Không sao chép config từ dự án khác, không nhúng admin/service-account secrets.
-- [ ] **C02 — Google Sign-In:** AuthService + auth provider/VM; loading/cancel/network/config error/retry thật; test Google Play services và SHA debug/release tương ứng.
-- [ ] **C03 — Auth guard/Profile:** chờ auth ready rồi vào route hợp lệ; tên/email/avatar từ user thật; chưa auth không đọc data. `/?demo=1` chỉ vào sandbox local, không bypass backend authorization.
+- [x] **C01 — Setup thật:** Firebase project riêng, Android package đúng, Analytics/provider và FlutterFire configuration; kiểm tra dependency/API hiện hành trước code. Không sao chép config từ dự án khác, không nhúng admin/service-account secrets.
+- [ ] **C02 — Google Sign-In (code/tests và web manual theo user đã đạt; native còn chờ):** AuthService + auth provider/VM; loading/cancel/network/config error/retry thật; test Google Play services và SHA debug/release tương ứng.
+- [x] **C03 — Auth guard/Profile:** chờ auth ready rồi vào route hợp lệ; tên/email/avatar từ user thật; chưa auth không đọc data. `/?demo=1` chỉ vào sandbox local, không bypass backend authorization.
 - [ ] **C04 — Logout/change user:** hủy listeners, invalidate data/cache/drafts nhạy cảm, xử lý device token binding; chặn Back/deep link vào data cũ. Test A → logout → B trên cùng thiết bị.
-- [ ] **C05 — Demo isolation:** user mới thấy empty; import/seed demo là thao tác rõ ràng. Không tự upload snapshot SharedPreferences sang Firestore hoặc trộn demo với dữ liệu thật.
+- [x] **C05 — Demo isolation:** user mới thấy empty; import/seed demo là thao tác rõ ràng. Không tự upload snapshot SharedPreferences sang Firestore hoặc trộn demo với dữ liệu thật.
 
 ### C2. Models, repository và query
 
-- [ ] **C06 — Contract mới:** thiết kế owner-scoped streams và atomic CRUD theo operation; typed failures và state loading/empty/data/error. Không thay `save(snapshot)` bằng một lần ghi toàn snapshot backend.
+Mục1–2 đã có nền ledger: C06 xong contract; C07–C12 có implementation một phần (account/usage/quota converters/paths/streams/metadata/transactions/retry), chưa đủ mọi entity, UI lifecycle, rules và integration. Xem firestore-data-contract.md; không đánh toàn bộ C07–C12 hoặc G3/G4 đạt từ fake store tests.
+
+- [x] **C06 — Contract mới:** thiết kế owner-scoped streams và atomic CRUD theo operation; typed failures và state loading/empty/data/error. Không thay `save(snapshot)` bằng một lần ghi toàn snapshot backend.
 - [ ] **C07 — Models/converters:** bổ sung User/Report/Notification/Device, ownerId, timestamps/schema/source theo nhu cầu; xác định mapping local → backend và migration nếu có. Giữ VM/calculator độc lập SDK và bảo toàn null semantics.
 - [ ] **C08 — Owner paths:** `users/{uid}/accounts`, `usage_sessions`, `quota_windows`, `reports`, `notifications`, `devices`; không query global rồi lọc UID trong widget.
 - [ ] **C09 — Query/indexes:** accounts active/order, usage theo kỳ `[start,end)`, account/purpose filters, reports/notifications ordering; tạo indexes theo query thực tế. Totals tính từ dataset đủ kỳ, không lấy một trang history để tính tổng.
-- [ ] **C10 — Cache/pending/error:** phân biệt last good/cache/pending/server; query fail có retry giữ context. Nếu dùng transaction, offline có thể fail và cần retry; không hứa tự queue. Chỉ thêm “chờ đồng bộ” khi có thiết kế queued-write thật.
-- [ ] **C11 — Retry/concurrency:** operation IDs ổn định, cùng ID không sinh duplicate; xử lý timeout chưa rõ kết quả, account bị archive/delete giữa lúc form mở và mutation; backend là nguồn xác nhận.
+- [x] **C10 — Cache/pending/error:** phân biệt last good/cache/pending/server; query fail có retry giữ context. Nếu dùng transaction, offline có thể fail và cần retry; không hứa tự queue. Chỉ thêm “chờ đồng bộ” khi có thiết kế queued-write thật.
+- [x] **C11 — Retry/concurrency:** operation IDs ổn định, cùng ID không sinh duplicate; xử lý timeout chưa rõ kết quả, account bị archive/delete giữa lúc form mở và mutation; backend là nguồn xác nhận.
+
+C07/C08/C09 đã có phần ledger/settings; User/Report/Notification/Device, pagination và queries tương ứng vẫn chưa xong. C04 core cloud lifecycle/routes/drafts đã có, FCM binding còn dịch vụ sau. C05/C10–C13 tick implementation/tests của ledger, không phải native/backend/manual gates. C14 không chạy emulator theo user; thay bằng142 cases Rules Test API và MVCC fake races. C15 đã deploy rules/indexes/hash/unauth403; manual authenticated SDK CRUD/A-B vẫn chờ.
 
 ### C3. Transactions, rules và deployment
 
-- [ ] **C12 — Usage/account relation:** create/delete usage và usageCount trong transaction; accountId immutable khi edit; hard delete chỉ account rỗng. Dùng mutation relation/getAfter hoặc thiết kế tương đương kiểm chứng được, không chỉ kiểm count ≥0.
-- [ ] **C13 — Rules:** default deny, UID path/owner, field allowlists/type/enum/length/bounds, owner/createdAt immutable; account relation hợp lệ/active lúc create. Reports/quota/notifications/devices không được chuyển owner.
+- [x] **C12 — Usage/account relation:** create/delete usage và usageCount trong transaction; accountId immutable khi edit; hard delete chỉ account rỗng. Dùng mutation relation/getAfter hoặc thiết kế tương đương kiểm chứng được, không chỉ kiểm count ≥0.
+- [x] **C13 — Rules:** default deny, UID path/owner, field allowlists/type/enum/length/bounds, owner/createdAt immutable; account relation hợp lệ/active lúc create. Reports/quota/notifications/devices không được chuyển owner.
 - [ ] **C14 — Emulator tests:** unauth deny; A đọc/ghi A pass, A đọc/ghi B deny; invalid type/field/number/owner/reference deny; counter tamper deny; race create usage ↔ delete account không orphan; edit không đổi account.
 - [ ] **C15 — Deploy và integration:** rules/indexes vào đúng project, kiểm console và app thật. Không dùng rules test mode. Ghi evidence deploy và A/B isolation; emulator tests không thay console evidence.
 
@@ -272,7 +294,7 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 - [ ] **G02 — APK bản nộp:** build/install trên Android, smoke login/F1/F2/F3/PDF/logout; ghi version/build/commit/device/signing scope. Giữ key/password ngoài Git và docs.
 - [ ] **G03 — Fresh clone:** làm theo README trên môi trường sạch; dependencies/config/setup/rules/indexes/storage/seed/test account và limitations đủ để chạy, không phụ thuộc skills/Node/sibling Lab2.
 - [ ] **G04 — Đồng bộ tài liệu cuối:** README, architecture, build-status, test-report, checklist, gaps/change log, `.agents` context phản ánh app thực. Không để final README vẫn mô tả chỉ demo local nếu backend đã hoàn tất.
-- [ ] **G05 — AI log:** ít nhất 6 entries thật theo rubric đang ghi; prompt nguyên văn/output/verification/decision/lý do và tools. Hiện có14 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs); entry docs không tự được tính thay entry implementation nếu rubric không chấp nhận.
+- [ ] **G05 — AI log:** ít nhất 6 entries thật theo rubric đang ghi; prompt nguyên văn/output/verification/decision/lý do và tools. Hiện có15 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs); entry docs không tự được tính thay entry implementation nếu rubric không chấp nhận.
 - [ ] **G06 — Report 5–10 trang:** đủ mục đề, thiết kế/kiến trúc/flows/Firebase/tests/review/gaps/AI usage/limitations; screenshots rõ, dữ liệu và kết quả thật.
 - [ ] **G07 — Video 3–5 phút:** login/profile, 3 flows + recovery, CRUD/Firestore, PDF URL, FCM, RC publish/react, Crashlytics hai loại, DebugView, MobAI/healing/bug-catching/review và logout theo yêu cầu đã đối chiếu. Tua nhanh có chú thích, không che fail để giả pass.
 - [ ] **G08 — Git hygiene:** inspect remote refs/staged diff/ignore/secrets trước push; giữ lockfile/source/platform/font assets cần thiết, loại build/cache/tooling/evidence local bị cấm. Không force push hoặc giả lịch sử.
@@ -287,7 +309,7 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 | `README.md` | Có | Hướng dẫn bản cuối và scope thật |
 | `docs/handoff-gaps.md` | Có | Resolution/evidence/remaining limits |
 | `docs/design-change-log.md` | Có | Toàn bộ thay đổi cuối + Figma |
-| `docs/implementation-ai-log.md` | Có,14 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs) | Đủ entries implementation thật hợp rubric |
+| `docs/implementation-ai-log.md` | Có,15 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs) | Đủ entries implementation thật hợp rubric |
 | `docs/test-report.md` | Có, local tests | Firebase/Android/MobAI và exercises |
 | `docs/analytics-plan.md` | Chưa có | Events/params/triggers/privacy |
 | `docs/fidelity-check.md` | Có B08–B13 + local F11–F13 source d4b6167 và visual handoff | Pixel/native/lecturer sign-off; giữ G8 pending |

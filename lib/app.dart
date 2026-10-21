@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'screens/login_screen.dart';
-import 'screens/shell_screen.dart';
 import 'theme/app_theme.dart';
-import 'viewmodels/ledger_viewmodel.dart';
+import 'widgets/auth_gate.dart';
 
 class TokenLedgerApp extends ConsumerWidget {
   const TokenLedgerApp({super.key});
@@ -13,8 +11,10 @@ class TokenLedgerApp extends ConsumerWidget {
     title: 'TokenLedger',
     debugShowCheckedModeBanner: false,
     theme: buildAppTheme(),
-    home: ref.watch(demoSessionProvider)
-        ? const ShellScreen()
-        : const LoginScreen(),
+    // Browser paths/deep links always enter the guard before any data route.
+    initialRoute: '/',
+    home: const AuthGate(),
+    onGenerateRoute: (_) =>
+        MaterialPageRoute<void>(builder: (_) => const AuthGate()),
   );
 }

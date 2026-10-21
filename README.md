@@ -1,6 +1,6 @@
 # TokenLedger — PRM393 Lab 3
 
-## Publication21/10
+## Publication trước Firebase —21/10
 
 Theo yêu cầu “push hết lên cho tôi”, target là [branch codex/local-form-safety](https://github.com/NhanHuynhThien/lab3_prm/tree/codex/local-form-safety), gồm checkpoint Flutter d4b6167 và commit tài liệu visual handoff chứa đoạn này. Xem Git log/remote refs cho SHA publication; các đoạn “chưa push” bên dưới ghi thời điểm trước yêu cầu này. Không merge main hoặc thay visibility. Runtime giữ nguyên bản200 tests đã kiểm; Firebase/native/lecturer acceptance vẫn pending.
 
@@ -8,7 +8,7 @@ Theo yêu cầu “push hết lên cho tôi”, target là [branch codex/local-f
 
 ## Trạng thái hiện tại
 
-Checkpoint local21/10 trên branch `codex/local-form-safety` (SHA: `git log -1 --oneline`), chưa push. Audit và phạm vi kiểm chứng ở [build status](docs/build-status.md).
+Hiện làm trên `main` sau merge PR#1 (`824df0b`). Đã nối Firebase Core/Auth cho project `tokenledger-lab3`; Auth/Firestore workspace được đưa vào commit publication trực tiếp lên `main` theo yêu cầu mới của người dùng. Các ghi chú checkpoint/publication phía trên giữ theo thời điểm cũ. Xem [Auth setup](docs/firebase-auth-setup.md) và [build status](docs/build-status.md).
 
 - Dashboard responsive và 4 tab: Tổng quan, Tài khoản, Phân tích, Cá nhân.
 - Account CRUD, archive/restore; account có lịch sử chỉ được archive, account rỗng có thể xóa.
@@ -25,7 +25,7 @@ Checkpoint local21/10 trên branch `codex/local-form-safety` (SHA: `git log -1 -
 - Accessibility/states: keyboard focus/semantics/reduced motion; loading/error/Retry giữ draft/filter, destructive actions có confirmation guard. Figma8 màn đã có annotation chuyển đổi và notes bổ sung.
 - Logo vector gốc, font Inter bundle, Android/PWA icons và animation hỗ trợ reduced motion.
 
-**Firebase đang pending:** chưa có Google Auth, Firestore, FCM, Remote Config, Crashlytics, Analytics hoặc PDF/cloud export. Demo không tự đọc usage/quota từ Claude/Codex.
+**Firebase Auth đã có implementation:** Google Sign-In Android/web, auth guard, Profile từ user SDK và logout; người dùng xác nhận web login/reload/logout và Firebase Users đã thành công, native còn chờ. **Firestore đã nối vào4 tab, CRUD/quota/settings theo UID; rules/indexes đã triển khai. Tests/rules simulations đã pass, manual CRUD/A-B thật còn cần kiểm. FCM, Remote Config, Crashlytics, Analytics SDK và PDF/cloud vẫn pending.** Không gian Google dùng cloud ledger riêng; user mới thấy empty, không tự nhận seed. Demo local tách biệt, không tự upload hoặc đọc usage/quota từ Claude/Codex.
 
 Figma P0 đã có8 màn360/412 và mẫu trạng thái chỉnh sửa được; xem [visual handoff](docs/visual-handoff-21-10.md) cho links/đối chiếu và các sai khác còn lại. Chưa nghiệm thu pixel/native/backend.
 
@@ -37,12 +37,12 @@ Figma P0 đã có8 màn360/412 và mẫu trạng thái chỉnh sửa được; x
 git clone https://github.com/NhanHuynhThien/lab3_prm.git
 cd lab3_prm
 flutter pub get
-flutter run -d chrome --web-port 4183
+flutter run -d chrome --web-hostname localhost --web-port 4183
 ```
 
-Chọn **Mở không gian demo** hoặc mở `http://localhost:4183/?demo=1`. Dừng bằng Ctrl+C. Toàn bộ dev server và compilation do Flutter quản lý.
+Bấm **Đăng nhập bằng Google** để kiểm Auth, hoặc chọn **Mở không gian demo** / `http://localhost:4183/?demo=1` để dùng local riêng. User Google mở4 tab với cloud data theo UID; demo local tách biệt. Xem [Firestore workspace](docs/firestore-workspace.md) để kiểm CRUD/reload/logout. Dừng bằng Ctrl+C. Toàn bộ dev server và compilation do Flutter quản lý.
 
-Seed gồm 3 accounts, 12 usage sessions giả định. Mọi thay đổi lưu trên thiết bị/trình duyệt hiện tại; origin/port khác có dữ liệu khác. Không cần Firebase config để chạy. Demo không có xác thực và không dùng để lưu credential thật.
+Seed gồm 3 accounts, 12 usage sessions giả định. Mọi thay đổi lưu trên thiết bị/trình duyệt hiện tại; origin/port khác có dữ liệu khác. Cấu hình Firebase client Android/web do người dùng tạo được giữ trong source; không có admin/service-account key. Demo không yêu cầu đăng nhập và không dùng để lưu credential thật.
 
 Lần mở dữ liệu schema1 sẽ sao lưu raw rồi chuyển sang schema2, giữ nguyên số liệu; chọn **Dữ liệu cũ** để xem. Reset/clear chỉ xóa dữ liệu đã gắn nhãn demo, giữ dữ liệu nhập tay/dữ liệu cũ. Chi tiết [migration và phạm vi local](docs/local-p0-upgrade.md).
 
@@ -74,7 +74,7 @@ lib/
   main.dart        # Flutter bootstrap, repository override
   app.dart         # MaterialApp, theme, demo entry
   models/          # account, usage, quota, JSON schema
-  services/        # local repository, seed, pure calculator
+  services/        # Auth/Firestore/local repositories, converters, calculator
   viewmodels/      # mutations, validations, reporting projections
   screens/         # dashboard, accounts, usage, analytics, profile
   widgets/         # shared components, charts, logo painter
@@ -84,7 +84,7 @@ android/           # native Android project và launcher icons
 web/               # Flutter web host, PWA icons/manifest
 assets/fonts/      # Inter và OFL license
 assets/brand/      # source SVG/logo documentation; không bundle vào app
-test/             # 200 unit/widget tests
+test/             # 299 unit/widget tests
 ```
 
 Git theo dõi source Flutter, cấu hình platform, lockfile, tài liệu và assets cần thiết. Build/cache, tooling skill cài local, bản chụp tài liệu Lab2, ảnh/log inspector và đề PDF được loại khỏi source tree trên GitHub.
@@ -96,6 +96,8 @@ Git theo dõi source Flutter, cấu hình platform, lockfile, tài liệu và as
 - [Phạm vi và gaps A03–A06](docs/scope-decisions.md), [roadmap](docs/APP_COMPLETION_ROADMAP.md).
 - [Kế hoạch](docs/IMPLEMENTATION_PLAN.md), [checklist](docs/TASK_CHECKLIST.md): có cả tính năng chưa triển khai.
 - [Nguồn thiết kế Lab2](docs/lab2-ui-reference.md), [design changes](docs/design-change-log.md), [handoff gaps](docs/handoff-gaps.md), [UI audit/fidelity draft](docs/fidelity-check.md).
+- [Cloud workspace/rules và manual verification](docs/firestore-workspace.md).
+- [Firestore data contract/repository](docs/firestore-data-contract.md).
 - [Firebase pending](docs/firebase-pending.md), [AI log](docs/implementation-ai-log.md), [docs index](docs/README.md).
 - [Agent instructions](AGENTS.md), [agent context/workflows](.agents/README.md).
 

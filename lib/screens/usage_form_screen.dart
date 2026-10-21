@@ -40,9 +40,13 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
   late final String? _initialAccountId;
   late final Purpose _initialPurpose;
   late final DateTime _initialDate;
+  late final int? _revision;
   @override
   void initState() {
     super.initState();
+    _revision = widget.session == null
+        ? (ref.read(ledgerProvider.notifier).isCloud ? 0 : null)
+        : ref.read(ledgerProvider.notifier).usageRevision(widget.session!.id);
     final s = widget.session;
     _id = s?.id ?? ref.read(ledgerProvider.notifier).newId();
     final initialData = ref.read(ledgerProvider).asData?.value;
@@ -167,10 +171,16 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
                   ? CostBasis.unknown
                   : _costBasis,
             ),
+            expectedRevision: _revision,
           );
       if (mounted) {
         Navigator.pop(context);
-        showMessage(context, 'Đã lưu phiên sử dụng trên thiết bị.');
+        showMessage(
+          context,
+          ref.read(ledgerProvider.notifier).isCloud
+              ? 'Đã lưu phiên sử dụng trên Firestore.'
+              : 'Đã lưu phiên sử dụng trên thiết bị.',
+        );
       }
     } catch (e) {
       if (mounted) {

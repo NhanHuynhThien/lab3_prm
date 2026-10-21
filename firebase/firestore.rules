@@ -1,0 +1,229 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function path(uid, col, id) { return /databases/$(database)/documents/users/$(uid)/$(col)/$(id); }
+    function keys(d, fields) { return d.keys().hasAll(fields) && d.keys().hasOnly(fields); }
+    function text(s, max) { return s is string && s.size() <= max; }
+    function required(s, max) { return text(s, max) && s.trim().size() > 0; }
+    function id(s) { return required(s, 128) && s != '.' && s != '..' && !s.matches('.*[/\\x00-\\x1f].*'); }
+    function integer(n, max) { return n is int && n >= 0 && n <= max; }
+    function money(n) { return n == null || integer(n, 9999999999999); }
+    function zone(s) { return required(s, 128) && s.matches('[A-Za-z0-9_+/-]+'); }
+    function source(s) { return s in ['manual', 'demo', 'legacy']; }
+    function identity(d, uid) {
+      return d.ownerId == uid && d.schemaVersion is int && d.schemaVersion == 1 &&
+        integer(d.revision, 9007199254740991) && d.revision > 0 &&
+        d.createdAt is timestamp && d.updatedAt is timestamp && id(d.lastOperationId);
+    }
+    function createTime(d) { return d.revision == 1 && d.createdAt == request.time && d.updatedAt == request.time; }
+    function updateTime(d, old) {
+      return d.ownerId == old.ownerId && d.schemaVersion == old.schemaVersion &&
+        d.createdAt == old.createdAt && d.revision == old.revision + 1 && d.updatedAt == request.time;
+    }
+    function envelope(d) {
+      return keys(d, ['ownerId','schemaVersion','revision','createdAt','updatedAt','payload','lastOperationId']);
+    }
+    function receipt(uid, op, col, entity, action, revision) {
+      let p = path(uid, 'mutations', op);
+      let r = getAfter(p).data;
+      return !exists(p) && r.ownerId == uid && r.createdAt == request.time &&
+        r.collection == col && r.entityId == entity && r.action == action && r.revision == revision;
+    }
+    function accountPayload(p, accountId) {
+      return keys(p, ['id','alias','provider','product','billingMode','plan','budgetMicros','archived',
+        'createdAt','defaultModelId','defaultPurposes','timezone','cycleStartDay','isDemo','dataSource','currency']) &&
+        p.id == accountId && id(p.id) && required(p.alias,80) &&
+        p.provider in ['Anthropic','OpenAI','Google','Khác'] && required(p.product,60) &&
+        p.billingMode in ['subscription','api','other'] && text(p.plan,60) && money(p.budgetMicros) &&
+        p.currency == 'USD' && p.archived is bool && p.createdAt is timestamp && p.createdAt <= request.time &&
+        (p.defaultModelId == null || required(p.defaultModelId,60)) &&
+        p.defaultPurposes is list && p.defaultPurposes.size() <= 9 &&
+        p.defaultPurposes.toSet().size() == p.defaultPurposes.size() &&
+        p.defaultPurposes.hasOnly(['code','debug','review','test','learn','write','research','design','other']) &&
+        zone(p.timezone) && p.cycleStartDay is int && p.cycleStartDay >= 1 && p.cycleStartDay <= 31 &&
+        p.isDemo is bool && source(p.dataSource) && p.isDemo == (p.dataSource == 'demo');
+    }
+    function account(d, uid, accountId) {
+      return keys(d, ['ownerId','schemaVersion','revision','createdAt','updatedAt','payload','lastOperationId',
+        'usageCount','quotaCount','lastUsageMutationId','lastQuotaMutationId']) && identity(d,uid) &&
+        accountPayload(d.payload,accountId) && integer(d.usageCount,9007199254740991) &&
+        integer(d.quotaCount,9007199254740991) &&
+        (d.lastUsageMutationId == null || id(d.lastUsageMutationId)) &&
+        (d.lastQuotaMutationId == null || id(d.lastQuotaMutationId));
+    }
+    function usagePayload(p, usageId) {
+      return keys(p, ['id','accountId','title','purpose','occurredAt','modelId','dataSource','costBasis',
+        'isDemo','inputTokens','outputTokens','costMicros','note','currency']) &&
+        p.id == usageId && id(p.id) && id(p.accountId) && required(p.title,120) &&
+        p.purpose in ['code','debug','review','test','learn','write','research','design','other'] &&
+        p.occurredAt is timestamp && p.occurredAt >= timestamp.date(2020,1,1) && p.occurredAt <= request.time &&
+        (p.modelId == null || required(p.modelId,60)) && source(p.dataSource) &&
+        p.isDemo is bool && p.isDemo == (p.dataSource == 'demo') &&
+        ((p.inputTokens == null && p.outputTokens == null) ||
+          (integer(p.inputTokens,1000000000) && integer(p.outputTokens,1000000000))) &&
+        money(p.costMicros) && p.currency == 'USD' &&
+        (p.costMicros == null ? p.costBasis == 'unknown' : p.costBasis in ['manual','actual','unspecified']) &&
+        text(p.note,1000);
+    }
+    function quotaId(accountId, key) { return hashing.sha256(accountId + '\n' + key).toHexString().lower(); }
+    function labelId(p) { return quotaId(p.accountId, p.window.trim().lower()); }
+    function quotaPayload(p, qid) {
+      return keys(p, ['accountId','window','unit','windowKey','source','sourceLabel','note','usedPercent','observedAt','resetAt']) &&
+        id(p.accountId) && required(p.window,60) && required(p.windowKey,128) &&
+        qid == quotaId(p.accountId,p.windowKey) && p.unit == 'percent' && source(p.source) &&
+        text(p.sourceLabel,120) && text(p.note,1000) && integer(p.usedPercent,100) &&
+        p.observedAt is timestamp && p.observedAt <= request.time && p.resetAt is timestamp && p.resetAt > p.observedAt;
+    }
+    function usageCounter(uid, accountId, d, old) {
+      let p = path(uid,'usage_sessions',d.lastUsageMutationId);
+      return d.payload == old.payload && d.quotaCount == old.quotaCount &&
+        d.lastQuotaMutationId == old.lastQuotaMutationId &&
+        ((d.usageCount == old.usageCount + 1 && !exists(p) && existsAfter(p) &&
+          getAfter(p).data.payload.accountId == accountId &&
+          receipt(uid,d.lastOperationId,'usage_sessions',d.lastUsageMutationId,'create',1)) ||
+         (d.usageCount == old.usageCount - 1 && exists(p) && !existsAfter(p) &&
+          get(p).data.payload.accountId == accountId &&
+          receipt(uid,d.lastOperationId,'usage_sessions',d.lastUsageMutationId,'delete',get(p).data.revision)));
+    }
+    function quotaCounter(uid, accountId, d, old) {
+      let p = path(uid,'quota_windows',d.lastQuotaMutationId);
+      return d.payload == old.payload && d.usageCount == old.usageCount &&
+        d.lastUsageMutationId == old.lastUsageMutationId &&
+        ((d.quotaCount == old.quotaCount + 1 && !exists(p) && existsAfter(p) &&
+          getAfter(p).data.payload.accountId == accountId &&
+          receipt(uid,d.lastOperationId,'quota_windows',d.lastQuotaMutationId,'create',1)) ||
+         (d.quotaCount == old.quotaCount - 1 && exists(p) && !existsAfter(p) &&
+          get(p).data.payload.accountId == accountId &&
+          receipt(uid,d.lastOperationId,'quota_windows',d.lastQuotaMutationId,'delete',get(p).data.revision)) ||
+         (d.quotaCount == old.quotaCount && exists(p) && existsAfter(p) &&
+          getAfter(p).data.payload.accountId == accountId &&
+          getAfter(p).data.revision == get(p).data.revision + 1 &&
+          receipt(uid,d.lastOperationId,'quota_windows',d.lastQuotaMutationId,'update',getAfter(p).data.revision)));
+    }
+    function usageParent(uid, d, delta) {
+      let p = path(uid,'accounts',d.payload.accountId);
+      let before = get(p).data;
+      let after = getAfter(p).data;
+      return before.ownerId == uid && after.ownerId == uid && after.usageCount == before.usageCount + delta &&
+        after.lastUsageMutationId == d.payload.id && (delta != 1 ||
+          (!before.payload.archived && before.payload.isDemo == d.payload.isDemo));
+    }
+    function quotaParent(uid, d, qid, delta) {
+      let p = path(uid,'accounts',d.payload.accountId);
+      let before = get(p).data;
+      let after = getAfter(p).data;
+      return before.ownerId == uid && after.ownerId == uid &&
+        after.quotaCount == before.quotaCount + delta &&
+        after.revision == before.revision + 1 && after.lastQuotaMutationId == qid;
+    }
+    function labelAfter(uid, p) {
+      let d = getAfter(path(uid,'quota_labels',labelId(p))).data;
+      return d.ownerId == uid && d.accountId == p.accountId && d.windowKey == p.windowKey;
+    }
+    function accountChange(uid, accountId, d, old) {
+      let col = getAfter(path(uid,'mutations',d.lastOperationId)).data.collection;
+      return col == 'accounts' ?
+        (d.usageCount == old.usageCount && d.quotaCount == old.quotaCount &&
+          d.lastUsageMutationId == old.lastUsageMutationId && d.lastQuotaMutationId == old.lastQuotaMutationId &&
+          receipt(uid,d.lastOperationId,'accounts',accountId,'update',d.revision)) :
+        col == 'usage_sessions' ? usageCounter(uid,accountId,d,old) :
+        col == 'quota_windows' && quotaCounter(uid,accountId,d,old);
+    }
+
+    match /users/{uid}/accounts/{accountId} {
+      allow read: if owner(uid);
+      allow create: if owner(uid) && account(request.resource.data,uid,accountId) &&
+        createTime(request.resource.data) && request.resource.data.usageCount == 0 &&
+        request.resource.data.quotaCount == 0 && request.resource.data.lastUsageMutationId == null &&
+        request.resource.data.lastQuotaMutationId == null &&
+        receipt(uid,request.resource.data.lastOperationId,'accounts',accountId,'create',1);
+      allow update: if owner(uid) && account(request.resource.data,uid,accountId) &&
+        updateTime(request.resource.data,resource.data) &&
+        request.resource.data.payload.createdAt == resource.data.payload.createdAt &&
+        request.resource.data.payload.isDemo == resource.data.payload.isDemo &&
+        request.resource.data.payload.dataSource == resource.data.payload.dataSource &&
+        accountChange(uid,accountId,request.resource.data,resource.data);
+      allow delete: if owner(uid) && resource.data.usageCount == 0 && resource.data.quotaCount == 0;
+    }
+    match /users/{uid}/usage_sessions/{usageId} {
+      allow read: if owner(uid);
+      allow create: if owner(uid) && envelope(request.resource.data) && identity(request.resource.data,uid) &&
+        createTime(request.resource.data) && usagePayload(request.resource.data.payload,usageId) &&
+        usageParent(uid,request.resource.data,1) &&
+        receipt(uid,request.resource.data.lastOperationId,'usage_sessions',usageId,'create',1);
+      allow update: if owner(uid) && envelope(request.resource.data) && identity(request.resource.data,uid) &&
+        updateTime(request.resource.data,resource.data) && usagePayload(request.resource.data.payload,usageId) &&
+        request.resource.data.payload.accountId == resource.data.payload.accountId &&
+        request.resource.data.payload.dataSource == resource.data.payload.dataSource &&
+        request.resource.data.payload.isDemo == resource.data.payload.isDemo &&
+        getAfter(path(uid,'accounts',resource.data.payload.accountId)).data.ownerId == uid &&
+        receipt(uid,request.resource.data.lastOperationId,'usage_sessions',usageId,'update',request.resource.data.revision);
+      allow delete: if owner(uid) && usageParent(uid,resource.data,-1);
+    }
+    match /users/{uid}/quota_windows/{qid} {
+      allow read: if owner(uid);
+      allow create: if owner(uid) && envelope(request.resource.data) && identity(request.resource.data,uid) &&
+        createTime(request.resource.data) && quotaPayload(request.resource.data.payload,qid) &&
+        request.resource.data.payload.resetAt > request.time &&
+        !get(path(uid,'accounts',request.resource.data.payload.accountId)).data.payload.archived &&
+        quotaParent(uid,request.resource.data,qid,1) &&
+        !exists(path(uid,'quota_labels',labelId(request.resource.data.payload))) && labelAfter(uid,request.resource.data.payload) &&
+        receipt(uid,request.resource.data.lastOperationId,'quota_windows',qid,'create',1);
+      allow update: if owner(uid) && envelope(request.resource.data) && identity(request.resource.data,uid) &&
+        updateTime(request.resource.data,resource.data) && quotaPayload(request.resource.data.payload,qid) &&
+        request.resource.data.payload.accountId == resource.data.payload.accountId &&
+        request.resource.data.payload.windowKey == resource.data.payload.windowKey &&
+        !get(path(uid,'accounts',request.resource.data.payload.accountId)).data.payload.archived &&
+        (request.resource.data.payload.resetAt > request.time ||
+          (request.resource.data.payload.resetAt == resource.data.payload.resetAt &&
+           request.resource.data.payload.observedAt == resource.data.payload.observedAt &&
+           request.resource.data.payload.usedPercent == resource.data.payload.usedPercent)) &&
+        quotaParent(uid,request.resource.data,qid,0) && labelAfter(uid,request.resource.data.payload) &&
+        (labelId(request.resource.data.payload) == labelId(resource.data.payload) ||
+          (!exists(path(uid,'quota_labels',labelId(request.resource.data.payload))) &&
+           !existsAfter(path(uid,'quota_labels',labelId(resource.data.payload))))) &&
+        receipt(uid,request.resource.data.lastOperationId,'quota_windows',qid,'update',request.resource.data.revision);
+      allow delete: if owner(uid) && quotaParent(uid,resource.data,qid,-1) &&
+        !existsAfter(path(uid,'quota_labels',labelId(resource.data.payload)));
+    }
+    match /users/{uid}/quota_labels/{label} {
+      allow read: if owner(uid);
+      allow create, update: if owner(uid) && keys(request.resource.data,['ownerId','accountId','windowKey']) &&
+        request.resource.data.ownerId == uid && id(request.resource.data.accountId) && required(request.resource.data.windowKey,128) &&
+        getAfter(path(uid,'quota_windows',quotaId(request.resource.data.accountId,request.resource.data.windowKey))).data.ownerId == uid &&
+        label == labelId(getAfter(path(uid,'quota_windows',quotaId(request.resource.data.accountId,request.resource.data.windowKey))).data.payload);
+      allow delete: if owner(uid) &&
+        (!existsAfter(path(uid,'quota_windows',quotaId(resource.data.accountId,resource.data.windowKey))) ||
+         label != labelId(getAfter(path(uid,'quota_windows',quotaId(resource.data.accountId,resource.data.windowKey))).data.payload));
+    }
+    match /users/{uid}/settings/{setting} {
+      allow read: if owner(uid);
+      allow create: if owner(uid) && setting == 'reporting' && envelope(request.resource.data) &&
+        identity(request.resource.data,uid) && createTime(request.resource.data) &&
+        keys(request.resource.data.payload,['reportingTimezone']) && zone(request.resource.data.payload.reportingTimezone) &&
+        receipt(uid,request.resource.data.lastOperationId,'settings',setting,'create',1);
+      allow update: if owner(uid) && setting == 'reporting' && envelope(request.resource.data) &&
+        identity(request.resource.data,uid) && updateTime(request.resource.data,resource.data) &&
+        keys(request.resource.data.payload,['reportingTimezone']) && zone(request.resource.data.payload.reportingTimezone) &&
+        receipt(uid,request.resource.data.lastOperationId,'settings',setting,'update',request.resource.data.revision);
+    }
+    match /users/{uid}/mutations/{op} {
+      allow read: if owner(uid);
+      allow create: if owner(uid) && id(op) &&
+        keys(request.resource.data,['ownerId','schemaVersion','intent','revision','createdAt','collection','entityId','action']) &&
+        request.resource.data.ownerId == uid && request.resource.data.schemaVersion is int && request.resource.data.schemaVersion == 1 &&
+        required(request.resource.data.intent,65536) && integer(request.resource.data.revision,9007199254740991) &&
+        request.resource.data.revision > 0 && request.resource.data.createdAt == request.time &&
+        request.resource.data.collection in ['accounts','usage_sessions','quota_windows','settings'] && id(request.resource.data.entityId) &&
+        ((request.resource.data.action in ['create','update'] &&
+          getAfter(path(uid,request.resource.data.collection,request.resource.data.entityId)).data.lastOperationId == op &&
+          getAfter(path(uid,request.resource.data.collection,request.resource.data.entityId)).data.revision == request.resource.data.revision) ||
+         (request.resource.data.action == 'delete' &&
+          get(path(uid,request.resource.data.collection,request.resource.data.entityId)).data.ownerId == uid &&
+          get(path(uid,request.resource.data.collection,request.resource.data.entityId)).data.revision == request.resource.data.revision &&
+          !existsAfter(path(uid,request.resource.data.collection,request.resource.data.entityId))));
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

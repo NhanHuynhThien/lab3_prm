@@ -42,10 +42,16 @@ class _QuotaFormScreenState extends ConsumerState<QuotaFormScreen> {
   late final DateTime _initialReset;
   late final String _initialPercent, _initialWindow;
   bool _saving = false;
+  late final int? _revision;
   String? _error;
   @override
   void initState() {
     super.initState();
+    _revision = _original == null
+        ? (ref.read(ledgerProvider.notifier).isCloud ? 0 : null)
+        : ref
+              .read(ledgerProvider.notifier)
+              .quotaRevision(widget.account.id, _original!.windowKey);
     _percent = TextEditingController(
       text: _original?.usedPercent.toString() ?? '',
     );
@@ -97,6 +103,7 @@ class _QuotaFormScreenState extends ConsumerState<QuotaFormScreen> {
               resetAt: _reset,
             ),
             requireExisting: _original != null,
+            expectedRevision: _revision,
           );
       if (mounted) Navigator.pop(context);
     } catch (e) {

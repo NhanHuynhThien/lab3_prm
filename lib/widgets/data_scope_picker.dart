@@ -80,11 +80,15 @@ class _ReportingSettingsState extends ConsumerState<_ReportingSettingsScreen> {
   final _form = GlobalKey<FormState>();
   late final TextEditingController _zone;
   late final String _initial;
+  late final int? _revision;
   bool _saving = false;
   String? _error;
   @override
   void initState() {
     super.initState();
+    _revision =
+        ref.read(ledgerProvider.notifier).settingsRevision ??
+        (ref.read(ledgerProvider.notifier).isCloud ? 0 : null);
     _initial =
         ref.read(ledgerProvider).asData?.value.reportingTimezone ??
         'Asia/Ho_Chi_Minh';
@@ -106,7 +110,7 @@ class _ReportingSettingsState extends ConsumerState<_ReportingSettingsScreen> {
     try {
       await ref
           .read(ledgerProvider.notifier)
-          .setReportingTimezone(_zone.text.trim());
+          .setReportingTimezone(_zone.text.trim(), expectedRevision: _revision);
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());

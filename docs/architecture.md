@@ -1,22 +1,39 @@
 # Kiến trúc TokenLedger — trạng thái code hiện hành
 
-Hiện trạng21/10/2026 sau A04:33 lib/14 test files; schema2/model/default purposes/multiple quota windows/provenance/cycle/timezone và analytics/history local đã triển khai, xem [upgrade](local-p0-upgrade.md). Các số106/142/168 tests bên dưới giữ theo lịch sử; full Firebase schema/owner/services trong plan chưa có.
+## Cloud workspace/rules —21/10/2026, mục3–5
+
+Đã nối4 tab với Firestore theo UID, CloudLedgerViewModel dùng4 streams ghép nhất quán, full-dataset reporting, CRUD/quota/settings atomic, revision từ lúc mở form, last-good/cache/pending/error/retry giữ draft/filter. Mỗi UID/demo có ProviderContainer/Navigator riêng, root auth action coordinator dùng chung; logout/change UID dọn state/listeners/routes, không seed/upload local vào cloud. Factory tắt Firestore disk persistence. [Workspace hướng dẫn](firestore-workspace.md) ghi thiết kế và manual checks.
+
+Rules default deny/owner/schema/relations/counters/quota labels/receipts đã code và deploy với5 indexes vào tokenledger-lab3/(default), Standard/asia-southeast1. Rules Test API142 cases pass (mocks trước/sau, không emulator/doc writes), live source hash khớp local và unauth GET403. Index readiness xem test-report, không suy deploy accepted thành READY. Full299 Flutter tests pass162s, analyzer sạch, web release48.3s;46 lib/22 test Dart files (2 helpers).25 tests VM/workspace mới;15 Auth tests cập nhật giữ assertions. Native/A-B thật/SDK transactions qua mạng/F1–F3 manual gates vẫn cần nghiệm thu. FCM/RC/Crash/Analytics SDK/PDF/Figma sync chưa làm. Không emulator/billing/commit/push.
+
+
+## Firestore foundation —21/10/2026, mục1–2
+
+Đã thêm cloud_firestore7.0.0, thiết kế envelope/paths theo UID, CloudLedgerRepository streams/atomic CRUD và SDK adapter cho account/usage/quota. Counters/revisions/quota label reservations và operation receipts commit cùng transaction, không upload snapshot local.35 tests repository mới pass; full regression274 tests pass138s trước lần siết receipt/path validation cuối, sau đó35 tests liên quan pass lại; analyzer sạch và web build xem test-report. Source44 lib/20 test Dart files, gồm2 support helpers. [Data contract](firestore-data-contract.md) ghi mapping/invariants/query/indexes và lifecycle. Chưa nối UI/VM, chưa viết/deploy rules/indexes hoặc kiểm database thật; các backend gates còn pending. Không emulator, billing, telemetry hoặc publication.
+
+Người dùng báo Google web login/reload/logout và Authentication Users đã thành công, đồng thời đã tạo Firestore. Đây là xác nhận người dùng; native/Play services/release cert và Firestore integration chưa được kiểm bởi agent.
+
+
+Hiện trạng21/10/2026 sau Auth:39 lib/18 test Dart files (gồm1 support helper),239 tests; schema2/model/default purposes/multiple quota windows/provenance/cycle/timezone và analytics/history local đã triển khai, xem [upgrade](local-p0-upgrade.md). Các số106/142/168 tests bên dưới giữ theo lịch sử; full Firebase schema/owner/services trong plan chưa có.
 
 Cập nhật21/10/2026. Tài liệu này mô tả implementation local hiện tại; [implementation plan](IMPLEMENTATION_PLAN.md) mô tả cả những phần chưa build.
 
 ## 1. Bootstrap và dependency injection
 
-`main.dart` khởi tạo Flutter bindings, override `ledgerRepositoryProvider` bằng `LocalLedgerRepository.open()`, rồi chạy `TokenLedgerApp` trong `ProviderScope`. Repository mở SharedPreferences lúc load; lỗi khởi tạo plugin cũng vào error/Retry, không làm bootstrap dừng trước khi render app.
+`main.dart` khởi tạo Flutter bindings, inject FirebaseAuthService qua authServiceProvider và override `ledgerRepositoryProvider` bằng `LocalLedgerRepository.open()`, rồi chạy `TokenLedgerApp` trong `ProviderScope`. Repository mở SharedPreferences lúc load; lỗi khởi tạo plugin cũng vào error/Retry, không làm bootstrap dừng trước khi render app.
 
-`app.dart` tạo MaterialApp và theme. `demoSessionProvider` chọn Login hoặc Shell; `/?demo=1` mở demo trực tiếp. Đây là điều hướng demo, không có Firebase Auth hoặc user identity thật.
+`app.dart` tạo MaterialApp/theme và AuthGate trước mọi route. authSessionProvider initialize Core/Auth và đợi userChanges; timeout20 giây mở error/Retry/demo, không tự giả signed-out/signed-in. Navigator keyed demo/UID tháo stack cũ khi logout/change user. Profile lấy AuthUser từ Firebase stream; authenticated workspace inject CloudLedgerViewModel/repository trong container riêng theo UID.4 tab dùng cloud streams; không dùng seed local. `/?demo=1` mở sandbox local riêng; xem firebase-auth-setup.md.
 
-Không có network request provider, API key, Firebase initialize hoặc Analytics telemetry trong ứng dụng hiện tại.
+AuthService là nơi gọi Firebase/Google SDK; native dùng ID token credential, web dùng Firebase popup trong lượt click. Client Firebase config không phải provider secret; tokens không lưu vào ledger. Không có provider usage sync hoặc Analytics telemetry SDK. Firestore repository trong services được provider lifecycle tạo sau auth ready; demo local không gọi factory cloud.
 
 ## 2. Ranh giới lớp
 
 | Lớp | File chính | Trách nhiệm |
 |---|---|---|
+| Auth | `lib/services/auth_service.dart`, `firebase_auth_service.dart`, `lib/viewmodels/auth_viewmodel.dart` | Core initialization, Google credential/popup, session stream và typed error/Retry; SDK chỉ trong services |
+| Identity model | `lib/models/auth_session.dart` | AuthUser public metadata/AuthFailure thuần Dart, không lưu OAuth tokens |
 | Model | `lib/models/ledger.dart` | Plain Dart, schema, JSON serialization; enum Purpose/BillingMode |
+| Cloud data | `lib/models/cloud_ledger.dart`, `lib/services/cloud_ledger_repository.dart`, `firestore_ledger_repository.dart`, `firestore_ledger_codec.dart`, `firestore_ledger_store.dart` | Owner-scoped streams, metadata/cache/pending, converters và atomic entity/counter/receipt/label commands; cloud VM/UI đã nối và rules đã deploy |
 | Persistence contract | `lib/services/ledger_repository.dart` | Snapshot `load()` / `save()`; adapter SharedPreferences |
 | Domain calculation | `lib/services/usage_calculator.dart` | Filter khoảng thời gian/account/purpose/search, summarize, purpose shares, daily costs |
 | Seed | `lib/services/demo_seed.dart` | Dataset giả định, có thể khôi phục rõ ràng |
@@ -70,7 +87,7 @@ Không tự sửa/xóa blob corrupt trong load: repository phân biệt lỗi re
 
 | Screen | Đường vào / thao tác |
 |---|---|
-| Login | Demo entry; Google disabled/pending |
+| Login | Google Auth thật hoặc demo local riêng |
 | Shell |4 destinations; desktop sidebar từ1000dp, mobile bottom navigation |
 | Dashboard | Budget, selected-period metrics, 7-day chart, quota, latest/purpose; Ghi sử dụng |
 | Accounts | Search, active/archive state, create/detail |
@@ -79,7 +96,7 @@ Không tự sửa/xóa blob corrupt trong load: repository phân biệt lỗi re
 | History / detail sheet | Search/range/account/purpose drilldown, edit/delete usage |
 | QuotaForm | Window key/name/unitpercent, used%, observed/reset time/source label/note, create/edit/delete guard |
 | Analytics | Cost/token/session metrics, donut/legend, account comparison, history filter |
-| Profile | Pending services, demo restore/clear/leave |
+| Profile | Google metadata và Firestore server/cache/error status; logout/demo riêng. Local Profile có restore/clear/leave |
 
 Navigation dùng Navigator/MaterialPageRoute và sheet, chưa có router URL đầy đủ cho mọi screen/deep link Firebase. Từ 21/10, `DraftGuard` bảo vệ Back appbar/system cho account/usage/quota form: form sạch thoát ngay, form có thay đổi cho tiếp tục sửa/bỏ thay đổi; đang lưu chặn Back và interactions. Save thành công chủ động pop không hỏi bỏ draft. Account và usage form giữ ID ổn định khi retry. Footer ContentPage đặt trên keyboard inset.
 

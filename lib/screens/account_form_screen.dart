@@ -33,6 +33,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   late BillingMode _billing;
   late final String _id;
   late final DateTime _createdAt;
+  late final int? _revision;
   late final List<String> _initialText;
   late final String _initialProvider;
   late final BillingMode _initialBilling;
@@ -55,6 +56,9 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     _provider = a?.provider ?? 'Anthropic';
     _billing = a?.billingMode ?? BillingMode.subscription;
     _id = a?.id ?? ref.read(ledgerProvider.notifier).newId();
+    _revision = a == null
+        ? (ref.read(ledgerProvider.notifier).isCloud ? 0 : null)
+        : ref.read(ledgerProvider.notifier).accountRevision(a.id);
     _initialText = _controllers.map((c) => c.text).toList();
     _initialProvider = _provider;
     _initialBilling = _billing;
@@ -117,10 +121,15 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
         isDemo: widget.account?.isDemo ?? false,
         dataSource: widget.account?.dataSource ?? DataSource.manual,
       );
-      await vm.saveAccount(account);
+      await vm.saveAccount(account, expectedRevision: _revision);
       if (mounted) {
         Navigator.pop(context, account.id);
-        showMessage(context, 'Đã lưu tài khoản trên thiết bị.');
+        showMessage(
+          context,
+          vm.isCloud
+              ? 'Đã lưu tài khoản trên Firestore.'
+              : 'Đã lưu tài khoản trên thiết bị.',
+        );
       }
     } catch (e) {
       if (mounted) {

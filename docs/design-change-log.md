@@ -78,3 +78,15 @@ B11 rà cuối: progress quota chưa biết/quá reset và budget chưa đặt �
 - DC33: Live Figma page237:2,8 core mockups360/412 và3 continuations cho model/purpose chips/cycle/timezone/usage/quota. Giữ tokens/Inter/geometry nguồn; tái sử dụng Button44:1648 và7 local components, thêm chartTertiary variable đúng source. Không đổi original Lab2 screen visuals hoặc Flutter runtime.
 - DC34:6 loading/empty/error specimens, storage/draft/quota/source notes, nav/input/busy examples và provider/cost-basis continuation. Đã xem screenshot và sửa layout rows/sourcepicker/donut/legend/filter/chips/order/disabled palette/stroke overflow; Inter + Material Icons,0 flattened UI image fills.
 - DC35:8 original annotations +8 notes trang07 sync P0, gắn checkpoint d4b6167. Bảng3 phía và node links tại [visual handoff](visual-handoff-21-10.md); QA412/state/component sources và app360/412 đã xem. Audit local F11–F13 không đồng nghĩa pixel-perfect/native/lecturer sign-off. Firebase/MobAI/GATE-08 pending, không emulator/push.
+
+## DC36–DC38 — Google Auth/guard/Profile21/10
+
+- DC36: Login giữ BrandLockup/intro/Inter/palette/Lab2 controls, Google CTA gọi AuthViewModel khi session ready; busy/disabled/cancel/network/config/popup feedback và Retry. Demo CTA là sandbox local riêng, không tự upload. Không cài vendor UI skill; mở rộng Material components hiện hành.
+- DC37: AuthGate chờ restore/timeout trước route, navigator riêng theo demo/UID và tháo old stack/drafts khi user đổi/logout. Authenticated Profile có tên/email/HTTPS avatar từ SDK và fallback; cloud ledger chưa nối nên không đưa seed vào màn này. Local Profile vẫn có reset/clear demo; authenticated Profile chỉ logout/mở demo riêng.
+- DC38: UI auth tests360/412/1440, text1/2, Inter/MaterialIcons và images local đã xem. Profile trong test dùng fixture example.test, không phải OAuth live evidence. Figma Login/Profile chưa sync sau Auth; page08 giữ snapshot d4b6167. Không đổi4-tab local/IndexedStack, motion hoặc quota/cost behavior.
+
+## DC39–DC41 — cloud workspace/rules,21/10/2026
+
+- DC39: Google workspace mở lại4 destinations và sidebar Lab2 hiện có; user mới empty. Profile dùng SDK metadata và status Firestore server/cache/pending/error thật từ VM. Demo local riêng, không hiển thị Google identity như owner của local dataset; không đổi palette/Inter/radii/Brand geometry.
+- DC40: Cloud sync banner nằm ngoài Navigator để retry khi form đang mở; last-good data/filter/draft giữ nguyên khi query lỗi. Forms giữ revisions, error không pop hoặc báo lưu trên thiết bị cho cloud. Logout/change UID dispose container và route stack; giữ IndexedStack/tab state và reduced motion trong cùng session.
+- DC41: UI engine tests360/412/1440dp, text1/2, fonts thật và ảnh Profile fixture đã xem. SDK core config không phải ảnh/counter Google thật. Figma Login/Profile/cloud status chưa sync; annotated checkpoint cũ không tự đại diện bản cloud. Không có skill UI vendor trong checkout, mở rộng Material components và Lab2 tokens hiện có; không cài/sửa skills hoặc làm fidelity evidence giả.

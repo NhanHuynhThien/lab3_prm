@@ -1,8 +1,51 @@
 # Test report — Flutter local và lịch sử verification
 
-Hiện trạng sau upgrade P0 local21/10/2026:33 lib/14 test files; full200/200 tests pass140s, analyzer sạch, format47 files0 changed. Mục upgrade cuối file ghi môi trường/build/evidence/giới hạn. Các bảng16/38/106/142/168 tests và A03–A06 docs-only bên dưới là lịch sử, không phải kết quả runtime hiện hành.
+Hiện trạng mục3–5 Firestore workspace21/10/2026:46 lib/22 test Dart files (2 helpers),299 Flutter tests pass162s;25 VM/workspace tests mới. Rules API142 cases pass; rules/indexes deploy và hash/unauth403 đã xác nhận. Web release48.3s, analyzer sạch; readiness/native/manual limits xem phần cuối. Các số274/239 và foundation/Auth phía dưới là checkpoints lịch sử.
+
+Hiện trạng Firestore foundation21/10/2026:44 lib/20 test Dart files (2 support helpers),274 tests.35 tests cloud mới pass; full274/274 pass138s, sau đó siết receipt/path validation và chạy lại35 tests liên quan pass. Analyzer sạch; build/format cuối ghi tại phần Firestore foundation cuối file. Kết quả239 tests sau Auth bên dưới là checkpoint trước lượt repository.
+
+Hiện trạng Auth21/10/2026:39 lib/18 test Dart files (gồm support helper); full239/239 tests pass140s, analyzer sạch, format57 files0 changed. Baseline trước Auth:33 lib/14 test files,200 tests. Mục upgrade cuối file ghi môi trường/build/evidence/giới hạn. Các bảng16/38/106/142/168 tests và A03–A06 docs-only bên dưới là lịch sử, không phải kết quả runtime hiện hành.
 
 Lịch sử scaffold20/10/2026. Kết quả là unit/widget tests của Flutter, chưa phải MobAI/Firebase/Android integration evidence.
+
+## Firestore foundation — kết quả cuối21/10/2026
+
+- Môi trường Flutter3.47.4/Dart3.13.3, Windows; cloud_firestore7.0.0, platform interface8.0.8/web5.7.4. Dependency resolve thành công, không nâng các dependency cũ.
+- `flutter test --no-pub --concurrency=1 --reporter expanded`: **274/274 pass138s** gồm35 tests cloud mới. Sau đó siết allowlist/schema/revision/timestamp receipt và typed errors ở path helper; chạy lại toàn suite repository **35/35 pass**, không chạy lại toàn app chỉ vì docs. Source UI/Auth/local model/VM không đổi trong lượt này, trừ comment mô tả local repository.
+- `flutter analyze --no-pub`: **No issues found**, lần cuối7.7s. Format64 Dart files0 changed sau chỉnh sửa cuối.44 lib/20 test files gồm2 test support helpers.
+- `flutter build web --release --no-pub --no-wasm-dry-run`: **thành công71.0s** sau thay đổi source cuối. Không APK/native/device/emulator hoặc database/rules integration.
+- Audit24 Markdown: local links/fences/portability sạch,93 roadmap IDs/196 checklist IDs unique,16 AI entries nguồn thực. Candidate secret-pattern scan125 files không phát hiện private/provider/admin/OAuth secrets theo patterns; Firebase client keys chỉ ở config đã cho phép. Không phải audit toàn lịch sử Git.
+
+Tests dùng LedgerCloudFake optimistic transactions: check versions trước commit, retry contention, fail/lost acknowledgement, read-after-write bị chặn; kiểm account/usage/quota CRUD/revisions/receipt/labels/UID/metadata/lifecycle. Không evaluate Security Rules hoặc xác nhận hành vi backend thật.5 composite indexes có file, chưa deploy/configure CLI. App vẫn dùng local demo và authenticated Profile riêng; bước rules và VM/UI chưa làm. Người dùng báo web OAuth/reload/logout/Users đã thành công và tạo Firestore; không gán là agent/native verification.
+
+Logs local ignored: `.taste-skill/firestore-foundation/full-tests.log`, `repository-tests.log`, `web-build.log`, `final-audit.json`. Thiết kế/giới hạn tiếp nối: [data contract](firestore-data-contract.md).
+
+## Cloud workspace/rules — kết quả cuối21/10/2026
+
+Môi trường Windows/Flutter3.47.4/Dart3.13.3; Google web Auth và Firestore creation được user xác nhận trước lượt này. Không tạo Google test users, không đọc/ghi ledger documents thật hoặc chạy emulator/native.
+
+| Kiểm tra | Kết quả thật / scope |
+|---|---|
+| Full Flutter regression | **299/299 pass162s**,25 tests mới (14 cloud VM,11 cloud workspace);15 Auth tests cập nhật giữ assertions |
+| Analyze | **No issues found**, lần cuối7.9s sau disk-cache setting; lần regression trước18.5s |
+| Format |68 Dart files; formatter đã áp dụng cho source mới, kiểm lại0 changed trước bàn giao |
+| Web release | **Pass48.3s**, `--release --no-pub --no-wasm-dry-run`; có SDK factory tắt disk persistence |
+| Rules Test API | **142/142 pass**, no compile issues; point-state get/getAfter/exists/existsAfter mocks, không document writes/emulator |
+| Deployment | CLI deploy rules/indexes riêng vào tokenledger-lab3/(default) thành công; Standard/asia-southeast1 |
+| Remote rule source | SHA256 `42f9dcf5d72393a3b5c942c88c7ed76ea4cfdff5458f2ed2e1bc3e0cc31ad86d`, khớp local và source142 tests |
+| Index readiness | **5/5 READY** lúc2026-10-21T06:09:30Z; lúc đọc trước còn CREATING, không gọi accepted là READY. Receipt.intent có0 indexes đúng exemption |
+| Live negative read | Không auth: HTTP403/PERMISSION_DENIED, không trả ledger data |
+| UI engine |360/412/1440×800 text1/2, real Inter/MaterialIcons; Profile fixture ảnh360/text1 và1440/text2 đã xem, không console/Google user evidence |
+
+Coverage mới: cùng dataset cho projections/totals, empty user không seed, atomic CRUD/quota/settings, revision từ lúc mở form, pending command/receipt retry sau lost acknowledgement, query error giữ last good/search/draft, Retry ngay trên form route, initial failure vẫn logout được, disposal lúc bootstrap, concurrent retries, A→B container/routes/listeners cleanup và cloud↔demo không trộn dữ liệu.
+
+Các iterations trước final có lỗi fixture/import/finder/lazy footer/desktop nav/Flutter binding; stale-form test bị treo khi await external fake repository.close trong fake async, đã chuyển external fixture sang tester.runAsync rồi pass, giữ assertions. Chỉ dừng các cây task test đã xác minh, không dừng flutter run của user. API rules phát hiện hash hex uppercase và max1000 expressions ở quota edit; đã sửa lowercase/branch selection rồi142 cases pass. Một regression trước final được dừng sau khi đã biết test helper lỗi; chỉ log `regression-final.log` đại diện full pass.
+
+Sau regression có cấu hình SDK factory tắt disk persistence, được kiểm analyzer/web compile; fake store tests không kiểm native SDK disk cache behavior. SDK in-memory cache không được tuyên bố đã xóa vật lý. Chưa có actual authenticated SDK CRUD/reload/A-B/backend contention hoặc native/Play services evidence mới; GATE-03/04 và emulator task vẫn chưa đạt từ các số tests/simulations này. FCM/RC/Crash/Analytics SDK/PDF còn pending, Figma chưa sync cloud.
+
+Logs/ảnh ignored tại `.taste-skill/firestore-ui/`: `regression-final.log`, `web-final.log`, `rules-final.json`, `deploy.log`, `backend-before.json`, `deploy-verification.json` và Profile fixtures. Scripts kiểm rules tái chạy được ở [tool/firestore_rules_test.cjs](../tool/firestore_rules_test.cjs); hướng dẫn manual tại [Firestore workspace](firestore-workspace.md). Chưa commit/push lượt Auth/foundation/workspace.
+
+Audit cuối25 Markdown: local links/fences/portability sạch,93 roadmap IDs/196 checklist IDs unique,17 AI entries thật. Candidate scan132 files không phát hiện private/provider/admin/OAuth secrets theo patterns đã kiểm;3 Firebase client key occurrences chỉ ở config cho phép.104 runtime hashes được giữ qua audit docs cuối. Không phải audit toàn lịch sử Git hoặc AI PR review.
 
 ## Coverage tại scaffold19–20/10 (lịch sử)
 
@@ -160,3 +203,13 @@ Git/docs-only, không sửa runtime. Candidate102 files,91 text files: secret-pa
 ## Bước2 — live visual evidence21/10
 
 Không thay runtime; không chạy Flutter lại.83 file hashes đối chiếu manifest của full200 pass/analyzer/format/web build không đổi. Xem đủ8 QA412 và2 Lab2 component/state boards, app8 core screens360/412 +component gallery360/412 từ ảnh Flutter đã có. Tạo Figma page237:2:16 core screens,3 continuations,6 feedback specimens;7 main components/120 instances/455 text nodes/0 image fills. View ảnh từng review board và hậu sửa, sync8 original annotations và8 B13 notes. [Visual handoff](visual-handoff-21-10.md) ghi môi trường/matrix/links/sai khác; không đo similarity hoặc claim pixel/native/backend acceptance. Markdown hiện22 files/13 AI entries; kiểm links/fences/IDs/portability/diff whitespace. Không emulator/push/PR review.
+
+## Firebase Auth C01–C03 —21/10/2026
+
+User cung cấp project tokenledger-lab3/config Android/web, cho phép tiếp tục Core/Auth/Google/guard/Profile. Code39 lib/18 test Dart files (1 support helper); SDK firebase_core5.0.0/firebase_auth7.0.0/google_sign_in7.2.0. Pub add/get thành công; format57 files0 changed; analyzer No issues found11.9s; full239/239 tests pass140s; web release JS build45.3s (`--no-pub --no-wasm-dry-run`), exit0.
+
+39 tests mới: auth_service_test19 (bootstrap shared/retry, native token exchange/missing token/cancel/config/ordering/concurrency/signout, web popup synchronous/typed sanitization); auth_viewmodel_test5 (listener lifecycle/busy/retry/no fake success/dispose/signout failure); auth_gate_test15 (restore/timeout/deep link/UID-stack removal/Profile refresh/logout failure/demo isolation và6 UI matrix360/412/1440×800 text1/2). Các lỗi lượt đầu là fixtures: Riverpod stream cần listener sống khi await future, lazy Profile footer phải cuộn trước tìm, identity phía trên có thể unmount khi cuộn, xuất ảnh phải tester.runAsync. Đã sửa fixture, giữ assertions no-data-read/no-fake-user; không ghi các run bị dừng/fail là pass. Timeout bootstrap20 giây được thêm để mạng treo vẫn có Retry/demo.
+
+Config thực: CLI SHA list khớp debug SHA người dùng; GET Auth config/provider enabled=true, localhost được phép. Không in/lưu credential CLI, client secret hoặc ID token vào docs/logs. Gradle :app:processDebugGoogleServices pass112s với1 worker/heap1536MB; generated project/default_web_client_id khớp client config. Không build/install APK; không emulator/ADB/native login. Gradle cảnh báo Kotlin/newDsl template deprecated, chưa xử lý migration vendor/Gradle10 ngoài scope.
+
+Web release static server localhost trả HTTP200/có flutter_bootstrap.js rồi dừng server do task tạo. Môi trường CUA chỉ có MCP Apps, thử IAB trả Browser is not available; không claim browser JS/console/popup interaction. Đã xem ảnh Flutter Login360/Profile360/412; identity trong ảnh là fixture example.test, không phải user Google thật. Ảnh/log `.taste-skill/c01-c03/` ignored. Live Google account round trip, Play services/cert signing variants, native Back/TalkBack/IME, full C04–C15/GATE-01 vẫn pending; main chưa commit/push lượt Auth. Chi tiết [Auth setup](firebase-auth-setup.md).
