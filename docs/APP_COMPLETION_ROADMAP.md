@@ -1,5 +1,23 @@
 # TokenLedger — Công việc còn lại để hoàn thành app Flutter và Lab3
 
+## Analytics/Remote Config và manual web checks —21/10/2026
+
+Người dùng xác nhận toàn bộ đợt manual web1–7 đạt: account edit/budget, usage totals/purpose drilldown, unknown data, validation/Back draft, archive/restore/history guard, empty-account delete, multi-quota/bounds; trước đó đã xác nhận reload/A-B isolation và offline/Retry. Đây là user-reported web evidence, không phải Android/ARTEMIS/concurrency stress hoặc console do agent kiểm.
+
+Đã thêm Analytics13.0.0 và RemoteConfig7.0.0, typed/noPII event allowlist, UID-serialized lifecycle/dedupe/success-only cloud mutations và tab/account/usage detail events; demo no-op. Remote Config defaults overview_recent_limit3/budget_warning_percent80, parse/clamp/cache/fallback/retry/single-flight; dashboard recent rows/warning thực thay đổi qua projections, không cắt dataset hoặc đổi tiền/token. Profile có effective values/source/check time/refresh và Analytics SDK status; Crashlytics vẫn chưa nối. Đọc [plan Analytics](analytics-plan.md) và [implementation/manual guide](analytics-remote-config.md).
+
+Verification cuối xem test-report; không coi SDK state hoặc fake tests là DebugView/console evidence. Remote Config publish→app before-after, DebugView mỗi event, Android/ARTEMIS vẫn pending; PDF export/upload events chỉ planned. FCM/Crash/PDF và Final modules chưa làm. Không Android emulator/billing/deploy hoặc push trong lượt này. Các câu SDK Analytics/RC còn pending ở checkpoint dưới đây đã được cập nhật implementation mới; giữ history/results đúng thời điểm.
+
+
+## Baseline đề mới và việc làm tiếp —21/10/2026
+
+**Đọc [Yêu cầu Lab3 + Final](ASSIGNMENT_REQUIREMENTS.md) trước khi dùng backlog này.** Đã đối chiếu L3 18 trang/Final9 trang; giảng viên chấp thuận TokenLedger theo xác nhận người dùng21/10. Các checkpoint chưa được duyệt chủ đề/MobAI/Cloudinary/3 findings/report5–10p/video3–5m bên dưới là lịch sử hoặc đã bị baseline mới thay thế, không phải yêu cầu hiện hành.
+
+Lab3: ARTEMIS pytest ≥10 cases×3 runs, native/error/analytics case và exploratory Pro15–30m; AI review ≥5 findings/≥2 kinds/≥3 fixes ở3 commits; report8–12p/slides12–15/video5–10m. Final: web admin/roles/shared core/cross-role/Gemini/App Check, Emulator role tests, report10–15p/slides12–15/video8–12m. Lab3 Storage upload và Final device PDF khác nhau, cần xác nhận riêng; không coi chấp thuận chủ đề là miễn trừ dịch vụ.
+
+Auth/Firestore code/rules/indexes đã có trên main484cc41;299 Flutter tests/142 Rules API cases là evidence cũ, không thay Android/ARTEMIS/Emulator/console mới. Không chạy máy ảo Android. File yêu cầu mới ghi chi tiết toàn bộ scope, gaps, evidence, dependencies và deliverables; các mục còn mở không tự được tick từ lượt docs này.
+
+
 ## Cloud workspace/rules —21/10/2026, mục3–5
 
 Đã nối4 tab với Firestore theo UID, CloudLedgerViewModel dùng4 streams ghép nhất quán, full-dataset reporting, CRUD/quota/settings atomic, revision từ lúc mở form, last-good/cache/pending/error/retry giữ draft/filter. Mỗi UID/demo có ProviderContainer/Navigator riêng, root auth action coordinator dùng chung; logout/change UID dọn state/listeners/routes, không seed/upload local vào cloud. Factory tắt Firestore disk persistence. [Workspace hướng dẫn](firestore-workspace.md) ghi thiết kế và manual checks.
@@ -22,7 +40,7 @@ Ngày tổng hợp: **20/10/2026**. Đây là danh sách hành động hợp nh�
 
 **Kết luận hiện trạng:** app đã có nền tảng Flutter và nghiệp vụ local; chưa hoàn thành bản Lab3 có Firebase, kiểm thử Android và hồ sơ nghiệm thu. Không cần dựng lại app từ đầu. Cần hoàn thiện trải nghiệm, nối backend đúng kiến trúc, kiểm chứng các tích hợp rồi hoàn tất bài nộp.
 
-**Trạng thái mới21/10:** người dùng đã yêu cầu tiếp tục C01–C03, tự tạo project/config. Core/Auth có code theo mục cập nhật trên; Firestore và services ngoài Auth vẫn pending. Đoạn Firebase pending ở các audit trước giữ như lịch sử, không cấm yêu cầu mới này.
+**Trạng thái hiện hành21/10:** Auth/Firestore workspace/rules/indexes đã có theo cập nhật đầu file; services ngoài Auth/Firestore vẫn pending. Đoạn Firebase pending ở các audit trước giữ như lịch sử, không cấm yêu cầu mới này.
 
 **Cập nhật sau A04 ngày21/10:** đã code [local P0 upgrade](local-p0-upgrade.md): SD01–SD05 và analytics/history local SD08. Model/migration2/form/quota windows/cycle/IANA/provenance/source isolation/provider/day grouping/drilldown có implementation; backend trong C/D/E và full nghiệm thu vẫn pending. Không tick D tasks backend chỉ vì phần local đã làm.
 
@@ -94,8 +112,8 @@ Seed hiện tại: **3 accounts, 12 sessions, 286.000 known tokens, $12,84 known
 | B | Hoàn thiện local UI/domain và chuẩn bị Android | Làm ngay, giữ Firebase pending | Local flows ổn định, Android toolchain/device baseline | Phần local G1–G5 |
 | C | Auth, owner-scoped repository, Firestore/rules | Người dùng yêu cầu tiếp tục Firebase; có project/test account | Login và data isolation thật; CRUD backend an toàn | G1, G3–G4 |
 | D | Hoàn chỉnh 3 flows, analytics và quota trên backend | Nền C hoạt động | F1/F2/F3 và recovery đúng cùng dữ liệu | G2–G5 |
-| E | PDF, FCM, RC, Crashlytics, Analytics | Auth/data lifecycle ổn định; spike storage khả dụng | Từng service có hành vi và evidence thật | G6 |
-| F | Regression, MobAI, AI review, fidelity | Các flows/tích hợp cần test đã hoạt động | Tests/fixes/review/visual audit có bằng chứng | G7–G8 |
+| E | PDF, FCM, RC, Crashlytics, Analytics | Auth/data lifecycle ổn định; storage theo REQ-SCOPE-04 | Từng service có hành vi và evidence thật | G6 |
+| F | Regression, ARTEMIS, AI review, fidelity | Các flows/tích hợp cần test đã hoạt động | Tests/fixes/review/visual audit có bằng chứng | G7–G8 |
 | G | Release Android và hồ sơ nộp | Các tiêu chí bắt buộc đã kiểm chứng | APK, docs, report/video, PR/access/submission | G9 |
 
 Có thể chuẩn bị đặc tả tests/events/PDF/Figma và thử khả năng công cụ sớm để phát hiện blocker. Không cần chờ tích hợp xong mới bắt đầu ghi tài liệu/evidence. P1/P2 không nằm trên đường hoàn thành P0.
@@ -104,8 +122,8 @@ Có thể chuẩn bị đặc tả tests/events/PDF/Figma và thử khả năng 
 
 A03–A06 hoàn tất21/10 trong [scope decisions](scope-decisions.md): SD01–SD08 giữ rõ P0 còn thiếu, không coi tick quyết định là đã implement. A01/A02/A07 chưa hoàn tất.
 
-- [ ] **A01 — Chốt yêu cầu với giảng viên:** cá nhân/nhóm, StudentID, deadline, quy định số commit/ngày còn placeholder, đổi chủ đề StudentPay → TokenLedger có được chấp nhận hay không. Lưu phản hồi thật.
-- [ ] **A02 — Đối chiếu đề gốc:** xác nhận tối thiểu 8 màn/3 flows, các Firebase services, storage được phép, yêu cầu MobAI/AI review, tên repo và hồ sơ nộp. Mapping điểm trong plan là tham khảo, chưa phải điểm đã đạt.
+- [ ] **A01 — Chốt thông tin còn thiếu:** topic đã được giảng viên chấp thuận theo user21/10; chỉ còn ID/work mode/deadline/[N] commits-days và roles Final. Không yêu cầu xin duyệt lại chủ đề.
+- [x] **A02 — Đối chiếu đề gốc mới:** đã đọc L3 18 trang và Final9 trang, lập ASSIGNMENT_REQUIREMENTS.md đầy đủ requirements/rubric/evidence; quyết định Storage/roles/môi trường vẫn mở riêng.
 - [x] **A03 — Chốt phạm vi dữ liệu P0:** manual usage/quota, USD, account metadata; thống nhất account/provider/product/model/session/auth token. CSV là P1, provider sync là P2.
 - [x] **A04 — Chốt khoảng cách plan/source:** modelId, default purposes, nhiều quota windows, cycle/timezone, source/costBasis và pricing estimates hiện chưa đủ trong source. Quyết định trường nào phải làm P0; mục nào bỏ/hoãn phải có lý do và được chấp nhận khi ảnh hưởng rubric. Không tự thêm pricing engine chỉ vì plan có công thức ước tính.
 - [x] **A05 — Đồng bộ checklist:** các file gaps/change log/AI log đã tồn tại, không tạo lại; cập nhật trạng thái phần có sẵn và phần chưa hoàn thiện. Thay cách ghi gate chung chung bằng “đã có local/chưa đạt nghiệm thu đầy đủ” khi đúng thực tế; không tick backend tasks theo local tests.
@@ -219,7 +237,7 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 
 ### E1. PDF và storage
 
-- [ ] **E01 — Spike storage sớm:** xác minh PDF upload/delivery và mở URL trên Android; Cloudinary unsigned preset là hướng đề xuất, không mặc định chắc chắn khả dụng. Giới hạn MIME/extension/size (5MB là đề xuất), kiểm billing/tier. Phương án thay thế theo điều kiện đề/giảng viên.
+- [ ] **E01 — Chốt storage theo mốc:** L3 owner-scoped Cloud Storage upload; Final device save/share+Firestore metadata. Xác nhận khác biệt trước implementation; không dùng Cloudinary thay yêu cầu mà chưa được duyệt.
 - [ ] **E02 — Generate PDF:** snapshot dataset theo filter; màu/font Lab2, tiếng Việt, kỳ/account/purpose/summary/table/source/coverage; test nhiều trang, long text, zero/unknown. Render kiểm tra trước bàn giao.
 - [ ] **E03 — Upload lifecycle:** progress/error/timeout/cancel khi cần, HTTPS URL/host hợp lệ; metadata owner/file/time/size/filter/count/status. Chỉ ready sau upload và metadata thành công.
 - [ ] **E04 — Partial failure:** upload thành công nhưng metadata fail thì retry cùng export ID/URL, không upload duplicate; có cách theo dõi orphan files. Kiểm không ghi record ready giả.
@@ -250,35 +268,35 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 
 ## 10. F — Kiểm thử, AI review và fidelity
 
-### F1. Regression và MobAI
+### F1. Regression và ARTEMIS
 
-- [ ] **F01 — Test plan:** environment, fixture/clock/seed/reset/cleanup, expected outcomes và retry policy riêng; scripts không ngầm phụ thuộc thứ tự chạy. Thử sớm MobAI nhận thiết bị; nếu bị chặn, ghi blocker và xác nhận phương án với giảng viên.
+- [ ] **F01 — Test plan:** docs/test-plan.md ≥10 ARTEMIS cases, IDs/flows/screens/precondition/instruction/expected/type; critical/error/alternative/native/analytics coverage; independent setup/cleanup/dedicated Google account.
 - [ ] **F02 — Unit/VM/widget/rules:** chạy các tests trọng yếu B/C/D/E; bổ sung auth dispose, transaction races, cache/pending, upload-success/metadata-fail, notifications/RC mapping và biên thời gian theo thay đổi thật.
-- [ ] **F03 — Tạo và tự review 10 scripts thật** theo bảng sau, lưu một `.mob`/scenario trong `mobai_tests/`; assertions kiểm kết quả dữ liệu, không chỉ tap/toast.
+- [ ] **F03 — ARTEMIS pytest suite:** e2e_test/conftest.py/pyproject.toml/test_*.py; ArtemisClient, structured reported values assertions; pin commit, Flash regression, secrets env. Không tạo .mob.
 
 | Script | Starting state | Outcome bắt buộc kiểm |
 |---|---|---|
-| M01 Google login | Logged out; Google test account riêng | Overview/Profile đúng user |
-| M02 Usage flow | Logged in; baseline seed | Record tồn tại sau reload, totals tăng đúng |
-| M03 Analytics flow | Fixture độc lập | Filter/list/summary đúng và Back giữ context |
-| M04 Account/quota flow | Không có account test | Create/detail/budget/quota/source đúng |
-| M05 Error/recovery | Draft + lỗi có kiểm soát | Error thật, draft giữ, retry đúng một record |
-| M06 Account CRUD | Account rỗng riêng | Create/read/edit/delete thay dữ liệu thật |
-| M07 Navigation | Fixture/states đã mô tả | 4 tab/Back/state preservation; states được kích hoạt rõ |
-| M08 Profile/RC | Remote values đã publish | User/effective values đúng và UI thực đổi |
-| M09 PDF export | Storage khả dụng; baseline | URL mở được, report item và metadata đúng |
-| M10 Logout | Logged in | Login và Back/deep link không truy cập data |
+| TC-01 Google login | Logged out; Google test account riêng | Overview/Profile đúng user |
+| TC-02 Usage flow | Logged in; dataset test riêng trên Firestore | Record tồn tại sau reload, totals tăng đúng |
+| TC-03 Analytics flow | Fixture độc lập | Filter/list/summary đúng và Back giữ context |
+| TC-04 Account/quota flow | Không có account test | Create/detail/budget/quota/source đúng |
+| TC-05 Error/recovery | Draft + lỗi có kiểm soát | Error thật, draft giữ, retry đúng một record |
+| TC-06 Account CRUD | Account rỗng riêng | Create/read/edit/delete thay dữ liệu thật |
+| TC-07 Navigation | Fixture/states đã mô tả | 4 tab/Back/state preservation; states được kích hoạt rõ |
+| TC-08 Profile/RC | Remote values đã publish | User/effective values đúng và UI thực đổi |
+| TC-09 PDF export | L3 Storage đã chốt; dataset test riêng | URL mở được, report item và metadata đúng |
+| TC-10 Logout | Logged in | Login và Back/deep link không truy cập data |
 
-- [ ] **F04 — Full run:** clean start, bảng pass/fail từng script, logs/video/screenshots thật; ghi manual Google steps nếu có. Test thêm usage edit/delete, archive/history, A/B, stale quota, native keyboard và PDF/network errors ngoài 10 scripts khi cần.
-- [ ] **F05 — Healing:** đổi label có kiểm soát → capture failure → MobAI patch/diff → đánh giá assertion vẫn kiểm đúng outcome → rerun.
-- [ ] **F06 — Bug-catching:** tạm inject save-no-op → test fail vì record/tổng sai → revert defect → rerun pass. Không merge bug hoặc dựng kết quả giả.
-- [ ] **F07 — Test report hoàn chỉnh:** environment/build/starting state/script results/exercises/manual limits/remaining risks. Bộ unit/widget tests local hiện hành trong test-report không thể thay phần này.
+- [ ] **F04 — Execution evidence:** ≥3 runs/case, pass rate/average time, command+trace/screenshots/replay từng run; explain failed/skipped/flaky và fixes/reruns.
+- [ ] **F05 — Exploratory:** ARTEMIS Pro unscripted15–30 phút, issues/triage thật; healing không còn là yêu cầu bắt buộc của đề mới.
+- [ ] **F06 — Native/error/analytics:** ≥1 native interaction và1 error case; ≥1 test kiểm event Logcat/DebugView; optional bug injection không thay yêu cầu này.
+- [ ] **F07 — Test report hoàn chỉnh:** environment/build/starting state/pytest outcomes/3runs/pass rates/exploratory/manual limits/remaining risks. Bộ unit/widget tests local hiện hành trong test-report không thể thay phần này.
 
 ### F2. AI PR review
 
 - [ ] **F08 — PR review:** feature branch prefix `codex/`, PR vào main, mô tả final behavior và validation thật; review code app và `firebase/firestore.rules` bằng AI tool khi chúng đã có.
-- [ ] **F09 — Findings:** theo tài liệu hiện có cần ≥3 findings thật, ≥1 security/robustness; file/line/severity, tool output, accepted/modified/rejected + lý do. Không tạo findings để đủ số lượng.
-- [ ] **F10 — Fix/verify:** fix accepted findings, link commit/before-after, rerun relevant checks. Tạo `docs/code-review.md`; chưa review thì không dùng architecture làm evidence thay thế.
+- [ ] **F09 — Findings:** ≥5 thật/≥2 kinds, file:line/tool output, accepted/modified/rejected+reason requirement/effect/constraint; không fabricate.
+- [ ] **F10 — Fix/verify:** ≥3 accepted findings, mỗi finding1 commit riêng chứa findingID, docs/code-review.md link commits/checks; disclose mọi AI tool.
 
 ### F3. Fidelity cuối
 
@@ -286,7 +304,7 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 - [x] **F12 — Final token/component audit:** colors/fonts/spacing/radius hard-coded, 9 families/states, touch/contrast/keyboard/text scale, logo/motion; ghi ngoại lệ và hạn chế, không claim perfect match vì chỉ cùng palette.
 - [x] **F13 — Đồng bộ Figma/docs:** annotations theo app cuối, change log, gaps resolutions; hoàn thiện `docs/fidelity-check.md` đã có, link evidence truy cập được. Chỉ báo Figma đã cập nhật sau khi có thao tác thật.
 
-**Điều kiện xong F:** regression cần thiết pass; defect thử đã revert; scripts/findings/fidelity có evidence thật và giới hạn được ghi rõ.
+**Điều kiện xong F:** regression và ARTEMIS≥3runs/case/exploratory/native/analytics có evidence;≥5 review findings/3separate fixes; final cloud/native fidelity không tự tick từ audit local cũ.
 
 ## 11. G — Release Android, tài liệu và hồ sơ nộp
 
@@ -294,32 +312,29 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 - [ ] **G02 — APK bản nộp:** build/install trên Android, smoke login/F1/F2/F3/PDF/logout; ghi version/build/commit/device/signing scope. Giữ key/password ngoài Git và docs.
 - [ ] **G03 — Fresh clone:** làm theo README trên môi trường sạch; dependencies/config/setup/rules/indexes/storage/seed/test account và limitations đủ để chạy, không phụ thuộc skills/Node/sibling Lab2.
 - [ ] **G04 — Đồng bộ tài liệu cuối:** README, architecture, build-status, test-report, checklist, gaps/change log, `.agents` context phản ánh app thực. Không để final README vẫn mô tả chỉ demo local nếu backend đã hoàn tất.
-- [ ] **G05 — AI log:** ít nhất 6 entries thật theo rubric đang ghi; prompt nguyên văn/output/verification/decision/lý do và tools. Hiện có15 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs); entry docs không tự được tính thay entry implementation nếu rubric không chấp nhận.
-- [ ] **G06 — Report 5–10 trang:** đủ mục đề, thiết kế/kiến trúc/flows/Firebase/tests/review/gaps/AI usage/limitations; screenshots rõ, dữ liệu và kết quả thật.
-- [ ] **G07 — Video 3–5 phút:** login/profile, 3 flows + recovery, CRUD/Firestore, PDF URL, FCM, RC publish/react, Crashlytics hai loại, DebugView, MobAI/healing/bug-catching/review và logout theo yêu cầu đã đối chiếu. Tua nhanh có chú thích, không che fail để giả pass.
+- [ ] **G05 — AI disclosure/log:** giữ prompt thật/tool-purpose, không coi ≥6 prompt là requirement của đề mới; không thay code-review record bằng AI implementation log.
+- [ ] **G06 — Report8–12 trang:** report/Lab03_<StudentID>.pdf đầy đủ REQ-L3-41; claims có evidence.
+- [ ] **G07 — Video5–10 phút và slides12–15 PDF:** live Android/flows/errors/services/ARTEMIS/review như REQ-L3-42–43; video URL trong README, không edited-in kết quả.
 - [ ] **G08 — Git hygiene:** inspect remote refs/staged diff/ignore/secrets trước push; giữ lockfile/source/platform/font assets cần thiết, loại build/cache/tooling/evidence local bị cấm. Không force push hoặc giả lịch sử.
 - [ ] **G09 — Repo/access:** hiện dùng repo `lab3_prm`; xác nhận yêu cầu tên `PRM393_Lab03_<StudentID>` trước đổi tên. Repo được docs ghi private: giải quyết quyền người chấm đúng lúc, kiểm quyền Figma/report/video; không tự đổi visibility/mời người khác.
-- [ ] **G10 — PR/commit nộp:** ít nhất một PR đã review và merge theo tài liệu đề; xử lý merge trong phạm vi được cho phép. Ghi submission commit/tag thật, xác minh remote và working tree; initial push không thay reviewed PR.
-- [ ] **G11 — Oral review:** chuẩn bị giải thích một VM, một service, rules và phép tính, làm thay đổi nhỏ trực tiếp trong 5–10 phút theo yêu cầu đã xác nhận.
+- [ ] **G10 — PR/commit nộp:** PR AI review và ≥3 separate fix commits, submission SHA/stage history thật; merge trong phạm vi cho phép, không coi PR#1 thay review cloud mới.
+- [ ] **G11 — Oral review:** L3≈5 phút run ARTEMIS/change RC/explain VM+review decision; Final≈10 phút run cross-role/change RC/explain rule+AI.
 
-### Deliverables phải kiểm trước khi nộp
+### Deliverables phải kiểm trước khi nộp Lab3
 
-| Deliverable | Hiện trạng21/10 | Việc phải hoàn thiện |
+| Deliverable | Hiện trạng21/10 | Phần còn lại |
 |---|---|---|
-| `README.md` | Có | Hướng dẫn bản cuối và scope thật |
-| `docs/handoff-gaps.md` | Có | Resolution/evidence/remaining limits |
-| `docs/design-change-log.md` | Có | Toàn bộ thay đổi cuối + Figma |
-| `docs/implementation-ai-log.md` | Có,15 prompt nguồn thực (entry12/14 Git-only, entry13 visual/docs) | Đủ entries implementation thật hợp rubric |
-| `docs/test-report.md` | Có, local tests | Firebase/Android/MobAI và exercises |
-| `docs/analytics-plan.md` | Chưa có | Events/params/triggers/privacy |
-| `docs/fidelity-check.md` | Có B08–B13 + local F11–F13 source d4b6167 và visual handoff | Pixel/native/lecturer sign-off; giữ G8 pending |
-| `docs/code-review.md` | Chưa có | Findings/decisions/fixes/verification |
-| `firebase/firestore.rules` và indexes | Chưa có | Implement/test/deploy đúng project |
-| `mobai_tests/` với 10 `.mob` | Chưa có | Scripts chạy thật và assertions reviewed |
-| APK + report 5–10 trang + video 3–5 phút | Chưa có bằng chứng hoàn tất trong docs | Tạo/kiểm/access/link submission |
-| PR review/merge và submission commit | Chưa có bằng chứng trong docs | Kiểm GitHub thực và hoàn tất |
+| README/architecture/build-status | Có, một số body giữ lịch sử local | Source cloud hiện hành, diagrams/VM-service table, run/pinned versions/tools/video/deliverable map |
+| design-traceability/analytics-plan/test-plan/code-review | analytics-plan đã có;3 file còn thiếu | Plan trước tracking; DebugView/export-upload hooks và nội dung các docs còn lại pending |
+| change-log/fidelity/handoff-gaps/AI-log/test-report | Có; AI log19 prompt thật | Final cloud/native/Figma/evidence; disclosure không thay review |
+| Firestore rules/indexes | Đã code/deploy;5READY | Manual SDK CRUD/A-B và Final role matrix riêng |
+| storage.rules/remote-config-defaults.json | RC JSONdefaults/code đã có;storage.rules chưa có | RC console evidence pending;L3 Storage theo REQ-SCOPE-04 |
+| e2e_test/ | Chưa có | ≥10 ARTEMIS pytest cases×3, exploratory/native/error/analytics, traces/pass rates |
+| evidence/ | Chưa có bộ evidence nộp | Service console/native/test/review thật, project/commit/env/time, quyền truy cập |
+| APK/report8–12p/slides12–15/video5–10m | Chưa hoàn tất | Đúng REQ-L3-40–45, live device và private-window access |
+| PR AI review/fix commits/submission SHA | PR#1 merged trước Auth/Firestore | Review mới≥5findings/3separate fixes; không tự gán findings cho PR cũ |
 
-“7 tài liệu trong docs” của checklist là gaps/change log/fidelity/analytics/AI log/test report/code review; các tài liệu architecture/build-status/plan vẫn giữ vai trò bổ sung. Không dùng file roadmap này thay các deliverables đó.
+Final có deliverables riêng theo FIN-01–FIN-36, không dùng report/video Lab3 sai độ dài thay Final. Không coi file có tồn tại là đáp ứng nội dung đề.
 
 **Điều kiện hoàn thành app/Lab3:** toàn bộ yêu cầu bắt buộc đã xác nhận có implementation và evidence trên bản Android cuối; hồ sơ truy cập được; các mục còn thiếu được giải quyết hoặc có chấp thuận ngoại lệ rõ ràng. Không tự chấm điểm rubric dựa trên số màn hoặc số checkbox.
 
@@ -364,7 +379,7 @@ Trạng thái dưới đây gồm tiến độ cập nhật21/10; các bằng ch
 | C — Auth/data/rules | Chờ yêu cầu tiếp tục Firebase | — | — | — |
 | D — 3 flows backend | Local SD01–SD05/SD08 đã mở rộng; chờ C/backend verification | — | — | — |
 | E — Services/PDF | Chưa tích hợp | — | — | — |
-| F — Tests/review/fidelity | Có local tests; thiếu integration/MobAI/review/fidelity đầy đủ | — | — | — |
+| F — Tests/review/fidelity |299 Flutter/142 Rules API có; thiếu manual/native/ARTEMIS/AI review/final fidelity | — | — | — |
 | G — Android release/submission | Chưa đủ điều kiện | — | — | — |
 
 Ưu tiên tiếp theo khi Firebase vẫn pending: **A01/A02/A07 / các phần F-G không phụ thuộc Firebase (B01–B14 đã có local/annotation verification; B15/B16 native hoãn)**, đồng thời chuẩn bị mapping/Figma/accessibility và test cases. Khi Firebase được yêu cầu tiếp tục: **C → D → E → F → G**; ghi docs/evidence ngay trong từng bước.
@@ -427,3 +442,7 @@ B11–B13 verification cuối:168/168 tests pass (26 mới), analyzer sạch, fo
 ### Hoàn tất P0 local sau A04 —21/10/2026
 
 SD01–SD05 và phần analytics/history local SD08 đã code/audit theo local-p0-upgrade.md. Final200 tests pass/analyzer/format/web JS build đạt, chi tiết test-report. Giữ C/D/E backend và F/G full acceptance pending; không tự tick Firebase/Auth/MobAI/native hoặc final fidelity. A01/A02/A07 còn việc ngoài phạm vi lượt code; không emulator, commit/push.
+
+## 15. Final — backlog bắt buộc riêng
+
+Theo ASSIGNMENT_REQUIREMENTS.md mục6–9, FIN-01–FIN-36 bao phủ gap review, roles/model/rules, shared core/mobile/web admin/Hosting/inbox/cross-role, Gemini/AppCheck/RC, Emulator/E2E/web/review và hồ sơ Final. Đây là P0 của Final, không nằm trong P1/P2 tùy chọn. Không tick theo desktop preview, owner-only rules hoặc app quản lý account AI hiện có. Thứ tự/evidence/điểm khác Lab3 ở baseline mới; giữ B/A tasks done đúng scope local lịch sử.

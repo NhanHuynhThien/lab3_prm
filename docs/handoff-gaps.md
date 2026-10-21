@@ -1,5 +1,21 @@
 # Handoff gaps — hiện trạng21/10/2026
 
+## Analytics/Remote Config và manual web checks —21/10/2026
+
+Người dùng xác nhận toàn bộ đợt manual web1–7 đạt: account edit/budget, usage totals/purpose drilldown, unknown data, validation/Back draft, archive/restore/history guard, empty-account delete, multi-quota/bounds; trước đó đã xác nhận reload/A-B isolation và offline/Retry. Đây là user-reported web evidence, không phải Android/ARTEMIS/concurrency stress hoặc console do agent kiểm.
+
+Đã thêm Analytics13.0.0 và RemoteConfig7.0.0, typed/noPII event allowlist, UID-serialized lifecycle/dedupe/success-only cloud mutations và tab/account/usage detail events; demo no-op. Remote Config defaults overview_recent_limit3/budget_warning_percent80, parse/clamp/cache/fallback/retry/single-flight; dashboard recent rows/warning thực thay đổi qua projections, không cắt dataset hoặc đổi tiền/token. Profile có effective values/source/check time/refresh và Analytics SDK status; Crashlytics vẫn chưa nối. Đọc [plan Analytics](analytics-plan.md) và [implementation/manual guide](analytics-remote-config.md).
+
+Verification cuối xem test-report; không coi SDK state hoặc fake tests là DebugView/console evidence. Remote Config publish→app before-after, DebugView mỗi event, Android/ARTEMIS vẫn pending; PDF export/upload events chỉ planned. FCM/Crash/PDF và Final modules chưa làm. Không Android emulator/billing/deploy hoặc push trong lượt này. Các câu SDK Analytics/RC còn pending ở checkpoint dưới đây đã được cập nhật implementation mới; giữ history/results đúng thời điểm.
+
+
+## Cập nhật yêu cầu21/10 — ưu tiên hơn checkpoint phía dưới
+
+[Baseline Lab3 + Final](ASSIGNMENT_REQUIREMENTS.md) đã đối chiếu đủ hai PDF mới. Giảng viên chấp thuận đổi sang TokenLedger theo xác nhận trực tiếp của người dùng21/10; các câu còn chờ duyệt chủ đề phía dưới là lịch sử. Không suy thành duyệt roles Final, miễn Storage/tests hoặc nghiệm thu UI.
+
+Auth/Firestore workspace/rules/indexes đã có tại main484cc41;299 Flutter tests/142 Rules API cases là evidence trước lượt docs, manual CRUD/A-B/native còn chờ. Đề mới yêu cầu ARTEMIS (không MobAI), AI review5 findings/3 separate fixes, report8–12p/slides12–15/video5–10m. Final cần roles/admin/shared core/cross-role/Gemini/AppCheck và Emulator tests; PDF L3 Storage khác Final device save/share. Baseline mới giữ mọi việc còn mở, không tick từ lượt docs này. Các checkpoint phía dưới chỉ có hiệu lực trong scope/time ghi tại từng mục.
+
+
 ## Cloud workspace/rules —21/10/2026, mục3–5
 
 Đã nối4 tab với Firestore theo UID, CloudLedgerViewModel dùng4 streams ghép nhất quán, full-dataset reporting, CRUD/quota/settings atomic, revision từ lúc mở form, last-good/cache/pending/error/retry giữ draft/filter. Mỗi UID/demo có ProviderContainer/Navigator riêng, root auth action coordinator dùng chung; logout/change UID dọn state/listeners/routes, không seed/upload local vào cloud. Factory tắt Firestore disk persistence. [Workspace hướng dẫn](firestore-workspace.md) ghi thiết kế và manual checks.
@@ -37,7 +53,7 @@ HG01–HG10 giữ đúng nghĩa trong [plan mục2](IMPLEMENTATION_PLAN.md), kh�
 | HG07 Loading/error minh họa | Async local states/typed failures/Retry/recovery và confirmed mutations thật | Tests load/write/backup/dispose/reload đã có; Auth có cancel/network/config/Retry tests; query/PDF upload states chờ backend |
 | HG08 Chưa kiểm keyboard/text lớn/accessibility | Ma trận360/412/768/1440, scale1/1.3/2, semantics/focus/targets/contrast/reduced motion | Tests/ảnh Flutter trong fidelity-check; TalkBack/IME/native hoãn, không claim widget tests thay chúng |
 | HG09 Chưa rõ remaining tiền/token/% | USD micros/null-vs-zero/coverage/basis breakdown, budget theo cycle/source, quota windows manual stale không cộng% | Calculator/schema/VM/calendar/live clock/form tests; numeric allowance/pricing mode/backend/native còn pending |
-| HG10 Đổi chủ đề chưa được chấp nhận | Người dùng cho phép đổi; design log/mapping, annotations và mockups page237:2 đã có | Lecturer acceptance A01/A02 chưa có; không suy từ Figma edits là được duyệt |
+| HG10 Chấp thuận đổi chủ đề | Giảng viên đã chấp thuận theo người dùng21/10; design mapping/annotations có | Gap approval đã đóng theo provenance user; traceability và final UI acceptance còn riêng, không suy thành duyệt roles Final/miễn Storage |
 
 HG01–HG10 có resolution hoặc phần pending rõ, không đồng nghĩa tất cả gap đã đóng. DESIGN-03 là hoàn tất **ghi nhận gap**, các gates giữ pending. Backend không được coi là done theo local tests; đã có annotated mockups, nhưng pixel/native/lecturer sign-off, MobAI và release vẫn thiếu.
 

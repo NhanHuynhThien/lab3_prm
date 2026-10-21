@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../utils/formatters.dart';
-import '../widgets/data_scope_picker.dart';
 import '../viewmodels/ledger_viewmodel.dart';
-import '../viewmodels/reporting_viewmodel.dart';
+import '../widgets/account_card.dart';
 import '../widgets/common.dart';
+import '../widgets/data_scope_picker.dart';
 import '../widgets/ledger_feedback.dart';
-import 'account_detail_screen.dart';
 import 'account_form_screen.dart';
 
 class AccountsScreen extends ConsumerStatefulWidget {
   const AccountsScreen({super.key});
+
   @override
   ConsumerState<AccountsScreen> createState() => _AccountsScreenState();
 }
@@ -19,20 +18,20 @@ class AccountsScreen extends ConsumerStatefulWidget {
 class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   String _search = '';
   final _searchController = TextEditingController();
+  bool _archived = false;
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
-  bool _archived = false;
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(ledgerProvider);
     final feedback = ledgerFeedback(state, 'Tài khoản AI');
     if (feedback != null) return feedback;
     final data = state.requireValue;
-    final now = ref.watch(nowProvider);
     final accounts = data.accounts
         .where(
           (a) =>
@@ -42,6 +41,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               ),
         )
         .toList();
+
     return ListView(
       padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 28),
       children: [
@@ -103,98 +103,8 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
               ),
             ),
           ),
-        ...accounts.map((a) {
-          final projection = ref.watch(accountProjectionProvider(a.id));
-          final summary = projection.summary;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Panel(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      ProviderAvatar(a),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              a.alias,
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                            Text(
-                              '${a.provider} · ${a.billingMode.label}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        tooltip: 'Mở chi tiết tài khoản',
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (_) =>
-                                AccountDetailScreen(accountId: a.id),
-                          ),
-                        ),
-                        icon: const Icon(Icons.arrow_forward_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Wrap(
-                    spacing: 32,
-                    runSpacing: 16,
-                    children: [
-                      _AccountFact(
-                        'Chi phí tháng này',
-                        money(summary.costMicros),
-                      ),
-                      _AccountFact(
-                        'Token đã ghi',
-                        compactTokens(summary.tokens),
-                      ),
-                      _AccountFact('Ngân sách kỳ', money(a.budgetMicros)),
-                      _AccountFact('Số phiên', '${summary.count}'),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  AnimatedProgress(
-                    value: projection.budgetProgress,
-                    semanticValue: a.budgetMicros == null
-                        ? 'Chưa đặt ngân sách'
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    a.quotaWindows.isEmpty
-                        ? 'Quota: chưa có dữ liệu'
-                        : '${a.quotaWindows.length} cửa sổ quota · ${a.quotaWindows.where((q) => q.isStale(now)).length} cần cập nhật · Xem chi tiết',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }),
+        ...accounts.map((a) => AccountCard(key: ValueKey(a.id), account: a)),
       ],
     );
   }
-}
-
-class _AccountFact extends StatelessWidget {
-  const _AccountFact(this.label, this.value);
-  final String label, value;
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: Theme.of(context).textTheme.bodySmall),
-      const SizedBox(height: 4),
-      Text(value, style: Theme.of(context).textTheme.titleMedium),
-    ],
-  );
 }

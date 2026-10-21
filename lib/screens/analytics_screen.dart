@@ -28,7 +28,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   Widget build(BuildContext context) {
     final feedback = ledgerFeedback(ref.watch(ledgerProvider), 'Phân tích');
     if (feedback != null) return feedback;
-    ref.watch(filteredSessionsProvider);
     final projection = ref.watch(analyticsProjectionProvider(_metric));
     final summary = projection.summary;
     final shares = projection.shares;

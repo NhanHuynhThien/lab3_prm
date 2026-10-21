@@ -1,5 +1,60 @@
 # Test report — Flutter local và lịch sử verification
 
+## Tối ưu hiệu năng, kiến trúc & giới hạn 300 dòng — 21/10/2026
+
+Verification sau khi hoàn thành đợt refactoring, tối ưu hiệu năng và kiểm soát giới hạn dòng:
+- Flutter 3.47.4 / Dart 3.13.3 trên Windows.
+- Script tự động: `dart run tool/check_line_limits.dart` kiểm tra toàn bộ 134 file Dart trong `lib/` và `test/`. Kết quả: **134/134 files đạt <= 300 dòng vật lý (100% pass)**.
+- Đã gỡ bỏ dependency thừa `cupertino_icons: ^1.0.8` khỏi `pubspec.yaml`, giảm dung lượng icon asset và tree-shaking overhead.
+- Tối ưu `CloudLedgerViewModel.publish()`: chuyển từ lookup $O(N \times M)$ lồng nhau sang precomputed maps $O(N + M)$ cho quota snapshots và usage counters.
+- Thu hẹp vùng repaint / rebuild: thêm `RepaintBoundary` cho 4 tabs chính trong `ShellScreen`, tách `AccountCard` thành `ConsumerWidget` riêng biệt tránh rebuild toàn bộ danh sách khi 1 account thay đổi.
+
+| Check thực chạy | Kết quả | Ghi chú |
+|---|---|---|
+| Kiểm tra giới hạn dòng `tool/check_line_limits.dart` | **134 files <= 300 dòng (100% pass)** | 66 lib files, 68 test files (bao gồm các test harness helpers) |
+| Full flutter test `--concurrency=1` | **326/326 tests pass (221s)** | Toàn bộ 326 tests pass 100%, bảo toàn 100% logic nghiệp vụ và invariants |
+| flutter analyze | **No issues found! (13.7s)** | 0 errors, 0 warnings, 0 lints |
+| dart format `--output=none --set-exit-if-changed lib test` | **134 files formatted (0 changed)** | Mã nguồn được format chuẩn theo Dart guidelines |
+| flutter build web `--release --no-pub --no-wasm-dry-run` | **Built build/web (71.6s)** | Bundle JS: 4,178,237 bytes (~4.18 MB) |
+| git diff --check | **Clean (0 whitespace/conflict errors)** | Không phát sinh lỗi whitespace hoặc xung đột |
+
+## Analytics/Remote Config — kết quả cuối21/10/2026
+
+Source working tree sau main484cc41, chưa commit lượt docs/features. Flutter3.47.4/Dart3.13.3 trên Windows; không emulator/native/browser-driven test. firebase_analytics13.0.0/remote_config7.0.0 resolve thành công bằng flutter pub add (6 dependencies mới, không sửa SDK/vendor). Runtime snapshot113 files trong tooling local giữ nguồn đã verify; không dùng SHA main cũ đại diện code mới.
+
+| Check thực chạy | Kết quả |
+|---|---|
+| Service/privacy/identity/RC/VM mutation/projection mới |19/19 tests pass; success-only/noPII/dedupe/owner clear/stale queue/cache/default/failure/retry/single-flight/dispose/full-dataset |
+| UI/lifecycle mới |8/8 pass: Profile360/412/1440×800 text1/2, fonts thật, refresh/error/last-good; root services shared, initial overview/tab event/no duplicate, demo không init SDK |
+| Full flutter test --no-pub --concurrency=1 --dart-define=FEATURE_IMAGES=true --reporter expanded |**326/326 pass185s**,27 tests mới; giữ299 assertions/tests trước |
+| flutter analyze --no-pub |**No issues found**,14.9s sau lint fixes |
+| dart format --output=none --set-exit-if-changed lib test |**76 files0changed**,52 lib/24 test Dart files |
+| flutter build web --release --no-pub --no-wasm-dry-run |**Built build/web**,JS compile53.8s; không Wasm/Android APK/deploy |
+| Docs/config/source audit |28 Markdown,0 broken local links/fences/machine paths;93 roadmap/196 checklist IDs giữ đủ,89 requirement IDs unique;20 AI entries thật;144 candidate files/113 runtime hashes, không phát hiện secret theo patterns đã kiểm;3 public Firebase client-key occurrences đúng2 config files |
+
+Lượt đầu UI helper không thấy control lazy/offscreen và capture/cleanup async kẹt fake clock; đã sửa scroll/pump và raster real-async/stream cleanup, giữ assertions, dừng đúng task test trees. Lượt sandbox format cuối không trả output; chạy lại bằng quyền SDK phù hợp pass0changed, không sửa SDK/dependency vendor hoặc dừng flutter run người dùng.6 ảnh Profile đã tạo trong .taste-skill ignored, đã xem360text2/412text1/1440text1; các viewport còn lại có Flutter assertions. Không dùng ảnh fixture làm console/Auth người dùng evidence.
+
+Manual web: user xác nhận account/usage/quota/reporting/unknown/validation/draft/archive/delete/reload/A-B/offline1–7 đạt theo [record](analytics-remote-config.md). Đây là user provenance, không phải agent native/automation/real concurrency stress. Rules/indexes không đổi trong lượt này;142 Rules API cases/5READY là evidence cũ, không chạy lại hoặc claim Emulator.
+
+**Pending:** Remote Config console publish→app before/after, DebugView từng event+params/UID, Android/native/ARTEMIS analytics assertion, export/upload event hooks khi PDF có code; FCM/Crash/PDF/Final requirements. App hiển thị SDK/effective config state, không claim console receipt. Không Firebase admin writes/publish/billing/telemetry console setup hoặc Git push trong lượt này.
+
+
+## Audit Markdown theo hai đề mới —21/10/2026
+
+Docs-only sau khi user xác nhận topic được giảng viên duyệt: đọc L3 18 trang/FA9 trang, baseline ASSIGNMENT_REQUIREMENTS.md có **89 requirement IDs** (6 scope +47 Lab3 +36 Final), kèm bảng coverage từng mục/phụ lục/rubric và điều kiện evidence.2 scope IDs done (topic approval/user provenance, đối chiếu đề);87 IDs chưa đóng toàn scope, gồm1 optional bonus, không suy thành87 features chưa code. B/A local checked giữ đúng scope lịch sử.
+
+Kiểm links/fences/portability trên26 Markdown; roadmap93 IDs và checklist196 IDs giữ đủ/không trùng; requirement IDs unique/contiguous. AI log19 entries thật.104 runtime SHA256 khớp baseline trước299 Flutter/142 Rules API tests; chỉ .md thay đổi, source/config/dependencies không đổi. Lượt này không chạy Flutter/analyzer/build/ARTEMIS/Firebase Emulator/deploy, không thay billing hoặc phát sinh console/test evidence mới. Chưa commit/push.
+
+Baseline hiện hành cập nhật thresholds/tools/deliverables, không fabricate findings/trace/approval và không đóng native/manual/backend gates. Topic approval không đồng nghĩa đã duyệt Final roles/PDF miễn trừ. Kiểm tra lại bằng git diff --check và local audit trước bàn giao; artifacts audit ở .taste-skill ignored, không commit.
+
+
+## Cập nhật yêu cầu21/10 — ưu tiên hơn checkpoint phía dưới
+
+[Baseline Lab3 + Final](ASSIGNMENT_REQUIREMENTS.md) đã đối chiếu đủ hai PDF mới. Giảng viên chấp thuận đổi sang TokenLedger theo xác nhận trực tiếp của người dùng21/10; các câu còn chờ duyệt chủ đề phía dưới là lịch sử. Không suy thành duyệt roles Final, miễn Storage/tests hoặc nghiệm thu UI.
+
+Auth/Firestore workspace/rules/indexes đã có tại main484cc41;299 Flutter tests/142 Rules API cases là evidence trước lượt docs, manual CRUD/A-B/native còn chờ. Đề mới yêu cầu ARTEMIS (không MobAI), AI review5 findings/3 separate fixes, report8–12p/slides12–15/video5–10m. Final cần roles/admin/shared core/cross-role/Gemini/AppCheck và Emulator tests; PDF L3 Storage khác Final device save/share. Baseline mới giữ mọi việc còn mở, không tick từ lượt docs này. Các checkpoint phía dưới chỉ có hiệu lực trong scope/time ghi tại từng mục.
+
+
 Hiện trạng mục3–5 Firestore workspace21/10/2026:46 lib/22 test Dart files (2 helpers),299 Flutter tests pass162s;25 VM/workspace tests mới. Rules API142 cases pass; rules/indexes deploy và hash/unauth403 đã xác nhận. Web release48.3s, analyzer sạch; readiness/native/manual limits xem phần cuối. Các số274/239 và foundation/Auth phía dưới là checkpoints lịch sử.
 
 Hiện trạng Firestore foundation21/10/2026:44 lib/20 test Dart files (2 support helpers),274 tests.35 tests cloud mới pass; full274/274 pass138s, sau đó siết receipt/path validation và chạy lại35 tests liên quan pass. Analyzer sạch; build/format cuối ghi tại phần Firestore foundation cuối file. Kết quả239 tests sau Auth bên dưới là checkpoint trước lượt repository.

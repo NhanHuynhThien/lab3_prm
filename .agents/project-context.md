@@ -1,10 +1,25 @@
 # Project context —21/10/2026, P0 local sau A04
 
+Final verification lượt Tối ưu & Giới hạn 300 dòng: 326/326 Flutter tests 221s, analyzer sạch 13.7s, format 134 files 0 changed, web JS build pass 71.6s; 134 Dart files (66 lib / 68 test) 100% <= 300 dòng. Native/console/ARTEMIS pending; user-reported web 1–7 đã ghi. Chưa commit/push.
+
+
+## Analytics/Remote Config mới nhất21/10
+
+User “mục1–7đạt” xác nhận manual web account/usage/quota/archive/validation/projections; trước đó reload/A-B/offline đạt. Ghi provenance tại docs/analytics-remote-config.md, không thay device/evidence gates. SDKAnalytics13/RC7 đã thêm code services/models/providers/UI/projections/JSONdefaults; plan privacy/event trước instrumentation, tests mới và images local. Console/DebugView/publish-template/Android/ARTEMIS vẫn pending; no emulator/billing/deploy/push. AI20 entries, giữ uncommitted docs baseline từ lượt trước; runtime fingerprint104 là bản trước features, không dùng làm manifest source mới. Kiểm kết quả cuối tại test-report.
+
+
+## Baseline Lab3 + Final mới nhất21/10
+
+User xác nhận giảng viên đã chấp thuận đổi sang TokenLedger; chỉ topic approval đã đóng, không suy roles Final/PDF miễn trừ. Đã đọc L3 18p/FA9p, docs/ASSIGNMENT_REQUIREMENTS.md là nguồn requirements hiện hành; roadmap/checklist/plan và indexes đã cập nhật. L3 ARTEMIS≥10cases×3 + Pro15–30m/native/error/analytics, review5findings/3separate commits, report8–12p/slides12–15/video5–10m. Final admin/roles/core/cross-role/inbox/Hosting/Gemini/AppCheck/Emulator và report10–15p/slides12–15/video8–12m còn chưa implement. L3 Storage vs Final device PDF và role/entity workflow cần chốt; không Cloudinary/MobAI cũ.
+
+Source publication main484cc41, Auth/Firestore code/deployed rules/5READY,299 Flutter/142 Rules API evidence cũ; manual/native CRUD/A-B pending. AI log20 entries thật. Lượt này docs-only, chưa commit/push; không runtime tests/build/deploy/emulator/billing. Không tự coi thêm checklist là authorization triển khai. Đọc baseline trước ghi chú lịch sử bên dưới.
+
+
 ## Cloud workspace/rules mới nhất —21/10/2026
 
 Theo prompt “tiếp tục đến 4,5 cho tôi.”: đã làm dependency bước3 và nối4–5. CloudLedgerViewModel override ledgerProvider trong container độc lập theo UID/demo;4 streams all accounts/usage/quota/settings ghép đủ references/counters, full projections và explicit empty. Last-good/filter/draft/cache/pending/error/server, root-level retry banner trên cả form routes, revisions từ lúc mở form/0 token tạo mới, pending command closure/ID giữ nguyên khi mất acknowledgement. Logout/change UID dispose routes/listeners/state; bootstrap disposal/concurrent retries được guard. Auth actions bridge về root chống double tap. Firestore factory tắt disk persistence; SDK in-memory cache không được tuyên bố xóa vật lý.
 
-Rules default deny/owner/schema/counters/getAfter/receipt proof/quota canonical SHA256 lowercase và labels; settings/reporting có revision.142 Rules Test API cases pass (mocks, không doc writes/emulator); deploy rules/5 indexes đúng project tokenledger-lab3/default Standard/Singapore đã thành công, remote source hash42f9dcf5d72393a3b5c942c88c7ed76ea4cfdff5458f2ed2e1bc3e0cc31ad86d khớp local, unauth GET403. Index readiness cuối xem test-report; không suy CREATING thành READY.299 Flutter tests pass162s,25 tests mới, analyzer/web48.3s;46 lib/22 test Dart files,2 helpers. AI18 entries. UI360/412/1440 text1/2 actual fonts và ảnh fixture đã xem; Figma chưa sync cloud.
+Rules default deny/owner/schema/counters/getAfter/receipt proof/quota canonical SHA256 lowercase và labels; settings/reporting có revision.142 Rules Test API cases pass (mocks, không doc writes/emulator); deploy rules/5 indexes đúng project tokenledger-lab3/default Standard/Singapore đã thành công, remote source hash42f9dcf5d72393a3b5c942c88c7ed76ea4cfdff5458f2ed2e1bc3e0cc31ad86d khớp local, unauth GET403. Index readiness cuối xem test-report; không suy CREATING thành READY.299 Flutter tests pass162s,25 tests mới, analyzer/web48.3s;46 lib/22 test Dart files,2 helpers. AI20 entries. UI360/412/1440 text1/2 actual fonts và ảnh fixture đã xem; Figma chưa sync cloud.
 
 Đọc docs/firestore-workspace.md trước sửa tiếp. Native/real SDK user CRUD/reload/A-B, actual contention và G3/G4 manual gates còn pending; không tạo test Google users hoặc ghi user docs để giả evidence. Không emulator/billing/FCM/RC/Crash/Analytics SDK/PDF. Publication hiện hành: người dùng yêu cầu commit/push toàn bộ Auth/Firestore trực tiếp main; xem Git log/remote SHA của commit chứa mục này.104 runtime hashes giữ nguyên bản đã kiểm. Các checkpoint phía dưới giữ theo thời điểm lịch sử.
 

@@ -4,6 +4,7 @@ import '../models/ledger.dart';
 import '../services/usage_calculator.dart';
 import '../services/reporting_calendar.dart';
 import 'ledger_viewmodel.dart';
+import 'product_features_viewmodel.dart';
 
 /// Derived screen state: views render results and never own accounting formulas.
 class DashboardProjection {
@@ -16,6 +17,8 @@ class DashboardProjection {
     required this.spent,
     required this.shares,
     required this.dailyCosts,
+    this.recentLimit = 3,
+    this.warningPercent = 80,
   });
   final List<UsageSession> sessions;
   final UsageSummary summary;
@@ -25,6 +28,13 @@ class DashboardProjection {
   int get remaining => budget - spent;
   final List<PurposeShare> shares;
   final List<int> dailyCosts;
+  final int recentLimit, warningPercent;
+  List<UsageSession> get recentSessions => sessions.take(recentLimit).toList();
+  bool get budgetWarning =>
+      budget > 0 &&
+      spent >=
+          (budget ~/ 100 * warningPercent +
+              ((budget % 100 * warningPercent) + 99) ~/ 100);
 }
 
 final dashboardProjectionProvider = Provider.autoDispose<DashboardProjection>((
@@ -34,6 +44,7 @@ final dashboardProjectionProvider = Provider.autoDispose<DashboardProjection>((
   final sessions = ref.watch(filteredSessionsProvider);
   final now = ref.watch(nowProvider);
   final scope = ref.watch(effectiveDataScopeProvider);
+  final config = ref.watch(productConfigProvider);
   final budgetAccounts = data.accounts
       .where(
         (a) =>
@@ -59,6 +70,8 @@ final dashboardProjectionProvider = Provider.autoDispose<DashboardProjection>((
       now,
       timezone: data.reportingTimezone,
     ),
+    recentLimit: config.recentLimit,
+    warningPercent: config.warningPercent,
   );
 });
 

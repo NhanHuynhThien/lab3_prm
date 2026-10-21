@@ -10,6 +10,7 @@ import '../services/ledger_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/cloud_ledger_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
+import '../viewmodels/product_features_viewmodel.dart';
 import 'common.dart';
 import 'cloud_sync_banner.dart';
 
@@ -18,6 +19,7 @@ class AuthGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(featureSessionProvider);
     // Explicit local sandbox: neither initializes Auth nor exposes cloud data.
     if (ref.watch(demoSessionProvider)) {
       return _WorkspaceScope(
@@ -110,6 +112,14 @@ class _WorkspaceScopeState extends State<_WorkspaceScope> {
   late final _container = ProviderContainer(
     overrides: [
       authServiceProvider.overrideWithValue(widget.auth),
+      if (widget.user != null) ...[
+        analyticsServiceProvider.overrideWithValue(
+          widget.parent.read(analyticsServiceProvider),
+        ),
+        remoteConfigServiceProvider.overrideWithValue(
+          widget.parent.read(remoteConfigServiceProvider),
+        ),
+      ],
       authActionProvider.overrideWith(
         () => _WorkspaceAuthActions(widget.parent),
       ),

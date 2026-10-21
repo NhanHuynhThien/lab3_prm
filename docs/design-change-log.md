@@ -1,5 +1,19 @@
 # Design change log — TokenLedger scaffold
 
+## DC Analytics/Remote Config —21/10/2026
+
+Profile tách Analytics khỏi Crashlytics, thêm Panel Cấu hình và đo lường (effective values/source/check time/refresh/error/SDK state). Dashboard recent rows đọc overview_recent_limit thay hard-coded4 (default3 đúng plan), thêm budget warning theo budget_warning_percent(default80) trong projection, không thay totals. Dùng Panel/SectionTitle/OutlinedButton/Inter/AppSpace/palette Lab2 hiện có; IndexedStack và reduced motion giữ nguyên. UI360/412/1440×800 text1/2 với fonts thật và ảnh local đã kiểm; không live Figma/cloud annotation sync trong lượt này, không claim screenshot fixture là Google thật.
+
+Nguồn/thiết kế/từng event và pending evidence tại [analytics/RC](analytics-remote-config.md), [analytics plan](analytics-plan.md). Tên key là cấu hình app, không provider balance. Các change entries phía dưới giữ lịch sử trước Analytics/RC.
+
+
+## Cập nhật yêu cầu21/10 — ưu tiên hơn checkpoint phía dưới
+
+[Baseline Lab3 + Final](ASSIGNMENT_REQUIREMENTS.md) đã đối chiếu đủ hai PDF mới. Giảng viên chấp thuận đổi sang TokenLedger theo xác nhận trực tiếp của người dùng21/10; các câu còn chờ duyệt chủ đề phía dưới là lịch sử. Không suy thành duyệt roles Final, miễn Storage/tests hoặc nghiệm thu UI.
+
+Auth/Firestore workspace/rules/indexes đã có tại main484cc41;299 Flutter tests/142 Rules API cases là evidence trước lượt docs, manual CRUD/A-B/native còn chờ. Đề mới yêu cầu ARTEMIS (không MobAI), AI review5 findings/3 separate fixes, report8–12p/slides12–15/video5–10m. Final cần roles/admin/shared core/cross-role/Gemini/AppCheck và Emulator tests; PDF L3 Storage khác Final device save/share. Baseline mới giữ mọi việc còn mở, không tick từ lượt docs này. Các checkpoint phía dưới chỉ có hiệu lực trong scope/time ghi tại từng mục.
+
+
 Ngày 19/10/2026. Nguồn baseline: StudentPay `design/DESIGN.md` và final exports09/10 trong Lab2. Người dùng cho phép đổi chủ đề/nghiệp vụ, thiết kế logo, thêm animation và dashboard quản trị. Đây là ghi nhận lúc scaffold19/10. Hiện trạng21/10: live Figma đã annotate8 final360 và board233:3, xem mục B11–B13 cuối file; full QA412/mockup/fidelity và lecturer acceptance vẫn pending.
 
 | ID | Thay đổi thực hiện | Lý do / kế thừa | Trạng thái |

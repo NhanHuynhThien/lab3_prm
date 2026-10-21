@@ -5,11 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/ledger.dart';
 import '../services/demo_seed.dart';
 import '../services/ledger_id.dart';
-import '../services/ledger_validation.dart';
 import '../services/ledger_repository.dart';
-import '../services/usage_calculator.dart';
+import '../services/ledger_validation.dart';
 import 'live_clock_viewmodel.dart';
 
+export 'ledger_scope_viewmodel.dart';
 export 'live_clock_viewmodel.dart' show clockProvider, nowProvider;
 
 final ledgerRepositoryProvider = Provider<LedgerRepository>(
@@ -38,7 +38,6 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     final epoch = ++_loadEpoch;
     final repository = ref.watch(ledgerRepositoryProvider);
     final now = ref.read(clockProvider)();
-    // A reload must not read an old snapshot while our previous save is pending.
     if (_pendingWrite != null) await _pendingWrite;
     final stored = await repository.load();
     if (stored != null) {
@@ -82,7 +81,7 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
   Future<void> _commit(LedgerData next) async {
     final repository = _repository;
     final epoch = _loadEpoch;
-    _data; // Ordinary mutations cannot overwrite unreadable storage.
+    _data;
     await _persist(next, repository.save);
     if (ref.mounted && epoch == _loadEpoch) state = AsyncData(next);
   }
@@ -235,70 +234,11 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     int? expectedRevision,
   }) async => _commit(_data.copyWith(reportingTimezone: zone.trim()));
 
-  LedgerData _withoutDemo() {
-    final data = _data;
-    final sessions = data.sessions.where((s) => !s.isDemo).toList();
-    return data.copyWith(
-      // Retain any demo account that has a non-demo legacy/manual reference.
-      accounts: data.accounts
-          .where((a) => !a.isDemo || sessions.any((s) => s.accountId == a.id))
-          .toList(),
-      sessions: sessions,
-    );
-  }
+  Future<void> resetDemo() async =>
+      _commit(createDemoReset(_data, ref.read(clockProvider)(), newId));
 
-  Future<void> resetDemo() async {
-    final retained = _withoutDemo();
-    final seed = createDemoSeed(ref.read(clockProvider)());
-    final ids = {
-      for (final a in seed.accounts)
-        a.id: retained.account(a.id) == null ? a.id : newId(),
-    };
-    final accounts = [
-      for (final a in seed.accounts)
-        AIAccount(
-          id: ids[a.id]!,
-          alias: a.alias,
-          provider: a.provider,
-          product: a.product,
-          billingMode: a.billingMode,
-          plan: a.plan,
-          createdAt: a.createdAt,
-          budgetMicros: a.budgetMicros,
-          isDemo: true,
-          dataSource: DataSource.demo,
-          timezone: a.timezone,
-          quotaWindows: a.quotaWindows,
-        ),
-    ];
-    final sessions = [
-      for (final s in seed.sessions)
-        UsageSession(
-          id: retained.sessions.any((old) => old.id == s.id) ? newId() : s.id,
-          accountId: ids[s.accountId]!,
-          title: s.title,
-          purpose: s.purpose,
-          occurredAt: s.occurredAt,
-          inputTokens: s.inputTokens,
-          outputTokens: s.outputTokens,
-          costMicros: s.costMicros,
-          costBasis: s.costBasis,
-          dataSource: DataSource.demo,
-          isDemo: true,
-          note: s.note,
-        ),
-    ];
-    await _commit(
-      retained.copyWith(
-        accounts: [...retained.accounts, ...accounts],
-        sessions: [...retained.sessions, ...sessions],
-      ),
-    );
-  }
+  Future<void> clearDemo() async => _commit(withoutDemo(_data));
 
-  Future<void> clearDemo() async => _commit(_withoutDemo());
-
-  /// Called only by the confirmed recovery action, after a load error.
   Future<void> recoverDemo() async {
     if (!state.hasError || state.error is! LedgerStorageException) {
       throw StateError('Chỉ khôi phục ở trạng thái lỗi đọc dữ liệu local.');
@@ -316,62 +256,3 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     if (ref.mounted && epoch == _loadEpoch) state = AsyncData(seed);
   }
 }
-
-class DemoSessionViewModel extends Notifier<bool> {
-  @override
-  bool build() => Uri.base.queryParameters['demo'] == '1';
-  void enter() => state = true;
-  void leave() => state = false;
-}
-
-final demoSessionProvider = NotifierProvider<DemoSessionViewModel, bool>(
-  DemoSessionViewModel.new,
-);
-
-class RangeViewModel extends Notifier<UsageRange> {
-  @override
-  UsageRange build() => UsageRange.month;
-  void select(UsageRange range) => state = range;
-}
-
-final rangeProvider = NotifierProvider<RangeViewModel, UsageRange>(
-  RangeViewModel.new,
-);
-final filteredSessionsProvider = Provider.autoDispose<List<UsageSession>>((
-  ref,
-) {
-  final data = ref.watch(ledgerProvider).asData?.value;
-  return UsageCalculator.filter(
-    data?.sessions ?? [],
-    ref.watch(nowProvider),
-    range: ref.watch(rangeProvider),
-    timezone: data?.reportingTimezone ?? 'device',
-    scope: ref.watch(effectiveDataScopeProvider),
-  );
-});
-
-class DataScopeViewModel extends Notifier<DataScope?> {
-  @override
-  DataScope? build() => null;
-  void select(DataScope scope) => state = scope;
-}
-
-final dataScopeProvider = NotifierProvider<DataScopeViewModel, DataScope?>(
-  DataScopeViewModel.new,
-);
-final effectiveDataScopeProvider = Provider.autoDispose<DataScope>((ref) {
-  final selected = ref.watch(dataScopeProvider);
-  if (selected != null) return selected;
-  final data = ref.watch(ledgerProvider).asData?.value;
-  if ((data?.sessions.any((s) => DataScope.manual.includes(s)) ?? false) ||
-      (data?.accounts.any((a) => a.dataSource == DataSource.manual) ?? false)) {
-    return DataScope.manual;
-  }
-  if ((data?.sessions.any((s) => DataScope.legacy.includes(s)) ?? false) ||
-      (data?.accounts.any((a) => a.dataSource == DataSource.legacy) ?? false)) {
-    return DataScope.legacy;
-  }
-  return data?.accounts.any((a) => a.isDemo) == true
-      ? DataScope.demo
-      : DataScope.manual;
-});

@@ -1,5 +1,17 @@
 # TokenLedger — PRM393 Lab 3
 
+## Analytics và Remote Config —21/10
+
+Đã triển khai [Analytics/Remote Config](docs/analytics-remote-config.md): sự kiện typed không gửi PII, Google-only business telemetry, UID lifecycle/dedupe; cấu hình số recent rows và ngưỡng cảnh báo ngân sách với defaults/refresh/fallback, Profile hiện giá trị/source/status. Analytics plan được viết trước tracking. Người dùng xác nhận đợt manual cloud web1–7 đã đạt; đây không phải Android/ARTEMIS hoặc console evidence. RC publish→app/DebugView còn cần kiểm theo hướng dẫn, FCM/Crashlytics/PDF vẫn pending. Không chạy máy ảo; 326 Flutter tests pass, analyzer/format sạch, web release build pass; chi tiết xem test-report.
+
+
+## Yêu cầu hiện hành Lab3 và Final —21/10
+
+Đọc [toàn bộ yêu cầu và việc còn lại](docs/ASSIGNMENT_REQUIREMENTS.md), rồi [roadmap](docs/APP_COMPLETION_ROADMAP.md)/[checklist](docs/TASK_CHECKLIST.md). Giảng viên đã chấp thuận TokenLedger theo xác nhận người dùng21/10. Auth/Firestore trên main484cc41; FCM/RC/Crash/Analytics SDK/PDF và Android/manual/backend acceptance còn thiếu. Final cần thêm roles/web admin/shared core/Hosting/cross-role/inbox/Gemini/AppCheck; web hiện chỉ preview, chưa admin.
+
+Đề mới: ARTEMIS ≥10cases×3runs + exploratory, AI review≥5findings/3separate fixes; Lab3 report8–12p/slides12–15/video5–10m, Final report10–15p/slides12–15/video8–12m. PDF L3 Cloud Storage và Final device save/share cần xác nhận khác biệt. Baseline mới thay ngưỡng MobAI/Cloudinary/report-video cũ; không tự triển khai, billing, emulator hoặc publication trong lượt docs.
+
+
 ## Publication trước Firebase —21/10
 
 Theo yêu cầu “push hết lên cho tôi”, target là [branch codex/local-form-safety](https://github.com/NhanHuynhThien/lab3_prm/tree/codex/local-form-safety), gồm checkpoint Flutter d4b6167 và commit tài liệu visual handoff chứa đoạn này. Xem Git log/remote refs cho SHA publication; các đoạn “chưa push” bên dưới ghi thời điểm trước yêu cầu này. Không merge main hoặc thay visibility. Runtime giữ nguyên bản200 tests đã kiểm; Firebase/native/lecturer acceptance vẫn pending.
@@ -8,7 +20,7 @@ Theo yêu cầu “push hết lên cho tôi”, target là [branch codex/local-f
 
 ## Trạng thái hiện tại
 
-Hiện làm trên `main` sau merge PR#1 (`824df0b`). Đã nối Firebase Core/Auth cho project `tokenledger-lab3`; Auth/Firestore workspace được đưa vào commit publication trực tiếp lên `main` theo yêu cầu mới của người dùng. Các ghi chú checkpoint/publication phía trên giữ theo thời điểm cũ. Xem [Auth setup](docs/firebase-auth-setup.md) và [build status](docs/build-status.md).
+Baseline source hiện hành trên `main`: `484cc41`, sau merge PR#1 (`824df0b`). Đã nối Firebase Core/Auth cho project `tokenledger-lab3`; Auth/Firestore workspace được đưa vào commit publication trực tiếp lên `main` theo yêu cầu mới của người dùng. Các ghi chú checkpoint/publication phía trên giữ theo thời điểm cũ. Xem [Auth setup](docs/firebase-auth-setup.md) và [build status](docs/build-status.md).
 
 - Dashboard responsive và 4 tab: Tổng quan, Tài khoản, Phân tích, Cá nhân.
 - Account CRUD, archive/restore; account có lịch sử chỉ được archive, account rỗng có thể xóa.
@@ -25,7 +37,7 @@ Hiện làm trên `main` sau merge PR#1 (`824df0b`). Đã nối Firebase Core/Au
 - Accessibility/states: keyboard focus/semantics/reduced motion; loading/error/Retry giữ draft/filter, destructive actions có confirmation guard. Figma8 màn đã có annotation chuyển đổi và notes bổ sung.
 - Logo vector gốc, font Inter bundle, Android/PWA icons và animation hỗ trợ reduced motion.
 
-**Firebase Auth đã có implementation:** Google Sign-In Android/web, auth guard, Profile từ user SDK và logout; người dùng xác nhận web login/reload/logout và Firebase Users đã thành công, native còn chờ. **Firestore đã nối vào4 tab, CRUD/quota/settings theo UID; rules/indexes đã triển khai. Tests/rules simulations đã pass, manual CRUD/A-B thật còn cần kiểm. FCM, Remote Config, Crashlytics, Analytics SDK và PDF/cloud vẫn pending.** Không gian Google dùng cloud ledger riêng; user mới thấy empty, không tự nhận seed. Demo local tách biệt, không tự upload hoặc đọc usage/quota từ Claude/Codex.
+**Firebase Auth đã có implementation:** Google Sign-In Android/web, auth guard, Profile từ user SDK và logout; người dùng xác nhận web login/reload/logout và Firebase Users đã thành công, native còn chờ. **Firestore đã nối vào4 tab, CRUD/quota/settings theo UID; rules/indexes đã triển khai. Tests/rules simulations đã pass, manual web CRUD/A-B được người dùng xác nhận; native/concurrency stress còn chờ. Analytics/Remote Config có client code; console/DebugView còn chờ. FCM/Crashlytics/PDF vẫn pending.** Không gian Google dùng cloud ledger riêng; user mới thấy empty, không tự nhận seed. Demo local tách biệt, không tự upload hoặc đọc usage/quota từ Claude/Codex.
 
 Figma P0 đã có8 màn360/412 và mẫu trạng thái chỉnh sửa được; xem [visual handoff](docs/visual-handoff-21-10.md) cho links/đối chiếu và các sai khác còn lại. Chưa nghiệm thu pixel/native/backend.
 

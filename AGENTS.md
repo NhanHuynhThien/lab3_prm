@@ -1,5 +1,21 @@
 # Agent instructions — TokenLedger / PRM393 Lab 3
 
+Final verification lượt Analytics/RC:326/326 Flutter tests185s, analyzer sạch14.9s, format76files0changed, web JS53.8s;52lib/24test Dart,113runtime hashes. Native/console/ARTEMIS pending; user-reported web1–7 đã ghi. Không rerun chỉ vì docs-only sau mốc này; chưa commit/push.
+
+
+## Tiếp tục Analytics/Remote Config21/10
+
+Analytics13/RemoteConfig7 client đã code theo docs/analytics-plan.md (viết trước tracking) và docs/analytics-remote-config.md. Google-only typed/noPII business events, session UID queue/dedupe/success-only mutations; demo dùng no-op. RC shared app values/defaults3recent/80warning, Profile refresh/status và projections giữ full totals. User xác nhận manual web1–7/A-B/offline đạt; không claim native/concurrency/DebugView/console/ARTEMIS. Không Android emulator, billing, Firebase config publish/deploy hoặc push ở lượt này. FCM/Crash/PDF/Final còn pending; không gộp Crashlytics thành Analytics đã nối. AI log20 entries thật, tests cuối xem test-report.
+
+
+## Baseline rubric21/10 — áp dụng trước các ghi chú cũ
+
+- Đọc `docs/ASSIGNMENT_REQUIREMENTS.md` trước triển khai tiếp. Hai đề mới L3 18 trang/Final9 trang đã được đối chiếu; topic TokenLedger được giảng viên duyệt theo user21/10. Không xin duyệt lại topic; roles Final/Storage khác nhau vẫn cần chốt.
+- L3: ARTEMIS pytest ≥10cases×3runs + Pro exploratory15–30m/native/error/analytics; AI review≥5findings/≥2kinds/≥3separate finding-ID fix commits; report8–12p/slides12–15/video5–10m. MobAI/.mob/healing/3findings/6prompt gate cũ không còn là rubric hiện hành.
+- Final: roles/admin/shared core/mobile+web/Hosting/inbox/cross-role/Gemini level2/AppCheck/RC và Emulator role tests là P0 Final; chưa implement. Không tự thêm AI/admin chỉ vì ghi vào backlog. L3 Storage khác Final device PDF; không dùng Cloudinary tự thay đề, không đổi billing trong lượt docs.
+- Không chạy/tạo/sửa Android emulator. Firebase Emulator khác máy ảo Android, Final yêu cầu tests nhưng cần thống nhất môi trường nhẹ/máy khác/CI trước khi chạy; không tự bỏ gate hoặc báo Rules API thay Emulator.
+
+
 Cập nhật21/10/2026. Áp dụng cho toàn repo. Đây là hướng dẫn làm việc; [`.agents/project-context.md`](.agents/project-context.md) giữ trạng thái dự án và [`.agents/workflows.md`](.agents/workflows.md) giữ quy trình. Yêu cầu trực tiếp mới của người dùng có ưu tiên cao hơn các quyết định cũ ở đây.
 
 ## 1. Đọc trước khi sửa
@@ -67,7 +83,7 @@ Plan là mục tiêu; source/tests là bằng chứng implementation. Không suy
 - Browser inspector taste-skill không hiểu Dart/CanvasKit DOM. Khi dùng phải đánh giá ảnh render + Flutter tests; không thêm hidden h1 để qua gate giả. Output inspector là local artifact, không commit.
 - Android SDK chưa có ở lần doctor19/10; trước khi claim APK/device test cần xác minh lại toolchain. Không claim web test thay Android/MobAI.
 - Không tạo `.mob`, AI review findings, prompt logs hoặc console screenshots giả. Mỗi evidence ghi môi trường/thời gian và scope thật.
-- AI log có18 prompt nguồn thực đến Firestore workspace ngày21/10 (entry12/14/18 Git-only, entry13 visual/docs); vẫn cần đối chiếu scope/chất lượng theo rubric trước nộp. Không chia prompt thành các entry tưởng tượng.
+- AI log có20 prompt nguồn thực đến Firestore workspace ngày21/10 (entry12/14/18 Git-only, entry19 cập nhật rubric/docs, entry13 visual/docs); vẫn cần đối chiếu scope/chất lượng theo rubric trước nộp. Không chia prompt thành các entry tưởng tượng.
 
 ## 7. Git và bàn giao
 

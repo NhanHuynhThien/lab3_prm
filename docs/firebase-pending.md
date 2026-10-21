@@ -1,40 +1,41 @@
-# Firebase — Auth/Firestore đã nối, dịch vụ bổ sung còn pending
+# Firebase — hiện trạng và việc còn lại theo L3/Final
 
-## Cloud workspace/rules —21/10/2026, mục3–5
+## Analytics/Remote Config và manual web checks —21/10/2026
 
-Đã nối4 tab với Firestore theo UID, CloudLedgerViewModel dùng4 streams ghép nhất quán, full-dataset reporting, CRUD/quota/settings atomic, revision từ lúc mở form, last-good/cache/pending/error/retry giữ draft/filter. Mỗi UID/demo có ProviderContainer/Navigator riêng, root auth action coordinator dùng chung; logout/change UID dọn state/listeners/routes, không seed/upload local vào cloud. Factory tắt Firestore disk persistence. [Workspace hướng dẫn](firestore-workspace.md) ghi thiết kế và manual checks.
+Người dùng xác nhận toàn bộ đợt manual web1–7 đạt: account edit/budget, usage totals/purpose drilldown, unknown data, validation/Back draft, archive/restore/history guard, empty-account delete, multi-quota/bounds; trước đó đã xác nhận reload/A-B isolation và offline/Retry. Đây là user-reported web evidence, không phải Android/ARTEMIS/concurrency stress hoặc console do agent kiểm.
 
-Rules default deny/owner/schema/relations/counters/quota labels/receipts đã code và deploy với5 indexes vào tokenledger-lab3/(default), Standard/asia-southeast1. Rules Test API142 cases pass (mocks trước/sau, không emulator/doc writes), live source hash khớp local và unauth GET403. Index readiness xem test-report, không suy deploy accepted thành READY. Full299 Flutter tests pass162s, analyzer sạch, web release48.3s;46 lib/22 test Dart files (2 helpers).25 tests VM/workspace mới;15 Auth tests cập nhật giữ assertions. Native/A-B thật/SDK transactions qua mạng/F1–F3 manual gates vẫn cần nghiệm thu. FCM/RC/Crash/Analytics SDK/PDF/Figma sync chưa làm. Không emulator/billing/commit/push.
+Đã thêm Analytics13.0.0 và RemoteConfig7.0.0, typed/noPII event allowlist, UID-serialized lifecycle/dedupe/success-only cloud mutations và tab/account/usage detail events; demo no-op. Remote Config defaults overview_recent_limit3/budget_warning_percent80, parse/clamp/cache/fallback/retry/single-flight; dashboard recent rows/warning thực thay đổi qua projections, không cắt dataset hoặc đổi tiền/token. Profile có effective values/source/check time/refresh và Analytics SDK status; Crashlytics vẫn chưa nối. Đọc [plan Analytics](analytics-plan.md) và [implementation/manual guide](analytics-remote-config.md).
 
-
-## Firestore foundation —21/10/2026, mục1–2
-
-Đã thêm cloud_firestore7.0.0, thiết kế envelope/paths theo UID, CloudLedgerRepository streams/atomic CRUD và SDK adapter cho account/usage/quota. Counters/revisions/quota label reservations và operation receipts commit cùng transaction, không upload snapshot local.35 tests repository mới pass; full regression274 tests pass138s trước lần siết receipt/path validation cuối, sau đó35 tests liên quan pass lại; analyzer sạch và web build xem test-report. Source44 lib/20 test Dart files, gồm2 support helpers. [Data contract](firestore-data-contract.md) ghi mapping/invariants/query/indexes và lifecycle. Chưa nối UI/VM, chưa viết/deploy rules/indexes hoặc kiểm database thật; các backend gates còn pending. Không emulator, billing, telemetry hoặc publication.
-
-Người dùng báo Google web login/reload/logout và Authentication Users đã thành công, đồng thời đã tạo Firestore. Đây là xác nhận người dùng; native/Play services/release cert và Firestore integration chưa được kiểm bởi agent.
+Verification cuối xem test-report; không coi SDK state hoặc fake tests là DebugView/console evidence. Remote Config publish→app before-after, DebugView mỗi event, Android/ARTEMIS vẫn pending; PDF export/upload events chỉ planned. FCM/Crash/PDF và Final modules chưa làm. Không Android emulator/billing/deploy hoặc push trong lượt này. Các câu SDK Analytics/RC còn pending ở checkpoint dưới đây đã được cập nhật implementation mới; giữ history/results đúng thời điểm.
 
 
-Cập nhật21/10/2026. Người dùng đã tiếp tục C01–C03 và cung cấp cấu hình project `tokenledger-lab3`. Core/Auth/Google Sign-In, auth guard/Profile có code; Google provider/authorized domains/debug SHA đã kiểm thật. [Auth setup](firebase-auth-setup.md) ghi239 tests, web build và giới hạn OAuth/native. Không có Firestore/rules deploy/FCM/RC/Crash/Analytics SDK/PDF; không đổi billing hoặc chạy emulator. Các mục “Khi tiếp tục” dưới đây giữ làm dependency checklist, phần Auth đã có code không phải chưa bắt đầu.
+Cập nhật21/10/2026. Baseline: [ASSIGNMENT_REQUIREMENTS](ASSIGNMENT_REQUIREMENTS.md). Topic TokenLedger được giảng viên chấp thuận theo user; Storage/roles/môi trường kiểm thử chưa được miễn trừ. Không dùng tên file pending để suy mọi Firebase còn chưa làm.
 
-## Đã chuẩn bị
+## Đã có implementation
 
-- Models Dart thuần, VM không truy cập SDK; `LedgerRepository` tách khỏi Views.
-- `ledgerRepositoryProvider` được override tại `main.dart` bằng `LocalLedgerRepository`.
-- Local storage schemaVersion2 với backup-first migration1→2; cost integer USD micros/null-vs-zero; model/defaults/multi-quota/cycle/IANA và source manual/demo/legacy đã có. Xem [local P0 upgrade](local-p0-upgrade.md). Chưa có owner UID hoặc stream/backend isolation.
-- Profile authenticated lấy identity Firebase Auth thật; nút Google gọi SDK, không giả đăng nhập. Demo Profile không gắn owner Google vào ledger local.
+- Firebase Core/Auth/Google Android+web/config đúng tokenledger-lab3, guard/Profile và UID-keyed workspace. Người dùng xác nhận Google web login/reload/logout/Users; native còn chờ.
+- Cloud Firestore7.0.0, owner-scoped streams/account/usage/quota/settings, atomic CRUD/counters/revisions/receipts/label reservations. Cloud VM ghép dữ liệu, last-good/cache/pending/error/retry/draft, dispose listener/state/routes khi đổi UID; không tự upload local snapshot/seed.
+- Rules default deny/owner/schema/relations đã deploy;5 indexes READY.299 Flutter tests/142 Rules API cases đã pass trước lượt docs; không thay manual CRUD/A-B/native/ARTEMIS hoặc Final Emulator.
+- SharedPreferences/schema2 chỉ dùng demo riêng. Bản nộp cần no runtime mock/demo entry theo REQ-L3-03; chưa bỏ entry trong lượt docs này.
 
-## Khi tiếp tục
+## Lab3 còn thiếu hoặc cần kiểm chứng
 
-1. Tạo project riêng, bật Analytics, đăng ký Android package/SHA-1, Google provider và FlutterFire configure.
-2. Thêm `AuthService`, auth state/route guard thật; demo session không được dùng làm production auth.
-3. Tạo Firestore converters/path `users/{uid}/accounts`, `usage_sessions`, `quota_windows` và collections liên quan.
-4. Mở rộng repository snapshot sang scoped streams/atomic CRUD. Không ghi nguyên snapshot local lên backend để xử lý concurrency.
-5. Xử lý account/usage relation, transaction/counter/delete race, rules validation/ownership; emulator tests rồi deploy.
-6. Hủy listeners/cache/draft khi auth đổi; không trộn local demo với data của user Firebase.
-7. Tích hợp FCM/Center/deep links, Remote Config defaults/behavior, Crashlytics demo và Analytics DebugView.
-8. Generate/export PDF và storage phù hợp; save URL/metadata; không nhúng API secret.
-9. MobAI10 scripts, healing/bug exercises, AI PR review và evidence console thật theo checklist.
+1. REQ-L3-13–15: Android Auth/native picker, SDK CRUD/reload/realtime/A-B/permission/network/concurrency/lifecycle và evidence project thật; preserve drafts, null/micros/history/privacy.
+2. REQ-L3-16–18: generate PDF đúng filter/data, L3 Cloud Storage owner upload/progress/URL/storage.rules/evidence. Chốt REQ-SCOPE-04 trước triển khai vì Final loại Storage và lưu/share PDF trên device+metadata Firestore. Cloudinary không tự được chấp thuận thay đề.
+3. REQ-L3-19–21: FCM3 app states/Android13 permission/token binding/logout, Center/inbox/dedupe/tap routes/target access và console tests.
+4. REQ-L3-22–24: analytics-plan≥7events trước code, typed params/questions/flows/noPII/userID, service instrumentation/DebugView mọi event;1 ARTEMIS analytics assertion.
+5. REQ-L3-25: Crashlytics real-path non-fatal+test crash, UID/custom key/sanitized hooks, dashboard evidence.
+6. REQ-L3-26–27: RC≥2 behaviour-changing values/defaults/fetch errors/no rebuild, Profile demo area+before/after; firebase/remote-config-defaults.json.
+7. REQ-L3-28–47: ARTEMIS≥10cases×3+Pro15–30m/native/error, AI PR review5findings/3separate fixes, docs/evidence/report8–12p/slides12–15/video5–10m/access. Không MobAI/.mob/healing giả làm yêu cầu mới.
 
-## Chưa cam kết
+## Final còn thiếu — không coi là P1 tùy chọn
 
-Có stream identity Firebase Auth; chưa có realtime listener dữ liệu Firestore, user isolation backend, notification delivery, RC fetch hay provider synchronization. `SharedPreferences` chỉ dùng dữ liệu demo và không phải kho bí mật. Không lưu API key/password/cookie trong local repository.
+- FIN-01–09: gap review/roles/users.role/no self-role update/first Admin console, data-model+transitions/migration/privacy, shared packages/core, AppCheck Firestore+AI Logic, RC/Analytics cả hai clients và Crash mobile.
+- FIN-10–18: admin Google role guard, management1mobile entity/review queue+reason/dashboard3aggregation figures+chart/announcement form, mobile realtime inbox, Hosting URL, docs+sequence+measured latency và cross-role3deployed runs.
+- FIN-19–25: Gemini Firebase AI Logic/AppCheck/RC model-prompt-flag, structured model/user preview-edit-confirm/noPII/quota-network fallback/AI events,3real examples+failure; level3 optional bonus.
+- FIN-26–36: Emulator allowed+denied per role/collection, ARTEMIS cross-role+AI3runs, web checklist screenshots, Final AI review≥3findings, release/report10–15p/slides12–15/video8–12m/access.
+- Final no custom server/Functions/Cloud Storage/App Hosting/Cloud Run; device PDF+Firestore metadata. Chốt role/entity flow với giảng viên; topic approval không tự duyệt flow này.
+
+## Ranh giới thao tác
+
+Lượt này docs-only, không SDK/runtime/telemetry/deploy/billing/Google user changes. Không chạy/tạo/sửa Android emulator; Firebase Emulator rules tests cần môi trường nhẹ được thống nhất trước khi thực chạy. Config client public được giữ; service-account/model/provider secrets không commit. Không thêm provider sync, payment/chat/scraping hoặc upload toàn snapshot để merge cloud. Chi tiết triển khai đã có: [Auth](firebase-auth-setup.md), [contract](firestore-data-contract.md), [workspace](firestore-workspace.md), [test evidence](test-report.md).

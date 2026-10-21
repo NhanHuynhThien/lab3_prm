@@ -8,6 +8,8 @@ import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/cloud_ledger_viewmodel.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/common.dart';
+import '../widgets/product_feature_panel.dart';
+import '../viewmodels/product_features_viewmodel.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({
@@ -60,6 +62,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = widget.user;
     final cloud = user != null && ref.watch(cloudOwnerProvider) != null;
     final sync = cloud ? ref.watch(cloudSyncProvider) : null;
+    final config = ref.watch(productConfigProvider);
+    final analytics = ref.watch(analyticsStatusProvider).asData?.value;
     final authAction = user == null
         ? const AuthActionState()
         : ref.watch(authActionProvider);
@@ -135,7 +139,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 'Cloud Firestore',
                 'Thông báo FCM',
                 'Remote Config',
-                'Crashlytics & Analytics',
+                'Analytics',
+                'Crashlytics',
                 'Export PDF & cloud storage',
               ].map(
                 (s) => Padding(
@@ -148,6 +153,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ? 'Đã kết nối'
                             : s == 'Cloud Firestore' && sync != null
                             ? sync.label
+                            : s == 'Remote Config' && cloud
+                            ? config.refreshing
+                                  ? 'Đang lấy'
+                                  : config.error != null
+                                  ? 'Lỗi lấy mới'
+                                  : 'Có giá trị'
+                            : s == 'Analytics' && cloud
+                            ? analytics?.enabled == true
+                                  ? 'SDK sẵn sàng'
+                                  : 'Chưa sẵn sàng'
                             : 'Chưa nối',
                         neutral:
                             !(s == 'Google Sign-In' && user != null ||
@@ -162,6 +177,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ),
         const SizedBox(height: 24),
+        if (cloud) ...[
+          const ProductFeaturePanel(),
+          const SizedBox(height: AppSpace.xl),
+        ],
         if (user == null)
           Panel(
             child: Column(

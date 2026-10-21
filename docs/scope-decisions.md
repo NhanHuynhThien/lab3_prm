@@ -1,6 +1,13 @@
 # Quyết định phạm vi và khoảng cách plan/source — A03–A06
 
-Ngày 21/10/2026. Đối chiếu [plan gốc](IMPLEMENTATION_PLAN.md) mục 1, 4–6, [checklist](TASK_CHECKLIST.md), [kiến trúc](architecture.md), models/services/ViewModels/screens và tests hiện có. Đây là quyết định kỹ thuật theo yêu cầu làm A03–A06; không phải phản hồi giảng viên hoặc nghiệm thu Lab3.
+## Cập nhật yêu cầu21/10 — ưu tiên hơn checkpoint phía dưới
+
+[Baseline Lab3 + Final](ASSIGNMENT_REQUIREMENTS.md) đã đối chiếu đủ hai PDF mới. Giảng viên chấp thuận đổi sang TokenLedger theo xác nhận trực tiếp của người dùng21/10; các câu còn chờ duyệt chủ đề phía dưới là lịch sử. Không suy thành duyệt roles Final, miễn Storage/tests hoặc nghiệm thu UI.
+
+Auth/Firestore workspace/rules/indexes đã có tại main484cc41;299 Flutter tests/142 Rules API cases là evidence trước lượt docs, manual CRUD/A-B/native còn chờ. Đề mới yêu cầu ARTEMIS (không MobAI), AI review5 findings/3 separate fixes, report8–12p/slides12–15/video5–10m. Final cần roles/admin/shared core/cross-role/Gemini/AppCheck và Emulator tests; PDF L3 Storage khác Final device save/share. Baseline mới giữ mọi việc còn mở, không tick từ lượt docs này. Các checkpoint phía dưới chỉ có hiệu lực trong scope/time ghi tại từng mục.
+
+
+Ngày 21/10/2026. Đối chiếu [plan gốc](IMPLEMENTATION_PLAN.md) mục 1, 4–6, [checklist](TASK_CHECKLIST.md), [kiến trúc](architecture.md), models/services/ViewModels/screens và tests hiện có. Đây là quyết định kỹ thuật A03–A06. Approval topic sau đó đã được user xác nhận21/10 ở cập nhật đầu file; các quyết định kỹ thuật khác không tự là lecturer acceptance hoặc nghiệm thu.
 
 **Cập nhật implementation sau A04:** [local-p0-upgrade](local-p0-upgrade.md) ghi schema2/migration và code SD01–SD05, analytics/history local SD08. Bảng A04 bên dưới giữ snapshot quyết định ban đầu, các câu “chưa có” tại đó không còn là hiện trạng code. Backend/SD07 và estimate/SD06 vẫn pending/hoãn; không đổi scope rubric.
 
@@ -23,7 +30,7 @@ P0 là ứng dụng Android quản lý dữ liệu cá nhân: account metadata, 
 
 USD integer micros là currency duy nhất P0; 1 USD = 1.000.000 micros. Null khác measured zero. Input/output cùng biết hoặc cùng trống. Cost seed là giả định, không phải giá provider hiện hành. Plan/thuê bao trên account là metadata, chưa có trường phí thuê bao hoặc tính hóa đơn. Không tự cộng phí vào usage.
 
-CSV/import, work templates, forecast và VND/FX là P1; provider sync qua API chính thức là P2. Chat, payment, cookie scraping, secret backend giả và admin đa user ngoài phạm vi hiện tại. Google login app không tự cấp quyền đọc Claude/Codex.
+CSV/import, work templates, forecast và VND/FX là P1; provider sync qua API chính thức là P2. Chat/payment/cookie scraping/secret backend giả ngoài scope. Admin/roles/Gemini chưa có implementation nhưng là mandatory Final trong baseline mới, không còn là mở rộng tùy chọn để loại khỏi Final. Google login app không tự cấp quyền đọc Claude/Codex.
 
 Bằng chứng source hiện tại: [models](../lib/models/ledger.dart), [repository](../lib/services/ledger_repository.dart), [reporting VM](../lib/viewmodels/reporting_viewmodel.dart), [usage form](../lib/screens/usage_form_screen.dart), [analytics](../lib/screens/analytics_screen.dart). Các file này chứng minh giới hạn local, không phải schema Firestore trong plan.
 

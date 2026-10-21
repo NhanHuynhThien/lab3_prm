@@ -1,6 +1,6 @@
 # AI implementation log — dữ liệu thật của phiên làm việc
 
-Hiện có18 prompt nguồn thực (entry12/14/18 Git-only, entry13 visual/docs) đến21/10; công cụ/kết quả ghi riêng theo từng entry. Không coi entry docs là code evidence nếu rubric không chấp nhận.
+Hiện có20 prompt nguồn thực (entry12/14/18 Git-only, entry13 visual/docs) đến21/10; công cụ/kết quả ghi riêng theo từng entry. Không coi entry docs là code evidence nếu rubric không chấp nhận.
 
 Lịch sử lượt đầu19/10/2026. Tool: Codex; shell/Flutter/Dart; cua_repl IAB; local taste-skill draw/lint/inspect. Không gọi AI provider để phân tích usage trong app. Không có subagent, Firebase console, MobAI hoặc AI PR review trong lượt này.
 
@@ -235,6 +235,33 @@ Ngày21/10/2026. Tools Git/shell/Python; không subagent hoặc runtime changes.
 
 Decision: publication trực tiếp main theo yêu cầu, không force push/PR/visibility change hoặc deploy thêm. Các ghi chú chưa commit/push trước đó là lịch sử. Native/manual authenticated CRUD/A-B và services pending vẫn giữ nguyên; Git-only không thay reviewed PR/submission evidence.
 
+## Entry19 — cập nhật toàn bộ backlog theo L3/Final mới
+
+Prompt người dùng nguyên văn:
+
+> mục 6 giảng viên đã chấp nhận rồi.
+> bây giờ cập nhật những cái còn đang thiếu hay cần làm vào trong markdown cho tôi thật đầy đủ. đảm bảo không thiếu.
+
+Ngày21/10/2026. Tools shell/Python/apply_patch; không subagents. Dựa trên lượt đọc đủ L3 18 trang và Final9 trang, source/main484cc41 và docs hiện có. Ghi topic approval với provenance người dùng, không tự suy duyệt roles/Storage/test exemptions. Thêm ASSIGNMENT_REQUIREMENTS.md bao phủ requirements/rubric/appendices/evidence/L3+Final, sửa task IDs cũ và ưu tiên baseline mới, giữ lịch sử verification/prompt thật. Thay MobAI/Cloudinary/3findings/ngưỡng report-video cũ bằng requirements mới; thêm Final role/core/admin/cross-role/Gemini/AppCheck/Emulator và deliverables. Không tạo placeholder runtime/AI findings/traces hoặc copy PDF vào Git.
+
+Verification docs-only: kiểm local links/fences/task-ID uniqueness/thresholds/provenance/path portability và runtime hashes so baseline đã kiểm. Kết quả cụ thể xem mục cập nhật test-report. Không chạy lại Flutter/analyzer/build/deploy/emulator hoặc thay billing;299 Flutter/142 Rules API là evidence cũ, không claim native/ARTEMIS/Final Emulator. Chưa commit/push lượt docs.
+
+Decision: chấp nhận baseline yêu cầu mới; Storage L3 vs Final, roles/entity flow, ID/deadline/[N]/môi trường còn mở riêng. Topic approved không tự đạt các gates. Disclosure AI giữ19 prompt thật, không coi số lượng thay code review hoặc rubric achievement.
+
+## Entry20 — tiếp tục Analytics và Remote Config sau manual checks
+
+Prompt người dùng nguyên văn:
+
+> mục 1-7 đạt. tiếp tục làm việc khác cho tôi.
+
+Ngày21/10/2026. Ngữ cảnh: người dùng xác nhận web checks1–7 và các lượt reload/Google A-B/offline trước đó đạt; ghi đúng user provenance, không agent/native evidence. Tiếp tục Analytics/RC theo thứ tự đã trao đổi, giữ tất cả Markdown chưa commit của lượt trước. Tools shell/apply_patch/Python/Flutter/Dart/web docs Firebase chính thức/view_image; không subagents/UI vendor skill/emulator/billing hoặc publication.
+
+Output: analytics-plan trước tracking, SDK13/7, injectable transports/coordinators/plain models/providers; allowlist enum payload không PII, session queue/identity clearing/stale guard/dedupe và success-only cloud mutation instrumentation, tab/detail events; RC defaults JSON/parse/clamp/cache/error/retry/refresh, recent rows và integer budget warning projection, Profile diagnostics cùng theme Lab2. Không emit export/upload khi feature chưa có. Auth/Firestore SDK có sẵn tiếp tục giữ.
+
+Verification: service/privacy/lifecycle/RC/mutation/projection và Profile360/412/1440/text1/2 tests, fonts thật/ảnh local. Lượt đầu helper ensureVisible không thấy ListView lazy và raster/future cleanup kẹt fake clock; sửa scroll helper/pump/capture real async, giữ assertions, chỉ dừng cây process test đúng lượt, không đụng flutter run user. Kết quả full/analyze/format/web build cuối xem test-report; không tự nhận console/DebugView/Android/ARTEMIS đã pass.
+
+Decision: client Analytics/RC code đã có; console publish before-after và DebugView vẫn pending, FCM/Crash/PDF/Final chưa làm. Không bật/publish template console, gửi test Google credentials hoặc viết user docs cloud thay người dùng; không đổi source artifacts/history để giả evidence. Chưa commit/push.
+
 ## Trạng thái theo rubric
 
-Hiện có18 prompt nguồn thực (entry12/14/18 Git-only, entry13 visual/docs), gồm entry implementation/verification B03–B13; cần đối chiếu chất lượng/phạm vi từng entry theo rubric trước nộp, không chỉ đếm số lượng. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.
+Hiện có20 prompt nguồn thực (entry12/14/18 Git-only, entry13 visual/docs), gồm entry implementation/verification B03–B13; cần đối chiếu chất lượng/phạm vi từng entry theo rubric trước nộp, không chỉ đếm số lượng. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.

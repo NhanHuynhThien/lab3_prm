@@ -1,5 +1,12 @@
 # Nguồn thiết kế Lab2
 
+## Cập nhật yêu cầu21/10 — ưu tiên hơn checkpoint phía dưới
+
+[Baseline Lab3 + Final](ASSIGNMENT_REQUIREMENTS.md) đã đối chiếu đủ hai PDF mới. Giảng viên chấp thuận đổi sang TokenLedger theo xác nhận trực tiếp của người dùng21/10; các câu còn chờ duyệt chủ đề phía dưới là lịch sử. Không suy thành duyệt roles Final, miễn Storage/tests hoặc nghiệm thu UI.
+
+Auth/Firestore workspace/rules/indexes đã có tại main484cc41;299 Flutter tests/142 Rules API cases là evidence trước lượt docs, manual CRUD/A-B/native còn chờ. Đề mới yêu cầu ARTEMIS (không MobAI), AI review5 findings/3 separate fixes, report8–12p/slides12–15/video5–10m. Final cần roles/admin/shared core/cross-role/Gemini/AppCheck và Emulator tests; PDF L3 Storage khác Final device save/share. Baseline mới giữ mọi việc còn mở, không tick từ lượt docs này. Các checkpoint phía dưới chỉ có hiệu lực trong scope/time ghi tại từng mục.
+
+
 TokenLedger dùng core UI StudentPay Lab2, chuyển nghiệp vụ từ expense/bills sang AI accounts/usage/purpose/quota. Bản ảnh/tài liệu Lab2 copy vào repo trước đây đã được bỏ khỏi Git để source tree tập trung vào Flutter. Dự án vẫn chạy độc lập; runtime không đọc file Lab2.
 
 [Figma gốc](https://www.figma.com/design/C7FiWYzVXUS8G2cnK5AGos/PRM393-Lab2-SE192382_SE192336). Source thiết kế trong workspace gốc là `lab2_prm/design/DESIGN.md` và `lab2_prm/handoff/flutter-handoff.md`; các đường dẫn này chỉ là provenance, không phải dependency runtime hoặc link trong repo hiện tại.

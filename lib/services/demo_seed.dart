@@ -110,3 +110,64 @@ LedgerData createDemoSeed(
     reportingTimezone: timezone,
   );
 }
+
+LedgerData withoutDemo(LedgerData data) {
+  final sessions = data.sessions.where((s) => !s.isDemo).toList();
+  return data.copyWith(
+    accounts: data.accounts
+        .where((a) => !a.isDemo || sessions.any((s) => s.accountId == a.id))
+        .toList(),
+    sessions: sessions,
+  );
+}
+
+LedgerData createDemoReset(
+  LedgerData current,
+  DateTime now,
+  String Function() newId,
+) {
+  final retained = withoutDemo(current);
+  final seed = createDemoSeed(now);
+  final ids = {
+    for (final a in seed.accounts)
+      a.id: retained.account(a.id) == null ? a.id : newId(),
+  };
+  final accounts = [
+    for (final a in seed.accounts)
+      AIAccount(
+        id: ids[a.id]!,
+        alias: a.alias,
+        provider: a.provider,
+        product: a.product,
+        billingMode: a.billingMode,
+        plan: a.plan,
+        createdAt: a.createdAt,
+        budgetMicros: a.budgetMicros,
+        isDemo: true,
+        dataSource: DataSource.demo,
+        timezone: a.timezone,
+        quotaWindows: a.quotaWindows,
+      ),
+  ];
+  final sessions = [
+    for (final s in seed.sessions)
+      UsageSession(
+        id: retained.sessions.any((old) => old.id == s.id) ? newId() : s.id,
+        accountId: ids[s.accountId]!,
+        title: s.title,
+        purpose: s.purpose,
+        occurredAt: s.occurredAt,
+        inputTokens: s.inputTokens,
+        outputTokens: s.outputTokens,
+        costMicros: s.costMicros,
+        costBasis: s.costBasis,
+        dataSource: DataSource.demo,
+        isDemo: true,
+        note: s.note,
+      ),
+  ];
+  return retained.copyWith(
+    accounts: [...retained.accounts, ...accounts],
+    sessions: [...retained.sessions, ...sessions],
+  );
+}

@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/ledger.dart';
 import '../services/ledger_validation.dart';
 import '../theme/app_theme.dart';
-import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../widgets/common.dart';
-import '../widgets/ledger_feedback.dart';
 import '../widgets/draft_guard.dart';
+import '../widgets/ledger_feedback.dart';
+import '../widgets/quota_form_fields.dart';
 
 class QuotaFormScreen extends ConsumerStatefulWidget {
   const QuotaFormScreen({
@@ -17,9 +17,11 @@ class QuotaFormScreen extends ConsumerStatefulWidget {
     this.quota,
     this.newWindow = false,
   });
+
   final AIAccount account;
   final QuotaSnapshot? quota;
   final bool newWindow;
+
   @override
   ConsumerState<QuotaFormScreen> createState() => _QuotaFormScreenState();
 }
@@ -32,18 +34,21 @@ class _QuotaFormScreenState extends ConsumerState<QuotaFormScreen> {
   late final DateTime _initialObserved;
   QuotaSnapshot? get _original =>
       widget.newWindow ? null : widget.quota ?? widget.account.quota;
+
   List<TextEditingController> get _controllers => [
     _percent,
     _window,
     _source,
     _note,
   ];
+
   late DateTime _reset;
   late final DateTime _initialReset;
   late final String _initialPercent, _initialWindow;
   bool _saving = false;
   late final int? _revision;
   String? _error;
+
   @override
   void initState() {
     super.initState();
@@ -193,73 +198,12 @@ class _QuotaFormScreenState extends ConsumerState<QuotaFormScreen> {
                   validator: LedgerValidation.percentInput,
                 ),
                 const SizedBox(height: 24),
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    final now = ref.read(clockProvider)().toLocal();
-                    final lastDate = now.add(const Duration(days: 366));
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: _reset.isBefore(now)
-                          ? now
-                          : _reset.isAfter(lastDate)
-                          ? lastDate
-                          : _reset,
-                      firstDate: DateTime(now.year, now.month, now.day),
-                      lastDate: lastDate,
-                    );
-                    if (date == null || !context.mounted) return;
-                    final time = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.fromDateTime(_reset),
-                    );
-                    if (time != null && mounted) {
-                      setState(
-                        () => _reset = DateTime(
-                          date.year,
-                          date.month,
-                          date.day,
-                          time.hour,
-                          time.minute,
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.schedule),
-                  label: Text(
-                    'Reset ${shortDate(_reset)} lúc ${shortTime(_reset)}',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.visibility_outlined),
-                  label: Text(
-                    'Quan sát ${shortDate(_observed)} lúc ${shortTime(_observed)} · giờ thiết bị',
-                  ),
-                  onPressed: () async {
-                    final now = ref.read(clockProvider)().toLocal();
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: _observed.isAfter(now) ? now : _observed,
-                      firstDate: DateTime(2020),
-                      lastDate: now,
-                    );
-                    if (date == null || !context.mounted) return;
-                    final time = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.fromDateTime(_observed),
-                    );
-                    if (time != null && mounted) {
-                      setState(
-                        () => _observed = DateTime(
-                          date.year,
-                          date.month,
-                          date.day,
-                          time.hour,
-                          time.minute,
-                        ),
-                      );
-                    }
-                  },
+                QuotaTimePickers(
+                  reset: _reset,
+                  observed: _observed,
+                  now: ref.read(clockProvider)().toLocal(),
+                  onResetChanged: (d) => setState(() => _reset = d),
+                  onObservedChanged: (d) => setState(() => _observed = d),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

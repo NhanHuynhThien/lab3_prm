@@ -1,5 +1,10 @@
 # Workflows — TokenLedger
 
+## Rubric hiện hành21/10
+
+Đọc docs/ASSIGNMENT_REQUIREMENTS.md: topic TokenLedger giảng viên đã chấp thuận theo user, không hỏi lại. L3 dùng ARTEMIS/e2e_test pytest≥10×3+exploratory/native/error/analytics, không MobAI/.mob; review≥5/2kinds/3separate fixes, report8–12/slides12–15/video5–10. Final yêu cầu roles/shared core/admin/cross-role/Gemini/AppCheck/Emulator tests, report10–15/video8–12. Storage khác nhau giữa hai đề còn cần chốt; quy tắc cũ xung đột bên dưới không áp dụng. Không emulator Android; không tự chạy Firebase Emulator hoặc thay evidence khi chưa thống nhất môi trường. Docs-only kiểm links/fences/IDs/facts/runtime hashes, không build lại.
+
+
 ## 1. Bắt đầu lượt mới
 
 - Đọc root AGENTS.md và project-context; xem `git status --short --branch`, `git remote -v`.
@@ -55,7 +60,7 @@ flutter test --reporter expanded
 - Cập nhật ngày/trạng thái ở phần mới; giữ evidence19/10 là lịch sử thay vì đổi ngày ảnh cũ thành hôm nay.
 - Kiểm tra Markdown fences, local links, task ID uniqueness và paths portability.
 - Links tới Lab2 dùng docs/lab2-ui-reference.md hoặc URL Figma gốc; không thêm absolute máy cá nhân vào hướng dẫn clone.
-- AI log chép prompt user thực, outcome/verification/decision. Nếu chưa đủ 6 entries theo rubric thì để pending.
+- AI log chép prompt user thực, outcome/verification/decision. Đề mới không có gate đếm6 prompt; giữ disclosure thật, không thay code review.
 - Kiểm tra technical claims bằng source/test logs; không phải mọi mục trong plan đều implemented.
 
 ## 6. Git publication
@@ -76,7 +81,7 @@ flutter test --reporter expanded
 4. Session disposal/FCM binding theo UID; demo data không tự nhập vào dữ liệu user thật.
 5. Từng service FCM/RC/Crash/Analytics/PDF có hành vi và console evidence thật.
 6. Không lưu provider secret trong APK, Firestore client-readable, repo hoặc AI logs.
-7. Sau integration mới làm MobAI10 scripts/AI review/fidelity/report/video và cập nhật gates tương ứng.
+7. Sau integration làm ARTEMIS≥10cases×3+exploratory/AI review/fidelity/report/slides/video và cập nhật gates tương ứng.
 
 ## Constraints hiện hành21/10/2026 — ưu tiên hơn ghi chú từng lượt
 

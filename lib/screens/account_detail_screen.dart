@@ -7,6 +7,7 @@ import '../widgets/data_scope_picker.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/reporting_viewmodel.dart';
+import '../viewmodels/product_features_viewmodel.dart';
 import '../widgets/common.dart';
 import '../widgets/ledger_feedback.dart';
 import 'account_form_screen.dart';
@@ -15,11 +16,26 @@ import 'history_screen.dart';
 import 'quota_form_screen.dart';
 import 'usage_form_screen.dart';
 
-class AccountDetailScreen extends ConsumerWidget {
+class AccountDetailScreen extends ConsumerStatefulWidget {
   const AccountDetailScreen({super.key, required this.accountId});
   final String accountId;
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountDetailScreen> createState() =>
+      _AccountDetailScreenState();
+}
+
+class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
+  String get accountId => widget.accountId;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(productFeaturesProvider.notifier).detail('account');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(ledgerProvider);
     final feedback = ledgerFeedback(state, 'Tài khoản');
     if (feedback != null) return feedback;

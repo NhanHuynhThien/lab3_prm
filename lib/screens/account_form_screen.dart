@@ -3,17 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/ledger.dart';
 import '../services/ledger_validation.dart';
-import '../services/reporting_calendar.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
+import '../widgets/account_form_fields.dart';
 import '../widgets/common.dart';
-import '../widgets/ledger_feedback.dart';
 import '../widgets/draft_guard.dart';
+import '../widgets/ledger_feedback.dart';
 
 class AccountFormScreen extends ConsumerStatefulWidget {
   const AccountFormScreen({super.key, this.account});
   final AIAccount? account;
+
   @override
   ConsumerState<AccountFormScreen> createState() => _AccountFormScreenState();
 }
@@ -39,6 +40,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   late final BillingMode _initialBilling;
   bool _saving = false;
   String? _error;
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +75,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     _timezone,
     _cycle,
   ];
+
   bool get _hasChanges =>
       !_purposes.containsAll(_initialPurposes) ||
       !_initialPurposes.containsAll(_purposes) ||
@@ -262,93 +265,16 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Mục đích gợi ý',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: Purpose.values
-                      .map(
-                        (p) => FilterChip(
-                          label: Text(p.label),
-                          selected: _purposes.contains(p),
-                          onSelected: _saving
-                              ? null
-                              : (selected) => setState(() {
-                                  if (selected) {
-                                    _purposes.add(p);
-                                  } else {
-                                    _purposes.remove(p);
-                                  }
-                                }),
-                        ),
-                      )
-                      .toList(),
+                PurposeChipsSelector(
+                  purposes: _purposes,
+                  onChanged: (p) => setState(() => _purposes = p),
+                  enabled: !_saving,
                 ),
                 const SizedBox(height: 24),
-                TextFormField(
-                  key: const ValueKey('account-timezone'),
-                  controller: _timezone,
-                  decoration: const InputDecoration(
-                    labelText: 'Múi giờ chu kỳ · IANA',
-                    helperText: 'Ví dụ Asia/Ho_Chi_Minh, America/New_York; device giữ chính sách cũ.',
-                  ),
-                  validator: (v) {
-                    try {
-                      ReportingCalendar.validateZone((v ?? '').trim());
-                      return null;
-                    } catch (_) {
-                      return 'Nhập múi giờ IANA hợp lệ.';
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  key: const ValueKey('account-cycle'),
-                  controller: _cycle,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Ngày bắt đầu kỳ ngân sách',
-                    helperText: '1–31. Tháng ngắn dùng ngày cuối tháng, không cộng thêm phí thuê bao.',
-                  ),
-                  validator: (v) {
-                    final raw = (v ?? '').trim();
-                    final n = RegExp(r'^\d+$').hasMatch(raw)
-                        ? int.tryParse(raw)
-                        : null;
-                    return n == null || n < 1 || n > 31
-                        ? 'Nhập ngày từ 1 đến 31.'
-                        : null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  key: const ValueKey('account-budget'),
-                  controller: _budget,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: 'Ngân sách theo dõi mỗi kỳ · USD',
-                    hintText: '20.00',
-                    helperText: 'USD · Ngân sách tự đặt theo chu kỳ đã chọn. Để trống nếu chưa đặt.',
-                  ),
-                  validator: (v) {
-                    try {
-                      parseUsd(v ?? '');
-                      return null;
-                    } catch (e) {
-                      return 'Nhập số USD không âm hợp lệ.';
-                    }
-                  },
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Ngân sách tự đặt không phải số dư API hay hạn mức thuê bao. Thay đổi chu kỳ chỉ đổi cách xem báo cáo, không sửa thời điểm phiên cũ.',
-                  style: TextStyle(color: AppColors.muted),
+                AccountCycleFields(
+                  timezoneController: _timezone,
+                  cycleController: _cycle,
+                  budgetController: _budget,
                 ),
                 if (_error != null)
                   Padding(

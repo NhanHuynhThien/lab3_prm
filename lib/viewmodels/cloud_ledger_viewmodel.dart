@@ -4,54 +4,16 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/cloud_ledger.dart';
+import '../models/cloud_sync_status.dart';
 import '../models/ledger.dart';
+import '../services/analytics_service.dart';
 import '../services/cloud_ledger_repository.dart';
-import '../services/firestore_ledger_repository.dart';
 import '../services/ledger_validation.dart';
+import 'cloud_ledger_mutations.dart';
 import 'ledger_viewmodel.dart';
+import 'product_features_viewmodel.dart';
 
-final cloudRepositoryFactoryProvider =
-    Provider<CloudLedgerRepository Function()>(
-      (ref) => FirestoreLedgerRepository.forCurrentUser,
-    );
-final cloudOwnerProvider = Provider<String?>((ref) => null);
-final cloudRepositoryProvider = Provider.autoDispose<CloudLedgerRepository>((
-  ref,
-) {
-  final repo = ref.read(cloudRepositoryFactoryProvider)();
-  if (repo.ownerId != ref.read(cloudOwnerProvider)) {
-    unawaited(repo.close());
-    throw const CloudLedgerFailure(
-      CloudLedgerProblem.unauthenticated,
-      'Phiên đã thay đổi.',
-    );
-  }
-  ref.onDispose(() => unawaited(repo.close()));
-  return repo;
-});
-
-class CloudSyncStatus {
-  const CloudSyncStatus({
-    this.loading = true,
-    this.fromCache = false,
-    this.pending = false,
-    this.error,
-    this.coherent = false,
-  });
-  final bool loading, fromCache, pending, coherent;
-  final Object? error;
-  bool get confirmed =>
-      !loading && !fromCache && !pending && coherent && error == null;
-  String get label => error != null
-      ? 'Lỗi kết nối'
-      : loading || !coherent
-      ? 'Đang đồng bộ'
-      : pending
-      ? 'Chờ xác nhận'
-      : fromCache
-      ? 'Bản lưu cache'
-      : 'Đã kết nối';
-}
+export '../models/cloud_sync_status.dart';
 
 final cloudSyncProvider = Provider<CloudSyncStatus>((ref) {
   final value = ref.watch(ledgerProvider);
@@ -61,23 +23,27 @@ final cloudSyncProvider = Provider<CloudSyncStatus>((ref) {
 });
 
 class _PendingCommand {
-  _PendingCommand(this.signature, this.id, this.execute);
+  _PendingCommand(this.signature, this.id, this.execute, this.event);
   final String signature, id;
   final Future<void> Function(String) execute;
+  final ProductEvent? event;
 }
 
-/// Shared screen API; cloud overrides every local mutation and never save(snapshot).
-class CloudLedgerViewModel extends LedgerViewModel {
+class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
   @override
   bool get isCloud => true;
   CloudSyncStatus sync = const CloudSyncStatus();
   late CloudLedgerRepository _repo;
+  @override
+  CloudLedgerRepository get repo => _repo;
   final _subscriptions = <StreamSubscription<Object?>>[];
   CloudSnapshot<AIAccount>? _accounts;
   CloudSnapshot<UsageSession>? _usage;
   CloudSnapshot<AccountQuota>? _quotas;
   CloudSnapshot<CloudSettings>? _settings;
   LedgerData? _last;
+  @override
+  LedgerData? get lastData => _last;
   var _epoch = 0;
   var _busy = false;
   var _bootActive = true;
@@ -165,15 +131,27 @@ class CloudLedgerViewModel extends LedgerViewModel {
       final a = _accounts, u = _usage, q = _quotas, s = _settings;
       if (a == null || u == null || q == null || s == null) return;
       final ids = a.records.map((r) => r.id).toSet();
+
+      final usageCounts = <String, int>{};
+      for (final r in u.records) {
+        final id = r.value.accountId;
+        usageCounts[id] = (usageCounts[id] ?? 0) + 1;
+      }
+      final quotasByAccount = <String, List<QuotaSnapshot>>{};
+      final quotaCounts = <String, int>{};
+      for (final r in q.records) {
+        final id = r.value.accountId;
+        quotaCounts[id] = (quotaCounts[id] ?? 0) + 1;
+        (quotasByAccount[id] ??= []).add(r.value.snapshot);
+      }
+
       final coherent =
           u.records.every((r) => ids.contains(r.value.accountId)) &&
           q.records.every((r) => ids.contains(r.value.accountId)) &&
           a.records.every(
             (r) =>
-                r.usageCount ==
-                    u.records.where((v) => v.value.accountId == r.id).length &&
-                r.quotaCount ==
-                    q.records.where((v) => v.value.accountId == r.id).length,
+                r.usageCount == (usageCounts[r.id] ?? 0) &&
+                r.quotaCount == (quotaCounts[r.id] ?? 0),
           );
       sync = CloudSyncStatus(
         loading: false,
@@ -194,10 +172,7 @@ class CloudLedgerViewModel extends LedgerViewModel {
           accounts: a.records
               .map(
                 (r) => r.value.copyWith(
-                  quotaWindows: q.records
-                      .where((v) => v.value.accountId == r.id)
-                      .map((v) => v.value.snapshot)
-                      .toList(),
+                  quotaWindows: quotasByAccount[r.id] ?? const [],
                 ),
               )
               .toList(),
@@ -276,11 +251,13 @@ class CloudLedgerViewModel extends LedgerViewModel {
   @override
   int? get settingsRevision => _settings?.records.firstOrNull?.revision;
 
-  Future<void> _run(
+  @override
+  Future<void> run(
     String key,
     Object payload,
-    Future<void> Function(String) execute,
-  ) async {
+    Future<void> Function(String) execute, {
+    ProductEvent? event,
+  }) async {
     if (_busy) throw StateError('Đang lưu thay đổi trước.');
     _ready();
     final signature = jsonEncode(payload);
@@ -290,14 +267,18 @@ class CloudLedgerViewModel extends LedgerViewModel {
         'Thao tác trước chưa rõ kết quả. Thử lại với nội dung cũ trước khi sửa tiếp.',
       );
     }
-    command ??= _PendingCommand(signature, newId(), execute);
+    command ??= _PendingCommand(signature, newId(), execute, event);
     _commands[key] = command;
     _busy = true;
     try {
       await command.execute(command.id);
       if (!ref.mounted) throw StateError('Không gian dữ liệu đã đóng.');
       _commands.remove(key);
-      // Stream is the sole state authority. Never publish a guessed next snapshot.
+      unawaited(
+        ref
+            .read(analyticsServiceProvider)
+            .record(command.event, operationId: command.id),
+      );
     } catch (error) {
       if (error is! CloudLedgerFailure ||
           error.problem != CloudLedgerProblem.unavailable) {
@@ -308,143 +289,4 @@ class CloudLedgerViewModel extends LedgerViewModel {
       _busy = false;
     }
   }
-
-  @override
-  Future<void> saveAccount(AIAccount account, {int? expectedRevision}) {
-    LedgerValidation.account(account);
-    final value = account.copyWith(quotaWindows: []);
-    final exists = expectedRevision != 0 && _last?.account(account.id) != null;
-    final revision = expectedRevision ?? accountRevision(account.id);
-    return _run('account/${account.id}', value.toJson(), (op) async {
-      if (exists) {
-        await _repo.updateAccount(
-          value,
-          expectedRevision: revision!,
-          operationId: op,
-        );
-      } else if (expectedRevision != null && expectedRevision != 0) {
-        throw StateError('Tài khoản đã bị xóa.');
-      } else {
-        await _repo.createAccount(value, operationId: op);
-      }
-    });
-  }
-
-  @override
-  Future<void> archiveAccount(String id, bool archive) => saveAccount(
-    _last!.account(id)!.copyWith(archived: archive),
-    expectedRevision: accountRevision(id),
-  );
-  @override
-  Future<void> deleteAccount(String id) {
-    if (_last?.account(id)?.quotaWindows.isNotEmpty == true) {
-      throw StateError(
-        'Tài khoản còn hạn mức. Xóa từng cửa sổ hoặc lưu trữ tài khoản.',
-      );
-    }
-    final revision = accountRevision(id);
-    return _run(
-      'deleteAccount/$id',
-      id,
-      (op) =>
-          _repo.deleteAccount(id, expectedRevision: revision!, operationId: op),
-    );
-  }
-
-  @override
-  Future<void> saveUsage(UsageSession session, {int? expectedRevision}) {
-    LedgerValidation.usage(session, now: ref.read(clockProvider)());
-    final revision = expectedRevision == 0
-        ? null
-        : expectedRevision ?? usageRevision(session.id);
-    return _run('usage/${session.id}', session.toJson(), (op) async {
-      if (revision != null) {
-        await _repo.updateUsage(
-          session,
-          expectedRevision: revision,
-          operationId: op,
-        );
-      } else {
-        await _repo.createUsage(session, operationId: op);
-      }
-    });
-  }
-
-  @override
-  Future<void> deleteUsage(String id) {
-    final revision = usageRevision(id);
-    return _run(
-      'deleteUsage/$id',
-      id,
-      (op) =>
-          _repo.deleteUsage(id, expectedRevision: revision!, operationId: op),
-    );
-  }
-
-  @override
-  Future<void> updateQuota(
-    String accountId,
-    QuotaSnapshot quota, {
-    bool requireExisting = false,
-    int? expectedRevision,
-  }) {
-    final revision = expectedRevision == 0
-        ? null
-        : expectedRevision ?? quotaRevision(accountId, quota.windowKey);
-    final value = AccountQuota(accountId: accountId, snapshot: quota);
-    return _run('quota/$accountId/${quota.windowKey}', quota.toJson(), (
-      op,
-    ) async {
-      if (revision != null) {
-        await _repo.updateQuota(
-          value,
-          expectedRevision: revision,
-          operationId: op,
-        );
-      } else if (requireExisting) {
-        throw StateError('Cửa sổ đã bị xóa.');
-      } else {
-        await _repo.createQuota(value, operationId: op);
-      }
-    });
-  }
-
-  @override
-  Future<void> deleteQuota(String accountId, String windowKey) {
-    final revision = quotaRevision(accountId, windowKey);
-    return _run(
-      'deleteQuota/$accountId/$windowKey',
-      windowKey,
-      (op) => _repo.deleteQuota(
-        accountId,
-        windowKey,
-        expectedRevision: revision!,
-        operationId: op,
-      ),
-    );
-  }
-
-  @override
-  Future<void> setReportingTimezone(String zone, {int? expectedRevision}) {
-    final revision = expectedRevision == 0
-        ? null
-        : expectedRevision ?? settingsRevision;
-    return _run('settings', zone, (op) async {
-      await _repo.setReportingTimezone(
-        zone.trim(),
-        expectedRevision: revision,
-        operationId: op,
-      );
-    });
-  }
-
-  @override
-  Future<void> resetDemo() async =>
-      throw StateError('Mở demo local riêng để khôi phục dữ liệu mẫu.');
-  @override
-  Future<void> clearDemo() async =>
-      throw StateError('Không xóa demo trong không gian cloud.');
-  @override
-  Future<void> recoverDemo() async =>
-      throw StateError('Cloud không dùng khôi phục snapshot local.');
 }
