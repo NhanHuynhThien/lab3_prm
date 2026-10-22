@@ -111,7 +111,6 @@ class AuthGateHarness {
   }
 
   Future<void> tap(WidgetTester tester, String label) async {
-    final finder = find.text(label).last;
     if (find.text(label).evaluate().isEmpty) {
       await tester.scrollUntilVisible(
         find.text(label),
@@ -119,6 +118,7 @@ class AuthGateHarness {
         scrollable: find.byType(Scrollable).last,
       );
     }
+    final finder = find.text(label).last;
     await tester.ensureVisible(finder);
     await tester.pumpAndSettle();
     await tester.tap(finder);

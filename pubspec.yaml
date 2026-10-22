@@ -19,6 +19,12 @@ dependencies:
   http: ^1.6.0
   firebase_analytics: ^13.0.0
   firebase_remote_config: ^7.0.0
+  firebase_crashlytics: ^6.0.0
+  firebase_messaging: ^17.0.0
+  firebase_storage: ^14.0.0
+  pdf: ^3.13.1
+  path_provider: ^2.1.6
+  open_filex: ^5.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

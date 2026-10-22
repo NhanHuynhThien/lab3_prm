@@ -12,6 +12,8 @@ import '../widgets/provider_sync_summary.dart';
 import '../viewmodels/provider_sync_viewmodel.dart';
 import '../models/cloud_sync_status.dart';
 import '../widgets/provider_ledger_feedback.dart';
+import '../widgets/notification_center_sheet.dart';
+import '../viewmodels/product_features_viewmodel.dart';
 import 'usage_form_screen.dart';
 
 export '../widgets/quota_row.dart';
@@ -73,6 +75,8 @@ class DashboardScreen extends ConsumerWidget {
       onAnalytics: onAnalytics,
     );
 
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+
     return ListView(
       padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 28),
       children: [
@@ -81,13 +85,31 @@ class DashboardScreen extends ConsumerWidget {
           cloud
               ? 'Model, hạn mức và số liệu từ nguồn đã kết nối.'
               : 'AI đang hỗ trợ công việc của bạn như thế nào?',
-          action: FilledButton.icon(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(builder: (_) => const UsageFormScreen()),
-            ),
-            icon: const Icon(Icons.add_rounded, size: 20),
-            label: const Text('Ghi sử dụng'),
+          action: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: () => NotificationCenterSheet.show(context),
+                icon: unreadCount > 0
+                    ? Badge(
+                        label: Text('$unreadCount'),
+                        child: const Icon(Icons.notifications_outlined),
+                      )
+                    : const Icon(Icons.notifications_outlined),
+                tooltip: 'Thông báo',
+              ),
+              const SizedBox(width: 4),
+              FilledButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const UsageFormScreen(),
+                  ),
+                ),
+                icon: const Icon(Icons.add_rounded, size: 20),
+                label: const Text('Ghi sử dụng'),
+              ),
+            ],
           ),
         ),
         if (showProviderFirst) ...[

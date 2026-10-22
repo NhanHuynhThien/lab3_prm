@@ -64,6 +64,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final sync = cloud ? ref.watch(cloudSyncProvider) : null;
     final config = ref.watch(productConfigProvider);
     final analytics = ref.watch(analyticsStatusProvider).asData?.value;
+    final crashlytics = ref.watch(crashlyticsStatusProvider).asData?.value;
+    final notifications = ref.watch(notificationServiceProvider);
     final authAction = user == null
         ? const AuthActionState()
         : ref.watch(authActionProvider);
@@ -153,6 +155,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ? 'Đã kết nối'
                             : s == 'Cloud Firestore' && sync != null
                             ? sync.label
+                            : s == 'Thông báo FCM' && cloud
+                            ? (notifications.permissionGranted
+                                  ? 'Đã cấp quyền'
+                                  : 'Sẵn sàng')
                             : s == 'Remote Config' && cloud
                             ? config.refreshing
                                   ? 'Đang lấy'
@@ -163,11 +169,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             ? analytics?.enabled == true
                                   ? 'SDK sẵn sàng'
                                   : 'Chưa sẵn sàng'
+                            : s == 'Crashlytics' && cloud
+                            ? (crashlytics?.enabled == true
+                                  ? 'Đã kích hoạt'
+                                  : 'Sẵn sàng')
+                            : s == 'Export PDF & cloud storage' && cloud
+                            ? 'Sẵn sàng'
                             : 'Chưa nối',
                         neutral:
-                            !(s == 'Google Sign-In' && user != null ||
-                                s == 'Cloud Firestore' &&
-                                    sync?.confirmed == true),
+                            !((s == 'Google Sign-In' && user != null) ||
+                                (s == 'Cloud Firestore' &&
+                                    sync?.confirmed == true) ||
+                                (s == 'Thông báo FCM' && cloud) ||
+                                (s == 'Remote Config' &&
+                                    cloud &&
+                                    config.error == null) ||
+                                (s == 'Analytics' &&
+                                    cloud &&
+                                    analytics?.enabled == true) ||
+                                (s == 'Crashlytics' && cloud) ||
+                                (s == 'Export PDF & cloud storage' && cloud)),
                       ),
                     ],
                   ),

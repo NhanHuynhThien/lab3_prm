@@ -15,6 +15,7 @@ import '../widgets/ledger_feedback.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
+import '../widgets/export_report_dialog.dart';
 
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
@@ -283,6 +284,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
             ],
           ),
+        ),
+        const SizedBox(height: 24),
+        OutlinedButton.icon(
+          onPressed: () => ExportReportDialog.show(context),
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          label: const Text('Xuất báo cáo PDF & Cloud Storage'),
         ),
       ],
     );

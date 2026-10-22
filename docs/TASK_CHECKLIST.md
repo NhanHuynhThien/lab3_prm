@@ -216,11 +216,11 @@ Dependency: G3–G5; spike storage/ARTEMIS nên xong từ G1. Exit gate: tất c
 
 ### FCM
 
-- [ ] FCM-01 NotificationService: permission Android13+, token refresh và per-user device binding lifecycle.
-- [ ] FCM-02 Foreground handler → Center+banner; không expose server key trong app.
-- [ ] FCM-03 Background handler đúng entry point/runtime, không cập nhật UI từ background isolate.
-- [ ] FCM-04 Tap background/cold start xử lý intent sau auth ready; allowlist routes, owner check/fallback.
-- [ ] FCM-05 Center trong Profile có read/unread, persist dưới UID và dedupe messageId/eventId.
+- [x] FCM-01 NotificationService: permission Android13+, token refresh và per-user device binding lifecycle.
+- [x] FCM-02 Foreground handler → Center+banner; không expose server key trong app.
+- [x] FCM-03 Background handler đúng entry point/runtime, không cập nhật UI từ background isolate.
+- [x] FCM-04 Tap background/cold start xử lý intent sau auth ready; allowlist routes, owner check/fallback.
+- [x] FCM-05 Center trong Profile có read/unread, persist dưới UID và dedupe messageId/eventId.
 - [ ] FCM-06 Test Console foreground/background/tap, permission denied, target missing, logout/user change.
 - [ ] FCM-07 Ghi giới hạn background delivery/inbox khi notification không được mở; không claim mọi tin đều persist tức thì.
 
@@ -233,23 +233,23 @@ Dependency: G3–G5; spike storage/ARTEMIS nên xong từ G1. Exit gate: tất c
 
 ### Crashlytics và Analytics
 
-- [ ] CRASH-01 Wiring Flutter và async error hooks, không ghi thông tin nhạy cảm.
-- [ ] CRASH-02 Non-fatal từ error path thật + deliberate test crash; user ID và ≥1 custom key, clear identity khi logout; không mất draft hoặc log PII.
+- [x] CRASH-01 Wiring Flutter và async error hooks, không ghi thông tin nhạy cảm.
+- [x] CRASH-02 Non-fatal từ error path thật + deliberate test crash; user ID và ≥1 custom key, clear identity khi logout; không mất draft hoặc log PII.
 - [ ] CRASH-03 Restart/send và xác nhận cả 2 xuất hiện dashboard; lưu evidence, giới hạn demo controls đúng cấu hình.
 - [x] EVENT-01 analytics-plan.md viết trước tracking, ≥7events/questions/typed params/flows/noPII; export/upload planned phải nối khi có PDF feature.
-- [ ] EVENT-02 Implement login/logout/screen_view/view-account/accountCRUD/usage actions/export + custom purpose/drilldown/quota.
+- [x] EVENT-02 Implement login/logout/screen_view/view-account/accountCRUD/usage actions/export + custom purpose/drilldown/quota.
 - [x] EVENT-03 Events sau repository success, operation-ID dedupe trong app session, owner queue/stale guard; tab/detail không do rebuild. Fake tests pass scope client, không claim exactly-once toàn reload hoặc console.
 - [ ] EVENT-04 DebugView mỗi event+params; set userID sau login/clear logout; ≥1 ARTEMIS test kiểm event qua Logcat/DebugView, lưu evidence.
 
 ### PDF và storage
 
-- [ ] PDF-01 Chốt REQ-SCOPE-04: L3 yêu cầu Cloud Storage owner path/rules; Final device save/share+Firestore metadata. Cloudinary không còn là mặc định được đề mới chấp nhận.
-- [ ] PDF-02 Snapshot dataset theo filter, generate PDF nhận diện Lab2 có summary/purpose/table/source/coverage.
-- [ ] PDF-03 Render kiểm tra PDF tiếng Việt, font/line wrap, nhiều trang, zero/unknown data, không lộ credential.
-- [ ] PDF-04 Upload progress/error/timeout, result HTTPS URL và metadata filename/owner/time/size/filter/count.
-- [ ] PDF-05 Upload-success/metadata-fail retry cùng exportID/URL; không tạo report ready giả hay duplicate upload.
-- [ ] PDF-06 S14/Profile report list/Open action; verify URL trên Android, Firestore metadata đúng UID.
-- [ ] PDF-07 L3 storage.rules owner-only read/write, kiểm unauth/user khác denied và URL access; Final không Cloud Storage/Cloudinary, save/share device. Không tự bật billing.
+- [x] PDF-01 Chốt REQ-SCOPE-04: L3 yêu cầu Cloud Storage owner path/rules; Final device save/share+Firestore metadata. Cloudinary không còn là mặc định được đề mới chấp nhận.
+- [x] PDF-02 Snapshot dataset theo filter, generate PDF nhận diện Lab2 có summary/purpose/table/source/coverage.
+- [x] PDF-03 Render kiểm tra PDF tiếng Việt, font/line wrap, nhiều trang, zero/unknown data, không lộ credential.
+- [x] PDF-04 Upload progress/error/timeout, result HTTPS URL và metadata filename/owner/time/size/filter/count.
+- [x] PDF-05 Upload-success/metadata-fail retry cùng exportID/URL; không tạo report ready giả hay duplicate upload.
+- [x] PDF-06 S14/Profile report list/Open action; verify URL trên Android, Firestore metadata đúng UID.
+- [x] PDF-07 L3 storage.rules owner-only read/write, kiểm unauth/user khác denied và URL access; Final không Cloud Storage/Cloudinary, save/share device. Không tự bật billing.
 - [ ] GATE-06 Console notifications/RC/Crash/DebugView và PDF URL thật đầy đủ; commit integrations/evidence.
 
 ## G7 — Kiểm thử ARTEMIS và regression (P0)

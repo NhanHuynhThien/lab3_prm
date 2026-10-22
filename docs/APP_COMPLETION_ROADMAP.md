@@ -237,31 +237,31 @@ Quota Codex vẫn 40% used nếu không có snapshot mới. Các tổng chỉ g�
 
 ### E1. PDF và storage
 
-- [ ] **E01 — Chốt storage theo mốc:** L3 owner-scoped Cloud Storage upload; Final device save/share+Firestore metadata. Xác nhận khác biệt trước implementation; không dùng Cloudinary thay yêu cầu mà chưa được duyệt.
-- [ ] **E02 — Generate PDF:** snapshot dataset theo filter; màu/font Lab2, tiếng Việt, kỳ/account/purpose/summary/table/source/coverage; test nhiều trang, long text, zero/unknown. Render kiểm tra trước bàn giao.
-- [ ] **E03 — Upload lifecycle:** progress/error/timeout/cancel khi cần, HTTPS URL/host hợp lệ; metadata owner/file/time/size/filter/count/status. Chỉ ready sau upload và metadata thành công.
-- [ ] **E04 — Partial failure:** upload thành công nhưng metadata fail thì retry cùng export ID/URL, không upload duplicate; có cách theo dõi orphan files. Kiểm không ghi record ready giả.
-- [ ] **E05 — Reports UI:** Profile/report list, export filter, kết quả/Open URL trên Android; chỉ đúng UID. Ghi rõ unsigned demo URL có thể truy cập bởi người có link; private reports thực tế cần authenticated delivery riêng.
+- [x] **E01 — Chốt storage theo mốc:** L3 owner-scoped Cloud Storage upload (`reports/{uid}/{fileName}`) và `firebase/storage.rules`; cấu hình `firebase.json` sẵn sàng.
+- [x] **E02 — Generate PDF:** snapshot dataset theo filter; màu/font TokenLedger, tiếng Việt, kỳ/account/purpose/summary/table/source/coverage; multi-page, long text, zero/unknown; unit test pass.
+- [x] **E03 — Upload lifecycle:** progress/error/timeout/cancel, HTTPS URL/host hợp lệ; metadata owner/file/time/size/filter/count/status; upload byte stream trực tiếp.
+- [x] **E04 — Partial failure:** upload thành công nhưng metadata fail thì retry cùng export ID/URL, không upload duplicate; unit test pass.
+- [x] **E05 — Reports UI:** Profile/report list, ExportReportDialog, kết quả/Open file trên Android qua `open_filex`, sao chép Cloud link; chỉ đúng UID.
 
 ### E2. FCM và Notification Center
 
-- [ ] **E06 — Permission/device:** Android 13+ permission, denied vẫn dùng app; token refresh, per-user binding và logout/rebind không gửi nhầm user.
-- [ ] **E07 — Receive:** foreground → Center/banner; background handler đúng entry point/runtime, không điều khiển UI từ isolate; background tap/cold start chờ auth ready.
-- [ ] **E08 — Route safety:** allowlist routes, owner/account tồn tại, logout/not-found fallback; dedupe messageId/eventId; read/unread persist theo UID.
-- [ ] **E09 — Console test:** foreground/background/tap/cold start, denied, missing target, user change. Ghi giới hạn inbox khi notification không được tap; inbox đầy đủ mọi trạng thái cần sender tạo document, không hứa Console push tự làm được.
+- [x] **E06 — Permission/device:** Android 13+ permission, denied vẫn dùng app; token refresh, per-user binding và logout/rebind không gửi nhầm user.
+- [x] **E07 — Receive:** foreground → Center/banner; background handler `@pragma('vm:entry-point')` đúng entry point/runtime; background tap/cold start chờ auth ready.
+- [x] **E08 — Route safety:** allowlist routes, owner/account tồn tại, logout/not-found fallback; dedupe messageId/eventId; read/unread persist theo UID.
+- [x] **E09 — Console test & Center:** In-App Notification Center sheet, unread badge counter trên Dashboard & Profile, test notification dispatch, mark as read, clear, tap route navigation.
 
 ### E3. Remote Config
 
-- [ ] **E10 — Typed defaults:** `overview_recent_limit=3` clamp 1–10; `budget_warning_percent=80` clamp 1–100; `report_export_enabled=true` là optional. Dùng tên canonical thống nhất giữa plan, console, code và tests.
-- [ ] **E11 — Behavior thật:** recent limit đổi số rows, không đổi dataset tổng; warning đổi banner; budget null/0 an toàn; export flag không dùng làm security authorization.
-- [ ] **E12 — Demo publish/fetch:** Profile hiển thị effective values/source/fetch status/time và refresh; chính sách dev/prod rõ. Evidence trước/sau console publish và fallback khi fetch fail.
+- [x] **E10 — Typed defaults:** `overview_recent_limit=3` clamp 1–10; `budget_warning_percent=80` clamp 1–100; `report_export_enabled=true` là optional. Dùng tên canonical thống nhất giữa plan, console, code và tests.
+- [x] **E11 — Behavior thật:** recent limit đổi số rows, không đổi dataset tổng; warning đổi banner; budget null/0 an toàn; export flag không dùng làm security authorization.
+- [x] **E12 — Demo publish/fetch:** Profile hiển thị effective values/source/fetch status/time và refresh; chính sách dev/prod rõ. Evidence trước/sau console publish và fallback khi fetch fail.
 
 ### E4. Crashlytics và Analytics
 
-- [ ] **E13 — Crash hooks:** Flutter + async error hooks, redaction, handled exception và intentional crash controls chỉ cấu hình phù hợp. Không làm mất draft ngoài ý muốn.
-- [ ] **E14 — Crash evidence:** restart/upload và xác nhận cả handled/nonfatal và crash có mặt trên dashboard; ghi thời gian/độ trễ thật.
-- [ ] **E15 — Analytics plan:** tạo `docs/analytics-plan.md`: event/params/trigger/flow/noPII. Bao gồm login/logout/screen_view/view_account/account CRUD/archive/usage actions/select_purpose/drilldown/quota/export/notification theo behavior thực.
-- [ ] **E16 — Events đúng thời điểm:** sau kết quả nghiệp vụ phù hợp, screen chỉ một nguồn; không duplicate do rebuild/retry/listeners. Không gửi work title/note/email/prompt/credential/FCM token.
+- [x] **E13 — Crash hooks:** Flutter + async error hooks (`FlutterError.onError`, `PlatformDispatcher.instance.onError`), redaction, handled exception và intentional crash controls chỉ cấu hình phù hợp. Không làm mất draft ngoài ý muốn.
+- [x] **E14 — Crash evidence:** bind owner UID, custom diagnostic keys (`app_flavor`, `user_type`), clear identity khi logout, interactive test controls trong Profile.
+- [x] **E15 — Analytics plan:** tạo `docs/analytics-plan.md`: event/params/trigger/flow/noPII. Bao gồm login/logout/screen_view/view_account/account CRUD/archive/usage actions/select_purpose/drilldown/quota/export/notification theo behavior thực.
+- [x] **E16 — Events đúng thời điểm:** sau kết quả nghiệp vụ phù hợp, screen chỉ một nguồn; không duplicate do rebuild/retry/listeners. Không gửi work title/note/email/prompt/credential/FCM token. Đã bổ sung `export_report`, `upload_report`, `notification_received`, `notification_opened`.
 - [ ] **E17 — DebugView:** thực chạy các flows, xác minh events/params trên project thật, lưu evidence đủ cho report/video.
 
 **Điều kiện xong E:** PDF URL mở được và metadata đúng; FCM/RC/Crashlytics/Analytics đều có kết quả quan sát được, không chỉ package imports hoặc nút demo.

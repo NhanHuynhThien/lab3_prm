@@ -40,6 +40,18 @@ class ProductEvent {
     'remote_config_refresh',
     {'outcome': success ? 'success' : 'failure'},
   );
+
+  static ProductEvent exportReport() =>
+      ProductEvent._('export_report', {'format': 'pdf'});
+
+  static ProductEvent uploadReport() =>
+      ProductEvent._('upload_report', {'destination': 'cloud_storage'});
+
+  static ProductEvent notificationReceived() =>
+      ProductEvent._('notification_received', {'type': 'fcm'});
+
+  static ProductEvent notificationOpened() =>
+      ProductEvent._('notification_opened', {'action': 'view'});
 }
 
 /// One app-scoped instance, injected; never a global mutable singleton.
