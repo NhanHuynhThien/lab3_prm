@@ -131,7 +131,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Text(
                 user == null
                     ? 'Bạn đang ở sandbox local. Dữ liệu tại đây không tự đưa vào tài khoản Google hoặc Firestore.'
-                    : 'Dữ liệu cá nhân lưu riêng trên Firestore. Token, chi phí và quota do bạn nhập tay; demo local ở không gian riêng.',
+                    : 'Sổ nhập tay lưu riêng trên Firestore. Dữ liệu provider được xem tại Kết nối nguồn AI trong tab Tài khoản; không tự trộn vào sổ.',
               ),
               const SizedBox(height: 16),
               ...[

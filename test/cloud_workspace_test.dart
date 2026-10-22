@@ -44,6 +44,7 @@ void main() {
         expect(find.text('Private A'), findsOneWidget);
         await h.tap(tester, 'Lưu tài khoản');
         expect(find.byType(AccountFormScreen), findsNothing);
+        await h.reveal(tester, find.text('Private A'));
         expect(find.text('Private A'), findsOneWidget);
         expect(
           h.stores['A']!.documents.keys
@@ -56,6 +57,7 @@ void main() {
         h.auth.emit(const AuthUser(uid: 'A', displayName: 'User A'));
         await tester.pumpAndSettle();
         await h.nav(tester, 'Tài khoản');
+        await h.reveal(tester, find.text('Private A'));
         expect(find.text('Private A'), findsOneWidget);
       } finally {
         await h.close(tester);
@@ -99,6 +101,7 @@ void main() {
       try {
         await h.form(tester);
         await h.tap(tester, 'Lưu tài khoản');
+        await h.reveal(tester, find.byType(TextField));
         final search = find.byType(TextField).first;
         await tester.enterText(search, 'Private');
         await tester.pump();
@@ -109,6 +112,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        await h.reveal(tester, find.text('Private A'));
         expect(find.text('Private A'), findsOneWidget);
         expect(tester.widget<TextField>(search).controller!.text, 'Private');
         expect(find.textContaining('Lỗi kết nối'), findsOneWidget);
@@ -129,6 +133,11 @@ void main() {
     (tester) async {
       await h.open(tester, corrupt: true);
       try {
+        expect(find.text('Hoạt động AI'), findsOneWidget);
+        await h.reveal(
+          tester,
+          find.textContaining('Không đọc được dữ liệu cloud'),
+        );
         expect(
           find.textContaining('Không đọc được dữ liệu cloud'),
           findsOneWidget,
@@ -153,6 +162,7 @@ void main() {
       try {
         await h.form(tester);
         await h.tap(tester, 'Lưu tài khoản');
+        await h.reveal(tester, find.byTooltip('Mở chi tiết tài khoản'));
         await tester.ensureVisible(find.byTooltip('Mở chi tiết tài khoản'));
         await tester.pumpAndSettle();
         await tester.tap(find.byTooltip('Mở chi tiết tài khoản'));

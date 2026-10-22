@@ -11,6 +11,8 @@ class TokenLedgerApp extends ConsumerWidget {
     title: 'TokenLedger',
     debugShowCheckedModeBanner: false,
     theme: buildAppTheme(),
+    // Android's Material 3 overscroll stretches every card in the viewport.
+    scrollBehavior: const MaterialScrollBehavior().copyWith(overscroll: false),
     // Browser paths/deep links always enter the guard before any data route.
     initialRoute: '/',
     home: const AuthGate(),

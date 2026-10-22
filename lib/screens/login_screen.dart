@@ -8,6 +8,7 @@ import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/common.dart';
+import '../widgets/google_sign_in_button.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -75,12 +76,24 @@ class LoginScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        'Bắt đầu khám phá TokenLedger với dữ liệu mẫu có thể chỉnh sửa.',
+                        'Đăng nhập để quản lý tài khoản AI và đồng bộ dữ liệu của bạn.',
                       ),
                       const SizedBox(height: 28),
+                      GoogleSignInButton(
+                        working: action.working,
+                        onPressed: ready && !action.working && !unavailable
+                            ? () =>
+                                  ref.read(authActionProvider.notifier).signIn()
+                            : null,
+                      ),
+                      if (unavailable) ...[
+                        const SizedBox(height: 12),
+                        const Text('Google Sign-In chưa được cấu hình.'),
+                      ],
+                      const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
-                        child: FilledButton.icon(
+                        child: OutlinedButton.icon(
                           onPressed: action.working
                               ? null
                               : () => ref
@@ -88,25 +101,6 @@ class LoginScreen extends ConsumerWidget {
                                     .enter(),
                           icon: const Icon(Icons.arrow_forward_rounded),
                           label: const Text('Mở không gian demo'),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: ready && !action.working
-                              ? () => ref
-                                    .read(authActionProvider.notifier)
-                                    .signIn()
-                              : null,
-                          icon: const Icon(Icons.login_rounded),
-                          label: Text(
-                            action.working
-                                ? 'Đang đăng nhập...'
-                                : unavailable
-                                ? 'Google Sign-In · Chưa kết nối'
-                                : 'Đăng nhập bằng Google',
-                          ),
                         ),
                       ),
                       const SizedBox(height: 24),

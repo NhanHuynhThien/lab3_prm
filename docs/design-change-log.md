@@ -1,5 +1,51 @@
 # Design change log — TokenLedger scaffold
 
+## 21/10: thống kê AI dễ đọc, theo taste skill do user yêu cầu
+
+Audit: số liệu provider nằm cuối trang, ghép nối thủ công mặc định tắt sau restart,
+shell guard có thể giấu toàn bộ nguồn nếu Firestore lỗi. Dashboard nhập tay trống
+làm user hiểu nhầm subscription chưa dùng. Summary cũ là chuỗi text gồm model,
+quota và token khó đọc, không phân cấp. Palette/type/radius gốc Lab2 giữ nguyên.
+
+Design read: redesign preserve dashboard cá nhân cho người dùng AI, ưu tiên
+đọc quota/model nhanh. Dials variance3/motion2/density4; Material Flutter + Inter,
+primary006C49/bgFAF8FF/mintE8F7EF/radius20/12. Skill taste v2 tự ghi không dành cho
+dashboard, nên chỉ áp dụng hierarchy, responsive, empty/error states và giữ brand;
+không dùng React, Tailwind, marketing hero hoặc hiệu ứng scroll scale.
+
+Thay đổi: bộ chọn nguồn có trạng thái; card hiện tên/gói/thời điểm nguồn, hai
+ô quota5h/7d với % còn lại/reset; token lifetime tách model30ngày, top3 model
+và đường vào chi tiết. Missing nguồn có thông báo riêng, phí đã charge unknown.
+Tổng quan thu gọn sổ thủ công khi mới đăng nhập. Fade đổi nguồn180ms tuân thủ
+reduced motion. Cỡ chữ hệ thống giữ nguyên; riêng con số % fit xuống khi thiếu
+chiều rộng để không bẻ dấu % sang dòng khác. 360/412/1440px và text1/2 đã render
+với snapshot Codex thật:1 nguồn/6 model; ảnh QA local /tmp, không commit.
+Ảnh render Flutter test không thay bằng chứng UI Android thực tế.
+
+
+## DC Kết nối provider và bảng model —21/10/2026
+
+Thêm section nguồn đồng bộ riêng vào dashboard/tài khoản và screen Kết nối
+nguồn AI. Mặc định ChatGPT/Codex, Claude, Gemini; pairing có xác nhận local
+coverage, busy/error/last-good/disconnect. Provider cards hiển thị source/time,
+quota không cộng gộp, unknown/stale và bảng model/token chính xác, estimate tách
+invoice. Giữ Panel20/control12/Inter/palette Lab2, touch>=48 và text scaling;
+không chèn số giả vào demo hay upload lịch sử model vào cloud. Danh sách account
+nhập tay vẫn ưu tiên vị trí cũ; nguồn đồng bộ nằm sau list. Figma chưa cập nhật.
+
+## DC Google login và scroll Android —21/10/2026
+
+Theo phản hồi trực tiếp: tắt Material3 overscroll stretch ở MaterialApp để
+không scale toàn bộ card/list khi kéo quá giới hạn. Giữ scroll physics,
+scrollbar, text scaling, IndexedStack và reduced motion. Login đặt Google trước
+demo, dùng nút trắng toàn chiều rộng, viền rõ, icon Google chính thức bundle
+offline/không recolor và busy/disabled/error states hiện có. Giữ Inter/radius12
+và palette Lab2, không thay theme để mô phỏng màn web. Custom Flutter button,
+không tuyên bố Google SDK-rendered hoặc đã được Google duyệt. Asset/source ở
+`assets/auth/README.md`; regression kiểm Android top/bottom overscroll và login
+360/412/1440dp text1/2. Live Figma chưa được đồng bộ bởi lượt này.
+
+
 ## DC Analytics/Remote Config —21/10/2026
 
 Profile tách Analytics khỏi Crashlytics, thêm Panel Cấu hình và đo lường (effective values/source/check time/refresh/error/SDK state). Dashboard recent rows đọc overview_recent_limit thay hard-coded4 (default3 đúng plan), thêm budget warning theo budget_warning_percent(default80) trong projection, không thay totals. Dùng Panel/SectionTitle/OutlinedButton/Inter/AppSpace/palette Lab2 hiện có; IndexedStack và reduced motion giữ nguyên. UI360/412/1440×800 text1/2 với fonts thật và ảnh local đã kiểm; không live Figma/cloud annotation sync trong lượt này, không claim screenshot fixture là Google thật.
@@ -104,3 +150,7 @@ B11 rà cuối: progress quota chưa biết/quá reset và budget chưa đặt �
 - DC39: Google workspace mở lại4 destinations và sidebar Lab2 hiện có; user mới empty. Profile dùng SDK metadata và status Firestore server/cache/pending/error thật từ VM. Demo local riêng, không hiển thị Google identity như owner của local dataset; không đổi palette/Inter/radii/Brand geometry.
 - DC40: Cloud sync banner nằm ngoài Navigator để retry khi form đang mở; last-good data/filter/draft giữ nguyên khi query lỗi. Forms giữ revisions, error không pop hoặc báo lưu trên thiết bị cho cloud. Logout/change UID dispose container và route stack; giữ IndexedStack/tab state và reduced motion trong cùng session.
 - DC41: UI engine tests360/412/1440dp, text1/2, fonts thật và ảnh Profile fixture đã xem. SDK core config không phải ảnh/counter Google thật. Figma Login/Profile/cloud status chưa sync; annotated checkpoint cũ không tự đại diện bản cloud. Không có skill UI vendor trong checkout, mở rộng Material components và Lab2 tokens hiện có; không cài/sửa skills hoặc làm fidelity evidence giả.
+
+Verification UI cuối:355Flutter/12Node pass, analyzer sạch, APK debug/web release
+build pass. Log app Android xác nhận1 ready source/6model sau cài mới, auto-connect
+đúng owner; ảnh test không gán thành screenshot native. Không thay provider adapters.

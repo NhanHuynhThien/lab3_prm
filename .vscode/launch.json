@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "TokenLedger · Android",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define-from-file=.env.local"]
+    },
+    {
+      "name": "TokenLedger · Web localhost",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "args": [
+        "--web-hostname=localhost",
+        "--web-port=4183",
+        "--dart-define-from-file=.env.local"
+      ]
+    }
+  ]
+}

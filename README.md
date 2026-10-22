@@ -1,5 +1,31 @@
 # TokenLedger — PRM393 Lab 3
 
+## Provider sync và giao diện thống kê
+
+Nguồn AI nằm trước sổ nhập tay trên Tổng quan/Tài khoản/Phân tích. Bộ chọn
+Codex/Claude/Gemini/Antigravity, quota còn lại/reset và model/token riêng;
+không coi thiếu nguồn là usage=0. Antigravity và Gemini web chưa có adapter.
+Nguồn AI vẫn hiển thị khi sổ cloud tải lỗi. Giữ core UI Lab2, cỡ chữ hệ thống,
+reduced motion; tắt overscroll stretch Android. Nút Google có icon và label đầy đủ.
+
+Companion local loopback8787 với pairing token, CORS/Host allowlist; Codex App
+Server + model history, Claude Code statusline, Gemini CLI history. Không đọc
+cookie/credential provider, gọi model để tạo số liệu hoặc thay billing. Quota,
+token theo model và phí đã charge là các nguồn khác nhau; không tự cộng vào sổ.
+Xem docs/provider-sync.md. Claude/Gemini thiếu nguồn thật hiện setup.
+
+Auto-connect là opt-in của bản local: chỉ email tài khoản khớp owner được cấu
+hình mới ghép nguồn; fresh clone mặc định tắt. Demo không đọc provider thật;
+logout/đổi UID dispose snapshot/timer. Token chỉ local/session, không commit.
+Tạo .env.local bằng cách copy .env.example rồi chạy tool/provider_bridge/setup.mjs
+trước khi dùng launch config. Không chia sẻ build chứa mã ghép nối máy cá nhân.
+
+Verification:355 Flutter tests và12 companion tests pass; analyzer sạch;
+Android debug/web release build pass. Android đã nhận1 nguồn ready/6model rows.
+QA render360/412/1440px, text1/2; ảnh QA không thay screenshot native.
+Cấu hình project, email, SHA và tài liệu chuyển Firebase được giữ ngoài commit.
+
+
 ## Analytics và Remote Config —21/10
 
 Đã triển khai [Analytics/Remote Config](docs/analytics-remote-config.md): sự kiện typed không gửi PII, Google-only business telemetry, UID lifecycle/dedupe; cấu hình số recent rows và ngưỡng cảnh báo ngân sách với defaults/refresh/fallback, Profile hiện giá trị/source/status. Analytics plan được viết trước tracking. Người dùng xác nhận đợt manual cloud web1–7 đã đạt; đây không phải Android/ARTEMIS hoặc console evidence. RC publish→app/DebugView còn cần kiểm theo hướng dẫn, FCM/Crashlytics/PDF vẫn pending. Không chạy máy ảo; 326 Flutter tests pass, analyzer/format sạch, web release build pass; chi tiết xem test-report.

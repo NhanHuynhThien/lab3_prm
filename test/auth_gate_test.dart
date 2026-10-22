@@ -152,8 +152,8 @@ void main() {
         expect(workingButton.onPressed, isNull);
         expect(
           tester
-              .widget<FilledButton>(
-                find.widgetWithText(FilledButton, 'Mở không gian demo'),
+              .widget<OutlinedButton>(
+                find.widgetWithText(OutlinedButton, 'Mở không gian demo'),
               )
               .onPressed,
           isNull,

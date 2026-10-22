@@ -65,10 +65,7 @@ void main() {
         expect(
           tester
               .widget<OutlinedButton>(
-                find.widgetWithText(
-                  OutlinedButton,
-                  'Google Sign-In · Chưa kết nối',
-                ),
+                find.widgetWithText(OutlinedButton, 'Đăng nhập bằng Google'),
               )
               .onPressed,
           isNull,

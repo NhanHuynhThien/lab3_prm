@@ -4,12 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/auth_session.dart';
 import '../theme/app_theme.dart';
 import '../viewmodels/auth_viewmodel.dart';
-import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/common.dart';
 import '../widgets/desktop_sidebar.dart';
-import '../widgets/storage_recovery.dart';
 import 'accounts_screen.dart';
 import 'analytics_screen.dart';
 import 'dashboard_screen.dart';
@@ -83,34 +81,23 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
 
   @override
   Widget build(BuildContext context) {
-    final (isReady, hasError, error) = ref.watch(
-      ledgerProvider.select(
-        (s) => (s.hasValue && !s.isLoading, s.hasError, s.error),
-      ),
-    );
     final restored = widget.user == null
         ? null
         : ref.watch(authSessionProvider.select((s) => s.asData?.value));
     final user = restored?.uid == widget.user?.uid ? restored : widget.user;
     final wide = MediaQuery.sizeOf(context).width >= AppSpace.wide;
 
-    Widget guarded(Widget child) => isReady
-        ? RepaintBoundary(child: child)
-        : hasError
-        ? Center(child: StorageRecovery(error: error!))
-        : const LoadingFeedback();
-
     final page = IndexedStack(
       index: _index,
       children: [
-        guarded(
-          DashboardScreen(
+        RepaintBoundary(
+          child: DashboardScreen(
             onAccounts: () => _selectTab(1),
             onAnalytics: () => _selectTab(2),
           ),
         ),
-        guarded(const AccountsScreen()),
-        guarded(const AnalyticsScreen()),
+        const RepaintBoundary(child: AccountsScreen()),
+        const RepaintBoundary(child: AnalyticsScreen()),
         RepaintBoundary(
           child: ProfileScreen(
             user: user,

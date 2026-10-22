@@ -1,5 +1,31 @@
 # Agent instructions — TokenLedger / PRM393 Lab 3
 
+## Provider sync và giao diện thống kê
+
+Nguồn AI nằm trước sổ nhập tay trên Tổng quan/Tài khoản/Phân tích. Bộ chọn
+Codex/Claude/Gemini/Antigravity, quota còn lại/reset và model/token riêng;
+không coi thiếu nguồn là usage=0. Antigravity và Gemini web chưa có adapter.
+Nguồn AI vẫn hiển thị khi sổ cloud tải lỗi. Giữ core UI Lab2, cỡ chữ hệ thống,
+reduced motion; tắt overscroll stretch Android. Nút Google có icon và label đầy đủ.
+
+Companion local loopback8787 với pairing token, CORS/Host allowlist; Codex App
+Server + model history, Claude Code statusline, Gemini CLI history. Không đọc
+cookie/credential provider, gọi model để tạo số liệu hoặc thay billing. Quota,
+token theo model và phí đã charge là các nguồn khác nhau; không tự cộng vào sổ.
+Xem docs/provider-sync.md. Claude/Gemini thiếu nguồn thật hiện setup.
+
+Auto-connect là opt-in của bản local: chỉ email tài khoản khớp owner được cấu
+hình mới ghép nguồn; fresh clone mặc định tắt. Demo không đọc provider thật;
+logout/đổi UID dispose snapshot/timer. Token chỉ local/session, không commit.
+Tạo .env.local bằng cách copy .env.example rồi chạy tool/provider_bridge/setup.mjs
+trước khi dùng launch config. Không chia sẻ build chứa mã ghép nối máy cá nhân.
+
+Verification:355 Flutter tests và12 companion tests pass; analyzer sạch;
+Android debug/web release build pass. Android đã nhận1 nguồn ready/6model rows.
+QA render360/412/1440px, text1/2; ảnh QA không thay screenshot native.
+Cấu hình project, email, SHA và tài liệu chuyển Firebase được giữ ngoài commit.
+
+
 Final verification lượt Analytics/RC:326/326 Flutter tests185s, analyzer sạch14.9s, format76files0changed, web JS53.8s;52lib/24test Dart,113runtime hashes. Native/console/ARTEMIS pending; user-reported web1–7 đã ghi. Không rerun chỉ vì docs-only sau mốc này; chưa commit/push.
 
 

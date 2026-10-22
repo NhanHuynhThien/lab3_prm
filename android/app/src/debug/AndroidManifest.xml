@@ -4,4 +4,6 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Local development companion only. Release keeps the platform policy. -->
+    <application android:networkSecurityConfig="@xml/local_companion_network" />
 </manifest>

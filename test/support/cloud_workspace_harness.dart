@@ -117,4 +117,13 @@ class CloudWorkspaceHarness {
     await tap(tester, 'Thêm tài khoản');
     await tester.enterText(find.byType(TextFormField).first, 'Private A');
   }
+
+  Future<void> reveal(WidgetTester tester, Finder target) async {
+    await tester.scrollUntilVisible(
+      target,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+  }
 }

@@ -16,6 +16,7 @@ dependencies:
   google_sign_in: ^7.2.0
   cloud_firestore: ^7.0.0
   crypto: ^3.0.7
+  http: ^1.6.0
   firebase_analytics: ^13.0.0
   firebase_remote_config: ^7.0.0
 dev_dependencies:
@@ -24,6 +25,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 flutter:
   uses-material-design: true
+  assets:
+    - assets/auth/google-g.png
   fonts:
     - family: Inter
       fonts:

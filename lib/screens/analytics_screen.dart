@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/usage_calculator.dart';
+import '../models/cloud_sync_status.dart';
+import '../widgets/provider_sync_summary.dart';
+import '../widgets/provider_ledger_feedback.dart';
 import '../widgets/data_scope_picker.dart';
 import 'usage_form_screen.dart';
 import '../utils/formatters.dart';
@@ -27,7 +30,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final feedback = ledgerFeedback(ref.watch(ledgerProvider), 'Phân tích');
-    if (feedback != null) return feedback;
+    final cloud = ref.watch(cloudOwnerProvider) != null;
+    if (feedback != null) {
+      return cloud ? ProviderLedgerFeedback(feedback: feedback) : feedback;
+    }
     final projection = ref.watch(analyticsProjectionProvider(_metric));
     final summary = projection.summary;
     final shares = projection.shares;
@@ -44,6 +50,15 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           'Phân tích sử dụng',
           'Công việc nào đang dùng nhiều nguồn lực AI nhất?',
         ),
+        if (cloud) ...[
+          const ProviderSyncSummary(),
+          const SizedBox(height: 24),
+          const SectionTitle('Phân tích các phiên tự ghi'),
+          const Text(
+            'Bộ lọc bên dưới áp dụng cho sổ thủ công, không thay đổi số liệu từ agent.',
+          ),
+          const SizedBox(height: 16),
+        ],
         const DataScopePicker(),
         const SizedBox(height: 16),
         const RangePicker(),
