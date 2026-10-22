@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "306832186195",
-    "project_id": "tokenledger-lab3",
-    "storage_bucket": "tokenledger-lab3.firebasestorage.app"
+    "project_number": "437223340054",
+    "project_id": "tokenledger-nhan-20261021",
+    "storage_bucket": "tokenledger-nhan-20261021.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:306832186195:android:74cc79579e088cba1fdfa6",
+        "mobilesdk_app_id": "1:437223340054:android:b74287e291dd8cd3c31d37",
         "android_client_info": {
           "package_name": "com.tokenledger.token_ledger"
         }
       },
       "oauth_client": [
         {
-          "client_id": "306832186195-aqdlglusoimm8hl1uhnvo85q6e8eiepr.apps.googleusercontent.com",
+          "client_id": "437223340054-rti3vkee6cp309ab8ka23h0ntdhbv4hn.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.tokenledger.token_ledger",
-            "certificate_hash": "8b57ebaa72afac165f212babb4765d9b93fc6b7d"
+            "certificate_hash": "6e26627736b7e8671cd0c46976bea0488063705f"
           }
         },
         {
-          "client_id": "306832186195-5necjfncu417gihpu7dhfcvqj1ae1qoe.apps.googleusercontent.com",
+          "client_id": "437223340054-bsjta8p163g4mgjg2p0mcss4vnir0rq5.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAkeDtXF1fuz2eSTVP7PKLPhFsy6G1d_to"
+          "current_key": "AIzaSyBmd9bv0-oanZtL5qvHnoXIcxX22z4RBYQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "306832186195-5necjfncu417gihpu7dhfcvqj1ae1qoe.apps.googleusercontent.com",
+              "client_id": "437223340054-bsjta8p163g4mgjg2p0mcss4vnir0rq5.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

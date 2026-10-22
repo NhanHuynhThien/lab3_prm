@@ -1,5 +1,7 @@
 # Firebase Auth — C01–C03
 
+> Cấu hình hiện hành đã chuyển sang `tokenledger-nhan-20261021`. Xem [migration](firebase-project-migration.md); thông tin project cũ bên dưới là lịch sử.
+
 Cập nhật21/10/2026. Người dùng đã yêu cầu tiếp tục Firebase, tự tạo project và cung cấp cấu hình FlutterFire; lượt này triển khai Core/Auth/Google Sign-In, auth guard/Profile và tách demo. Làm trên `main` sau merge PR#1 (`824df0b`). Không tự đổi billing, bật Firestore/FCM/Remote Config/Crashlytics/Analytics SDK/PDF hoặc deploy rules. Không chạy máy ảo.
 
 ## Cấu hình thật

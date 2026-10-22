@@ -1,0 +1,17 @@
+{
+  "conditions": [],
+  "parameters": {
+    "overview_recent_limit": {
+      "defaultValue": {
+        "value": "3"
+      },
+      "valueType": "NUMBER"
+    },
+    "budget_warning_percent": {
+      "defaultValue": {
+        "value": "80"
+      },
+      "valueType": "NUMBER"
+    }
+  }
+}

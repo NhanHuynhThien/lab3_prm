@@ -50,20 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDV_djeR4U5kS0em2aaniQwvHHpVY5Xb18',
-    appId: '1:306832186195:web:b573b2f9cfcdd6321fdfa6',
-    messagingSenderId: '306832186195',
-    projectId: 'tokenledger-lab3',
-    authDomain: 'tokenledger-lab3.firebaseapp.com',
-    storageBucket: 'tokenledger-lab3.firebasestorage.app',
-    measurementId: 'G-P60MHE03V8',
+    apiKey: 'AIzaSyAPXeOYDd5AtVOuk2XvyKQk8ssd_oYFkss',
+    appId: '1:437223340054:web:d39e6ac3503a9beec31d37',
+    messagingSenderId: '437223340054',
+    projectId: 'tokenledger-nhan-20261021',
+    authDomain: 'tokenledger-nhan-20261021.firebaseapp.com',
+    storageBucket: 'tokenledger-nhan-20261021.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAkeDtXF1fuz2eSTVP7PKLPhFsy6G1d_to',
-    appId: '1:306832186195:android:74cc79579e088cba1fdfa6',
-    messagingSenderId: '306832186195',
-    projectId: 'tokenledger-lab3',
-    storageBucket: 'tokenledger-lab3.firebasestorage.app',
+    apiKey: 'AIzaSyBmd9bv0-oanZtL5qvHnoXIcxX22z4RBYQ',
+    appId: '1:437223340054:android:b74287e291dd8cd3c31d37',
+    messagingSenderId: '437223340054',
+    projectId: 'tokenledger-nhan-20261021',
+    storageBucket: 'tokenledger-nhan-20261021.firebasestorage.app',
   );
 }

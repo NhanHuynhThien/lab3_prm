@@ -1,30 +1,84 @@
 # Agent instructions — TokenLedger / PRM393 Lab 3
 
-## Provider sync và giao diện thống kê
+Verification lượt UI:355/355 Flutter tests26s,12/12 Node tests pass,
+analyzer sạch2.5s,154files format0changed, tất cả Dart<=300lines.
+APK debug9.3s/web release18.3s build pass; APK install/start thành công.
+Log chính Android PID5269 xác nhận `Provider sync: 1 ready sources; 6 model rows.`
+Google session đã restore và owner auto-connect hoạt động thật trên emulator;
+không coi log này là nghiệm thu mọi màn hình, Claude/Gemini/Antigravity/invoice.
+Ảnh render QA với snapshot Codex thật đã xem ở412 text1 và360 text2;
+6 cấu hình360/412/1440 text1/2 pass. Xem docs/provider-sync.md.
 
-Nguồn AI nằm trước sổ nhập tay trên Tổng quan/Tài khoản/Phân tích. Bộ chọn
-Codex/Claude/Gemini/Antigravity, quota còn lại/reset và model/token riêng;
-không coi thiếu nguồn là usage=0. Antigravity và Gemini web chưa có adapter.
-Nguồn AI vẫn hiển thị khi sổ cloud tải lỗi. Giữ core UI Lab2, cỡ chữ hệ thống,
-reduced motion; tắt overscroll stretch Android. Nút Google có icon và label đầy đủ.
 
-Companion local loopback8787 với pairing token, CORS/Host allowlist; Codex App
-Server + model history, Claude Code statusline, Gemini CLI history. Không đọc
-cookie/credential provider, gọi model để tạo số liệu hoặc thay billing. Quota,
-token theo model và phí đã charge là các nguồn khác nhau; không tự cộng vào sổ.
-Xem docs/provider-sync.md. Claude/Gemini thiếu nguồn thật hiện setup.
+## Bố cục thống kê và tự kết nối local — 21/10/2026
 
-Auto-connect là opt-in của bản local: chỉ email tài khoản khớp owner được cấu
-hình mới ghép nguồn; fresh clone mặc định tắt. Demo không đọc provider thật;
-logout/đổi UID dispose snapshot/timer. Token chỉ local/session, không commit.
-Tạo .env.local bằng cách copy .env.example rồi chạy tool/provider_bridge/setup.mjs
-trước khi dùng launch config. Không chia sẻ build chứa mã ghép nối máy cá nhân.
+Nguồn AI có vùng riêng ở đầu Tổng quan/Tài khoản/Phân tích, chọn từng Codex,
+Claude, Gemini, Antigravity. Quota còn lại/reset hiển thị lớn, model/token có
+nhãn nguồn; sổ thủ công tách riêng, Tổng quan thu gọn khi chưa có account.
+Không suy ra usage=0 khi thiếu nguồn. Antigravity là trạng thái chưa hỗ trợ,
+không có adapter mới trong lượt UI này. Gemini web/AI Pro invoice vẫn pending.
+Nguồn AI không bị shell chặn bởi Firestore loading/error.
 
-Verification:355 Flutter tests và12 companion tests pass; analyzer sạch;
-Android debug/web release build pass. Android đã nhận1 nguồn ready/6model rows.
-QA render360/412/1440px, text1/2; ảnh QA không thay screenshot native.
-Cấu hình project, email, SHA và tài liệu chuyển Firebase được giữ ngoài commit.
+User xác nhận Codex trên Mac cùng email và yêu cầu sửa việc không hiện dữ liệu.
+Build local có thể opt-in auto-connect bằng PROVIDER_BRIDGE_OWNER_EMAIL + token
+trong .env.local. Chỉ email Firebase khớp mới auto-connect; mặc định bỏ trống,
+demo/khác UID/email không kế thừa snapshot. Logout vẫn dispose state/timer,
+Ngắt kết nối có hiệu lực trong phiên. Không hardcode email/token trong runtime
+source hay ghi snapshot vào Firestore. Skill taste áp dụng theo hướng preserve,
+Inter/palette/radius Lab2 được giữ; không áp dụng quy tắc web marketing vào app.
+Xem docs/provider-sync.md và docs/design-change-log.md cho QA hiện hành.
 
+
+## Firebase mới do người dùng sở hữu — 21/10/2026
+
+Theo yêu cầu trực tiếp, app đã chuyển từ `tokenledger-lab3` sang
+`tokenledger-nhan-20261021` (TokenLedger Nhan), owner `nhanhuynh7115@gmail.com`.
+Yêu cầu mới thay ràng buộc skip Firebase cũ trong phạm vi project mới. Người dùng
+đã xác nhận quyền OAuth rộng của Firebase CLI và email hỗ trợ hiển thị cho người
+dùng app. Chỉ thao tác project mới; không xóa/sửa project cũ hay migrate user data.
+Spark, Google Auth enabled, SHA-1/SHA-256 debug Mac registered, localhost allowed,
+Firestore Standard `(default)` Singapore với rules/indexes repo đã deploy,
+Remote Config v1 defaults 3/80 đã publish và đọc lại. Client Android/web và
+`.firebaserc` đã cập nhật. Analytics SDK còn trong app nhưng project mới chưa liên
+kết GA; không claim Analytics console đã có dữ liệu. Không bật billing/Storage.
+Analyzer sạch, 48 Auth/RC tests pass, APK debug 7.0s và web release 19.9s pass;
+APK đã install/open trên emulator. Native Google login đang chờ user thử, không
+coi build/deploy là OAuth pass. Chi tiết `docs/firebase-project-migration.md`.
+
+
+## Đồng bộ provider mới —21/10/2026
+
+Verification cuối:346Flutter+12Node tests pass; analyzer sạch;147file format0
+changed/<=300lines; APK debug11.6s/web release20.6s. DartHTTP live bridge đọc
+Codex6models/2quota windows; Claude/Gemini setup. APK installed/adb reverse8787,
+Studio reopened; không claim OAuth/invoice/web-consumer full coverage.
+
+Người dùng đã yêu cầu đồng bộ mặc định ChatGPT/Codex, Claude, Gemini, gồm
+model/token/chi phí. Yêu cầu này cho phép extension companion local, thay giới
+hạn “chưa provider sync” trong lịch sử, không cho phép thay Firebase đang do bạn
+người dùng quản lý. Đọc docs/provider-sync.md. Companion Node chỉ loopback với
+pairing token/CORS/Host/auth, không phải server triển khai Final. Không đọc/in
+provider credentials, scrape cookies/private consumer endpoints, gọi model hoặc
+đổi billing. Claude/Gemini thiếu nguồn thật hiện setup, không giả ready.
+Model history30ngày local có thể nhiều account; không khẳng định owner là email
+Google. Không cộng local models vào lifetime server/manual ledger; không coi
+API-equivalent estimate là phí thuê bao đã charge. Pairing theo workspace,
+logout/UID change dọn state; giữ core Lab2 và3 provider mặc định.
+
+## Setup Android và login/scroll mới —21/10/2026
+
+Người dùng đã yêu cầu cài Android Studio, setup máy ảo và thao tác kết nối Google.
+Yêu cầu mới thay ràng buộc không emulator của các lượt cũ trong phạm vi công việc
+này. Mac đã có Studio/SDK/JDK/AVD ARM64 `TokenLedger_API_36` (2 CPU/2GB RAM),
+Flutter Android doctor pass và APK debug build/install/start. Không suy thành
+Google OAuth đã pass. SHA debug Mac khác máy trước; config hiện chưa có SHA mới.
+Console tài khoản người dùng chưa thấy `tokenledger-lab3`; người dùng xác nhận
+Firebase do bạn setup và yêu cầu skip thao tác Firebase Console. Không tự đổi
+project/provider/config hoặc tạo project thay thế; SHA Mac cần nhờ owner thêm. Xem
+`docs/google-login-environment.md` cho env JSON, VS Code và checklist.
+Login dùng GoogleSignInButton/icon chính thức; app tắt Material3 overscroll
+stretch theo yêu cầu. Giữ core Lab2 và accessibility, không khóa text scale.
+Không nhập mật khẩu/2FA thay người dùng, không ghi credential vào env hoặc repo.
 
 Final verification lượt Analytics/RC:326/326 Flutter tests185s, analyzer sạch14.9s, format76files0changed, web JS53.8s;52lib/24test Dart,113runtime hashes. Native/console/ARTEMIS pending; user-reported web1–7 đã ghi. Không rerun chỉ vì docs-only sau mốc này; chưa commit/push.
 
