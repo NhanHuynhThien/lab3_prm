@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { readCodex } from './codex.mjs';
 import { readClaude, stateDir } from './claude.mjs';
 import { readGemini } from './gemini.mjs';
+import { readAntigravity } from './antigravity.mjs';
 import { localModelUsage } from './models.mjs';
 
 export function bridgeServer({ token, collect, port = 8787, origins = ['http://localhost:4183'] }) {
@@ -48,7 +49,7 @@ export function bridgeServer({ token, collect, port = 8787, origins = ['http://l
 
 export async function collectSnapshot() {
   const now = new Date();
-  const codex = await readCodex({ binary: process.env.TOKENLEDGER_CODEX_BIN || 'codex' })
+  const codexPromise = readCodex({ binary: process.env.TOKENLEDGER_CODEX_BIN || 'codex' })
     .then((result) => ({ id: 'codex', source: 'Codex App Server',
       coverage: 'Quota tài khoản CLI hiện tại; token lifetime nếu CLI hỗ trợ. Không phải phí đã charge.',
       observedAt: now.toISOString(), contextTokens: null, estimatedCostMicros: null,
@@ -57,10 +58,10 @@ export async function collectSnapshot() {
       source: 'Codex App Server', coverage: 'Cần Codex CLI đã đăng nhập; cập nhật CLI nếu RPC chưa hỗ trợ.',
       observedAt: null, totalTokens: null, contextTokens: null, estimatedCostMicros: null,
       subscriptionFeeMicros: null, billedCostMicros: null }));
-  const [claude, google, codexModels, claudeModels] = await Promise.all([
-    readClaude(), readGemini(), localModelUsage('codex'), localModelUsage('claude')]);
+  const [codex, claude, google, antigravity, codexModels, claudeModels] = await Promise.all([
+    codexPromise, readClaude(), readGemini(), readAntigravity(), localModelUsage('codex'), localModelUsage('claude')]);
   return { schemaVersion: 1, collectedAt: new Date().toISOString(), providers: [
-    { ...codex, ...codexModels }, { ...claude, ...claudeModels }, google] };
+    { ...codex, ...codexModels }, { ...claude, ...claudeModels }, google, antigravity] };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

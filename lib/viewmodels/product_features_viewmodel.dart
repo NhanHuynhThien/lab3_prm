@@ -13,7 +13,6 @@ import '../services/remote_config_service.dart';
 import '../services/report_management_service.dart';
 import '../services/storage_service.dart';
 import 'auth_viewmodel.dart';
-import 'ledger_viewmodel.dart';
 
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
   final service = AnalyticsService(null);
@@ -93,12 +92,11 @@ final productConfigProvider = Provider<ProductConfig>(
       ref.watch(remoteConfigServiceProvider).current,
 );
 
-/// Only the root auth gate owns this lifecycle. Initial demo never reads Auth.
+/// The root auth gate owns SDK lifecycle for the authenticated owner.
 final featureSessionProvider = Provider<void>((ref) {
-  final demo = ref.watch(demoSessionProvider);
-  final uid = demo
-      ? null
-      : ref.watch(authSessionProvider.select((s) => s.asData?.value?.uid));
+  final uid = ref.watch(
+    authSessionProvider.select((s) => s.asData?.value?.uid),
+  );
   final analytics = ref.watch(analyticsServiceProvider);
   final config = ref.watch(remoteConfigServiceProvider);
   final crashlytics = ref.watch(crashlyticsServiceProvider);
@@ -139,6 +137,9 @@ class ProductFeaturesViewModel extends Notifier<void> {
     return success;
   }
 
+  Future<bool> requestNotifications() =>
+      ref.read(notificationServiceProvider).requestPermission();
+
   Future<void> recordHandledError(String message) async {
     await ref
         .read(crashlyticsServiceProvider)
@@ -151,16 +152,6 @@ class ProductFeaturesViewModel extends Notifier<void> {
 
   void triggerCrash() {
     ref.read(crashlyticsServiceProvider).triggerTestCrash();
-  }
-
-  void sendDemoNotification({
-    String title = 'Cảnh báo ngân sách AI',
-    String body = 'Tài khoản OpenAI Codex đạt 85% hạn mức đã đặt.',
-    String route = '/analytics',
-  }) {
-    ref
-        .read(notificationServiceProvider)
-        .sendDemoNotification(title: title, body: body, route: route);
   }
 }
 

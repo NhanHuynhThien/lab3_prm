@@ -162,16 +162,4 @@ mixin CloudLedgerMutations on LedgerViewModel {
       );
     });
   }
-
-  @override
-  Future<void> resetDemo() async =>
-      throw StateError('Mở demo local riêng để khôi phục dữ liệu mẫu.');
-
-  @override
-  Future<void> clearDemo() async =>
-      throw StateError('Không xóa demo trong không gian cloud.');
-
-  @override
-  Future<void> recoverDemo() async =>
-      throw StateError('Cloud không dùng khôi phục snapshot local.');
 }

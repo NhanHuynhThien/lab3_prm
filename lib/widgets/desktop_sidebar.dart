@@ -114,16 +114,12 @@ class DesktopSidebar extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          user == null
-                              ? 'Dữ liệu trên thiết bị'
-                              : 'Dữ liệu cá nhân trên cloud',
+                          'Dữ liệu cá nhân trên cloud',
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          user == null
-                              ? 'Bạn có thể thêm, sửa và xóa dữ liệu demo. Sandbox không tự tải lên cloud.'
-                              : 'Tài khoản AI, usage và quota lưu riêng cho bạn. Số liệu do bạn nhập tay.',
+                          'Sổ ghi nhận được đồng bộ theo tài khoản Google. Nguồn AI có nhãn và thời điểm riêng.',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       ],
@@ -145,15 +141,11 @@ class DesktopSidebar extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user == null
-                                  ? 'Không gian demo'
-                                  : 'Tài khoản Google',
+                              'Tài khoản Google',
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             Text(
-                              user == null
-                                  ? 'Local workspace'
-                                  : 'Cloud workspace',
+                              'Không gian cá nhân',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],

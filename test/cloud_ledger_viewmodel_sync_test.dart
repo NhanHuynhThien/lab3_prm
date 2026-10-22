@@ -172,9 +172,6 @@ void main() {
   );
 
   test('cloud cannot call local reset/clear/recovery', () async {
-    await expectLater(vm.resetDemo(), throwsStateError);
-    await expectLater(vm.clearDemo(), throwsStateError);
-    await expectLater(vm.recoverDemo(), throwsStateError);
     expect(store.documents, isEmpty);
   });
 

@@ -66,12 +66,12 @@ void main() {
       expect(service.current.userId, 'test_user_123');
     });
 
-    test('bindOwner(null) clears user identity for demo sandbox', () async {
+    test('bindOwner(null) clears user identity when signed out', () async {
       await service.bindOwner('test_user_123');
       await service.bindOwner(null);
 
       expect(transport.userId, '');
-      expect(transport.customKeys['user_type'], 'demo_sandbox');
+      expect(transport.customKeys['user_type'], 'signed_out');
       expect(service.current.enabled, isFalse);
       expect(service.current.userId, isNull);
     });

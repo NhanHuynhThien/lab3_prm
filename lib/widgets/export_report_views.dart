@@ -54,12 +54,15 @@ class ExportReportPreviewCard extends StatelessWidget {
     required this.totalCostMicros,
     required this.accountCount,
     required this.totalTokens,
+    this.knownCostCount,
+    this.knownTokensCount,
   });
 
   final int sessionCount;
   final int totalCostMicros;
   final int accountCount;
   final int totalTokens;
+  final int? knownCostCount, knownTokensCount;
 
   @override
   Widget build(BuildContext context) {
@@ -72,15 +75,16 @@ class ExportReportPreviewCard extends StatelessWidget {
             style: TextStyle(fontSize: 12, color: AppColors.muted),
           ),
           const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
             children: [
               Text(
                 '$sessionCount phiên công việc',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               Text(
-                money(totalCostMicros),
+                money(knownCostCount == 0 ? null : totalCostMicros),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
@@ -88,9 +92,15 @@ class ExportReportPreviewCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
+          if (knownCostCount != null && knownTokensCount != null)
+            Text(
+              '$knownCostCount/$sessionCount phiên có chi phí · $knownTokensCount/$sessionCount có token',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          const SizedBox(height: 8),
           Text(
-            '$accountCount tài khoản · ${compactTokens(totalTokens)} token đã ghi nhận',
+            '$accountCount tài khoản · ${compactTokens(knownTokensCount == 0 ? null : totalTokens)} token đã ghi nhận',
             style: const TextStyle(fontSize: 12, color: AppColors.muted),
           ),
         ],

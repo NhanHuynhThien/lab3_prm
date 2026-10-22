@@ -2,6 +2,27 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
+class FormSaveFooter extends StatelessWidget {
+  const FormSaveFooter({super.key, required this.child, this.error});
+  final Widget child;
+  final String? error;
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      if (error != null) ...[
+        Semantics(
+          liveRegion: true,
+          child: Text(error!, style: const TextStyle(color: AppColors.danger)),
+        ),
+        const SizedBox(height: AppSpace.md),
+      ],
+      child,
+    ],
+  );
+}
+
 class LoadingFeedback extends StatelessWidget {
   const LoadingFeedback({super.key, this.label = 'Đang tải dữ liệu'});
   final String label;

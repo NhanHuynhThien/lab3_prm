@@ -35,11 +35,6 @@ class TrackingRepository extends MemoryRepository {
   }
 }
 
-class DirectDemoEntry extends DemoSessionViewModel {
-  @override
-  bool build() => true;
-}
-
 class AuthGateHarness {
   late FakeAuthService service;
   late TrackingRepository repository;
@@ -59,7 +54,6 @@ class AuthGateHarness {
     WidgetTester tester, {
     double width = 412,
     double scale = 1,
-    bool demo = false,
     ProviderAutoConnect? autoConnect,
     ProviderSyncService Function()? providerSyncFactory,
   }) async {
@@ -90,7 +84,6 @@ class AuthGateHarness {
             store: store,
           );
         }),
-        if (demo) demoSessionProvider.overrideWith(DirectDemoEntry.new),
       ],
     );
     boundary = GlobalKey();
@@ -127,8 +120,7 @@ class AuthGateHarness {
 
   Future<void> settle(WidgetTester tester) async {
     await tester.pumpAndSettle();
-    if (container.read(authSessionProvider).asData?.value != null &&
-        !container.read(demoSessionProvider)) {
+    if (container.read(authSessionProvider).asData?.value != null) {
       final nav = find.byType(NavigationBar);
       final profile = nav.evaluate().isNotEmpty
           ? find.descendant(of: nav, matching: find.text('Cá nhân'))

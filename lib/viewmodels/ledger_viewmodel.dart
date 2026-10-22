@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/ledger.dart';
-import '../services/demo_seed.dart';
 import '../services/ledger_id.dart';
 import '../services/ledger_repository.dart';
 import '../services/ledger_validation.dart';
@@ -35,20 +34,15 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
 
   @override
   Future<LedgerData> build() async {
-    final epoch = ++_loadEpoch;
+    _loadEpoch++;
     final repository = ref.watch(ledgerRepositoryProvider);
-    final now = ref.read(clockProvider)();
     if (_pendingWrite != null) await _pendingWrite;
     final stored = await repository.load();
     if (stored != null) {
       LedgerValidation.snapshot(stored);
       return stored;
     }
-    final seed = createDemoSeed(now);
-    if (ref.mounted && epoch == _loadEpoch) {
-      await _persist(seed, repository.save);
-    }
-    return seed;
+    return LedgerData(accounts: [], sessions: []);
   }
 
   Future<void> _persist(
@@ -110,7 +104,7 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     if (previous != null &&
         (previous.isDemo != account.isDemo ||
             previous.dataSource != account.dataSource)) {
-      throw ArgumentError('Không đổi nhãn dữ liệu demo của tài khoản.');
+      throw ArgumentError('Không đổi nguồn dữ liệu của tài khoản.');
     }
     for (final quota in account.quotaWindows) {
       final old = previous?.quotaWindows
@@ -157,7 +151,7 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     if (previous != null &&
         (previous.dataSource != session.dataSource ||
             previous.isDemo != session.isDemo)) {
-      throw ArgumentError('Không đổi nguồn hoặc nhãn demo của phiên lịch sử.');
+      throw ArgumentError('Không đổi nguồn dữ liệu của phiên lịch sử.');
     }
     if (account == null || (account.archived && previous == null)) {
       throw StateError('Chọn tài khoản đang hoạt động.');
@@ -233,26 +227,4 @@ class LedgerViewModel extends AsyncNotifier<LedgerData> {
     String zone, {
     int? expectedRevision,
   }) async => _commit(_data.copyWith(reportingTimezone: zone.trim()));
-
-  Future<void> resetDemo() async =>
-      _commit(createDemoReset(_data, ref.read(clockProvider)(), newId));
-
-  Future<void> clearDemo() async => _commit(withoutDemo(_data));
-
-  Future<void> recoverDemo() async {
-    if (!state.hasError || state.error is! LedgerStorageException) {
-      throw StateError('Chỉ khôi phục ở trạng thái lỗi đọc dữ liệu local.');
-    }
-    final repository = _repository;
-    if (repository is! RecoverableLedgerRepository) {
-      throw StateError('Kho dữ liệu này không hỗ trợ khôi phục an toàn.');
-    }
-    final epoch = _loadEpoch;
-    final seed = createDemoSeed(ref.read(clockProvider)());
-    await _persist(
-      seed,
-      (repository as RecoverableLedgerRepository).replaceUnreadable,
-    );
-    if (ref.mounted && epoch == _loadEpoch) state = AsyncData(seed);
-  }
 }

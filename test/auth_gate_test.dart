@@ -69,59 +69,10 @@ void main() {
             .state<NavigatorState>(find.byType(Navigator).first)
             .pushNamed('/accounts/claude/usage/new');
         await h.settle(tester);
-        expect(find.text('Mở không gian demo'), findsOneWidget);
+        expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
         expect(find.text('Lưu phiên sử dụng'), findsNothing);
         expect(h.repository.loads, 0);
         expect(h.repository.saves, 0);
-      } finally {
-        await h.close(tester);
-      }
-    },
-  );
-
-  testWidgets(
-    'auth failure offers Retry and offline local demo without cloud writes',
-    (tester) async {
-      h.service.initializationError = const AuthFailure(
-        AuthProblem.network,
-        'Không kết nối được dịch vụ đăng nhập.',
-      );
-      await h.open(tester);
-      await h.settle(tester);
-      try {
-        expect(
-          find.text('Không kết nối được dịch vụ đăng nhập.'),
-          findsOneWidget,
-        );
-        expect(h.repository.loads, 0);
-        h.service.initializationError = null;
-        await h.tap(tester, 'Thử kết nối lại');
-        await h.settle(tester);
-        expect(h.service.initializations, 2);
-        await h.tap(tester, 'Mở không gian demo');
-        await h.settle(tester);
-        expect(find.text('Ngân sách còn lại · Kỳ hiện tại'), findsOneWidget);
-        expect(h.repository.loads, 1);
-        expect(h.service.signIns, 0);
-      } finally {
-        await h.close(tester);
-      }
-    },
-  );
-
-  testWidgets(
-    'direct demo mode never initializes Firebase and leaving returns to guarded login',
-    (tester) async {
-      await h.open(tester, demo: true);
-      await h.settle(tester);
-      try {
-        expect(h.service.initializations, 0);
-        expect(h.repository.loads, 1);
-        h.container.read(demoSessionProvider.notifier).leave();
-        await h.settle(tester);
-        expect(find.text('Mở không gian demo'), findsOneWidget);
-        expect(h.service.initializations, 1);
-        expect(find.text('Claude cá nhân'), findsNothing);
       } finally {
         await h.close(tester);
       }
@@ -150,14 +101,7 @@ void main() {
           find.widgetWithText(OutlinedButton, 'Đang đăng nhập...'),
         );
         expect(workingButton.onPressed, isNull);
-        expect(
-          tester
-              .widget<OutlinedButton>(
-                find.widgetWithText(OutlinedButton, 'Mở không gian demo'),
-              )
-              .onPressed,
-          isNull,
-        );
+
         await h.container.read(authActionProvider.notifier).signIn();
         expect(h.service.signIns, 2);
         h.service.emit(

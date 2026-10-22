@@ -7,7 +7,9 @@ import 'package:token_ledger/screens/login_screen.dart';
 import 'package:token_ledger/screens/quota_form_screen.dart';
 import 'package:token_ledger/screens/shell_screen.dart';
 import 'package:token_ledger/screens/usage_form_screen.dart';
-import 'package:token_ledger/services/demo_seed.dart';
+
+import 'support/demo_seed.dart';
+
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 import 'package:token_ledger/widgets/common.dart';
 

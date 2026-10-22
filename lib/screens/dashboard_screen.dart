@@ -8,12 +8,11 @@ import '../widgets/dashboard_cards.dart';
 import '../widgets/data_scope_picker.dart';
 import '../widgets/ledger_feedback.dart';
 import '../widgets/range_picker.dart';
-import '../widgets/provider_sync_summary.dart';
+import '../widgets/agent_dashboard_panel.dart';
 import '../viewmodels/provider_sync_viewmodel.dart';
 import '../models/cloud_sync_status.dart';
+import '../theme/app_theme.dart';
 import '../widgets/provider_ledger_feedback.dart';
-import '../widgets/notification_center_sheet.dart';
-import '../viewmodels/product_features_viewmodel.dart';
 import 'usage_form_screen.dart';
 
 export '../widgets/quota_row.dart';
@@ -35,7 +34,12 @@ class DashboardScreen extends ConsumerWidget {
     final feedback = ledgerFeedback(state, 'Tổng quan');
     final cloud = ref.watch(cloudOwnerProvider) != null;
     if (feedback != null) {
-      return cloud ? ProviderLedgerFeedback(feedback: feedback) : feedback;
+      return cloud
+          ? ProviderLedgerFeedback(
+              feedback: feedback,
+              header: AgentDashboardPanel(onAnalytics: onAnalytics),
+            )
+          : feedback;
     }
     final data = state.requireValue;
     final projection = ref.watch(dashboardProjectionProvider);
@@ -75,31 +79,21 @@ class DashboardScreen extends ConsumerWidget {
       onAnalytics: onAnalytics,
     );
 
-    final unreadCount = ref.watch(unreadNotificationCountProvider);
-
-    return ListView(
-      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 28),
-      children: [
-        PageHeading(
-          'Tổng quan',
-          cloud
-              ? 'Model, hạn mức và số liệu từ nguồn đã kết nối.'
-              : 'AI đang hỗ trợ công việc của bạn như thế nào?',
-          action: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () => NotificationCenterSheet.show(context),
-                icon: unreadCount > 0
-                    ? Badge(
-                        label: Text('$unreadCount'),
-                        child: const Icon(Icons.notifications_outlined),
-                      )
-                    : const Icon(Icons.notifications_outlined),
-                tooltip: 'Thông báo',
-              ),
-              const SizedBox(width: 4),
-              FilledButton.icon(
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppSpace.dashboardWidth),
+        child: ListView(
+          padding: EdgeInsets.all(
+            MediaQuery.sizeOf(context).width < 600 ? 16 : 28,
+          ),
+          children: [
+            PageHeading(
+              'Tổng quan',
+              centered: true,
+              cloud
+                  ? 'Tình hình các agent bạn đang sử dụng, trong một dashboard.'
+                  : 'AI đang hỗ trợ công việc của bạn như thế nào?',
+              action: FilledButton.icon(
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute<void>(
@@ -109,142 +103,148 @@ class DashboardScreen extends ConsumerWidget {
                 icon: const Icon(Icons.add_rounded, size: 20),
                 label: const Text('Ghi sử dụng'),
               ),
-            ],
-          ),
-        ),
-        if (showProviderFirst) ...[
-          const ProviderSyncSummary(),
-          const SizedBox(height: 24),
-          Material(
-            color: Colors.transparent,
-            child: ExpansionTile(
-              title: const Text('Sổ sử dụng thủ công'),
-              subtitle: const Text('Ngân sách và các phiên bạn tự ghi'),
-              initiallyExpanded: data.accounts.isNotEmpty,
-              tilePadding: EdgeInsets.zero,
-              children: [
-                const Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [RangePicker(), DataScopePicker()],
-                ),
-                const SizedBox(height: 24),
-                LayoutBuilder(
-                  builder: (context, c) => c.maxWidth >= 680
-                      ? IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Expanded(child: balance),
-                              const SizedBox(width: 16),
-                              Expanded(child: metrics),
-                            ],
-                          ),
-                        )
-                      : Column(
-                          children: [
-                            balance,
-                            const SizedBox(height: 16),
-                            metrics,
-                          ],
-                        ),
-                ),
-                const SizedBox(height: 16),
-                LayoutBuilder(
-                  builder: (context, c) => c.maxWidth >= 800
-                      ? Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(flex: 3, child: trend),
-                            const SizedBox(width: 16),
-                            Expanded(flex: 2, child: quota),
-                          ],
-                        )
-                      : Column(
-                          children: [trend, const SizedBox(height: 16), quota],
-                        ),
-                ),
-                const SizedBox(height: 16),
-                LayoutBuilder(
-                  builder: (context, c) => c.maxWidth >= 800
-                      ? Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(flex: 3, child: latest),
-                            const SizedBox(width: 16),
-                            Expanded(flex: 2, child: purpose),
-                          ],
-                        )
-                      : Column(
-                          children: [
-                            latest,
-                            const SizedBox(height: 16),
-                            purpose,
-                          ],
-                        ),
-                ),
-              ],
             ),
-          ),
-        ] else ...[
-          const Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [RangePicker(), DataScopePicker()],
-          ),
-          const SizedBox(height: 24),
-          LayoutBuilder(
-            builder: (context, c) => c.maxWidth >= 680
-                ? IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(child: balance),
-                        const SizedBox(width: 16),
-                        Expanded(child: metrics),
-                      ],
+            if (showProviderFirst) ...[
+              AgentDashboardPanel(onAnalytics: onAnalytics),
+              const SizedBox(height: 24),
+              Material(
+                color: Colors.transparent,
+                child: ExpansionTile(
+                  title: const Text('Sổ sử dụng thủ công'),
+                  subtitle: const Text('Ngân sách và các phiên bạn tự ghi'),
+                  initiallyExpanded: false,
+                  tilePadding: EdgeInsets.zero,
+                  children: [
+                    const Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [RangePicker(), DataScopePicker()],
                     ),
-                  )
-                : Column(
-                    children: [balance, const SizedBox(height: 16), metrics],
-                  ),
-          ),
-          const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, c) => c.maxWidth >= 800
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 3, child: trend),
-                      const SizedBox(width: 16),
-                      Expanded(flex: 2, child: quota),
-                    ],
-                  )
-                : Column(children: [trend, const SizedBox(height: 16), quota]),
-          ),
-          const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, c) => c.maxWidth >= 800
-                ? Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 3, child: latest),
-                      const SizedBox(width: 16),
-                      Expanded(flex: 2, child: purpose),
-                    ],
-                  )
-                : Column(
-                    children: [latest, const SizedBox(height: 16), purpose],
-                  ),
-          ),
-        ],
-        if (!showProviderFirst) ...[
-          const SizedBox(height: 16),
-          const ProviderSyncSummary(),
-        ],
-      ],
+                    const SizedBox(height: 24),
+                    LayoutBuilder(
+                      builder: (context, c) => c.maxWidth >= 680
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(child: balance),
+                                const SizedBox(width: 16),
+                                Expanded(child: metrics),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                balance,
+                                const SizedBox(height: 16),
+                                metrics,
+                              ],
+                            ),
+                    ),
+                    const SizedBox(height: 16),
+                    LayoutBuilder(
+                      builder: (context, c) => c.maxWidth >= 800
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(flex: 3, child: trend),
+                                const SizedBox(width: 16),
+                                Expanded(flex: 2, child: quota),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                trend,
+                                const SizedBox(height: 16),
+                                quota,
+                              ],
+                            ),
+                    ),
+                    const SizedBox(height: 16),
+                    LayoutBuilder(
+                      builder: (context, c) => c.maxWidth >= 800
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(flex: 3, child: latest),
+                                const SizedBox(width: 16),
+                                Expanded(flex: 2, child: purpose),
+                              ],
+                            )
+                          : Column(
+                              children: [
+                                latest,
+                                const SizedBox(height: 16),
+                                purpose,
+                              ],
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              const Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [RangePicker(), DataScopePicker()],
+              ),
+              const SizedBox(height: 24),
+              LayoutBuilder(
+                builder: (context, c) => c.maxWidth >= 680
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: balance),
+                          const SizedBox(width: 16),
+                          Expanded(child: metrics),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          balance,
+                          const SizedBox(height: 16),
+                          metrics,
+                        ],
+                      ),
+              ),
+              const SizedBox(height: 16),
+              LayoutBuilder(
+                builder: (context, c) => c.maxWidth >= 800
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 3, child: trend),
+                          const SizedBox(width: 16),
+                          Expanded(flex: 2, child: quota),
+                        ],
+                      )
+                    : Column(
+                        children: [trend, const SizedBox(height: 16), quota],
+                      ),
+              ),
+              const SizedBox(height: 16),
+              LayoutBuilder(
+                builder: (context, c) => c.maxWidth >= 800
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 3, child: latest),
+                          const SizedBox(width: 16),
+                          Expanded(flex: 2, child: purpose),
+                        ],
+                      )
+                    : Column(
+                        children: [latest, const SizedBox(height: 16), purpose],
+                      ),
+              ),
+            ],
+            if (!showProviderFirst) ...[
+              const SizedBox(height: 16),
+              AgentDashboardPanel(onAnalytics: onAnalytics),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

@@ -65,7 +65,7 @@ class UsageDetailSheet extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 24),
-            _DetailLine('Chi phí nhập tay', money(session.costMicros)),
+            _DetailLine('Chi phí nhập tay', preciseMoney(session.costMicros)),
             _DetailLine(
               'Input token',
               session.inputTokens?.toString() ?? 'Chưa biết',
@@ -87,10 +87,7 @@ class UsageDetailSheet extends ConsumerWidget {
             ),
             _DetailLine('Nguồn', session.dataSource.label),
             _DetailLine('Loại chi phí', session.effectiveCostBasis.label),
-            _DetailLine(
-              'Phân loại',
-              session.isDemo ? 'Demo giả định' : 'Dữ liệu theo dõi',
-            ),
+            _DetailLine('Phân loại', 'Dữ liệu theo dõi'),
             _DetailLine('Model', session.modelId ?? 'Chưa biết'),
             if (session.note.isNotEmpty)
               Padding(

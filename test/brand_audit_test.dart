@@ -6,7 +6,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:token_ledger/services/demo_seed.dart';
+
+import 'support/demo_seed.dart';
+
 import 'package:token_ledger/theme/app_theme.dart';
 import 'package:token_ledger/widgets/brand_mark.dart';
 import 'package:token_ledger/widgets/common.dart';

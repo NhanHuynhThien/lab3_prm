@@ -96,17 +96,21 @@ void main() {
                 capture.dispose();
               });
             }
-            await tester.tap(find.widgetWithText(ChoiceChip, 'Antigravity'));
-            await tester.pumpAndSettle();
-            expect(
-              find.text('Chưa đọc được số liệu Antigravity'),
-              findsOneWidget,
+            await tester.ensureVisible(
+              find.widgetWithText(ChoiceChip, 'Antigravity'),
             );
+            await tester.tap(find.widgetWithText(ChoiceChip, 'Antigravity'));
+
+            await tester.pumpAndSettle();
+            expect(find.text('Chưa đủ dữ liệu để đánh giá'), findsOneWidget);
             expect(find.text('Token lifetime · server'), findsNothing);
             container.read(providerSyncProvider.notifier).disconnect();
+            await tester.ensureVisible(
+              find.widgetWithText(ChoiceChip, 'Codex'),
+            );
             await tester.tap(find.widgetWithText(ChoiceChip, 'Codex'));
             await tester.pumpAndSettle();
-            expect(find.text('Chưa thể thống kê Codex'), findsOneWidget);
+            expect(find.text('Chưa đủ dữ liệu để đánh giá'), findsOneWidget);
             expect(tester.takeException(), isNull);
           } finally {
             await tester.pumpWidget(const SizedBox());

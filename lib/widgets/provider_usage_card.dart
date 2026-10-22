@@ -7,9 +7,15 @@ import 'common.dart';
 import 'provider_model_rows.dart';
 
 class ProviderUsageCard extends StatelessWidget {
-  const ProviderUsageCard({super.key, required this.usage, required this.now});
+  const ProviderUsageCard({
+    super.key,
+    required this.usage,
+    required this.now,
+    this.showModels = true,
+  });
   final ProviderUsage usage;
   final DateTime now;
+  final bool showModels;
 
   @override
   Widget build(BuildContext context) => Panel(
@@ -43,6 +49,8 @@ class ProviderUsageCard extends StatelessWidget {
         _Metric(
           usage.id == 'codex'
               ? 'Token lifetime · server'
+              : usage.id == 'antigravity'
+              ? 'Token IDE'
               : 'Token CLI · 30 ngày',
           compactTokens(usage.totalTokens),
         ),
@@ -105,7 +113,7 @@ class ProviderUsageCard extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 24),
-        ProviderModelRows(usage: usage),
+        if (showModels) ProviderModelRows(usage: usage),
       ],
     ),
   );

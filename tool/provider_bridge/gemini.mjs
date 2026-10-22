@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { safeCount } from './codex.mjs';
 import { modelRows } from './models.mjs';
+import { activitySummary } from './activity.mjs';
 
 export function geminiMessages(text) {
   try {
@@ -63,7 +64,9 @@ export async function readGemini(root = join(homedir(), '.gemini', 'tmp'), now =
         seen.add(row.id);
         if (!Number.isSafeInteger(tokens + amount)) { truncated = true; continue; }
         tokens += amount; known++;
-        records.push({ model: row.model, input: row.tokens.input, output: row.tokens.output, total: amount });
+        records.push({ model: row.model, input: row.tokens.input, output: row.tokens.output, total: amount,
+          timestamp: row.timestamp, session: file, task: row.id, purpose: 'other',
+          cached: safeCount(row.tokens.cached), reasoning: safeCount(row.tokens.thoughts), cacheWrite: null });
         observed = Math.max(observed ?? 0, date);
       }
     } catch { truncated = true; }
@@ -73,6 +76,6 @@ export async function readGemini(root = join(homedir(), '.gemini', 'tmp'), now =
     coverage: `${truncated ? 'Một phần lịch sử. ' : ''}Chỉ phiên CLI lưu trên máy; chưa đọc quota/hoá đơn AI Pro hay usage website.`,
     observedAt: observed == null ? null : new Date(observed).toISOString(),
     totalTokens: known ? tokens : null, contextTokens: null, windows: [],
-    models: modelRows(records), modelsCoverage: 'Lịch sử Gemini CLI trên máy, 30 ngày; không xác minh cùng owner với Google login.',
+    activity: activitySummary(records, now, truncated), models: modelRows(records), modelsCoverage: 'Lịch sử Gemini CLI trên máy, 30 ngày; không xác minh cùng owner với Google login.',
     estimatedCostMicros: null, subscriptionFeeMicros: null, billedCostMicros: null };
 }

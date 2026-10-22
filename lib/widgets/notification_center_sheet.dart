@@ -61,12 +61,13 @@ class NotificationCenterSheet extends ConsumerWidget {
                     color: AppColors.primary,
                   ),
                   const SizedBox(width: AppSpace.sm),
-                  Text(
-                    'Trung tâm thông báo',
-                    style: Theme.of(context).textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      'Trung tâm thông báo',
+                      style: Theme.of(context).textTheme.titleLarge
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  const Spacer(),
                   if (items.isNotEmpty)
                     TextButton(
                       onPressed: () {
@@ -102,16 +103,6 @@ class NotificationCenterSheet extends ConsumerWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(color: AppColors.muted, fontSize: 13),
                     ),
-                    const SizedBox(height: AppSpace.lg),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        ref
-                            .read(productFeaturesProvider.notifier)
-                            .sendDemoNotification();
-                      },
-                      icon: const Icon(Icons.send_outlined),
-                      label: const Text('Gửi thông báo thử nghiệm'),
-                    ),
                   ],
                 ),
               )
@@ -129,7 +120,6 @@ class NotificationCenterSheet extends ConsumerWidget {
                         notificationService.markAsRead(item.id);
                         if (item.route != null && item.route!.isNotEmpty) {
                           Navigator.pop(context);
-                          // Route navigation can be processed here if applicable
                         }
                       },
                       leading: CircleAvatar(
@@ -191,20 +181,11 @@ class NotificationCenterSheet extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton.icon(
-                    onPressed: () {
-                      ref
-                          .read(productFeaturesProvider.notifier)
-                          .sendDemoNotification();
-                    },
-                    icon: const Icon(Icons.add_alert_outlined, size: 18),
-                    label: const Text('Thêm thông báo mẫu'),
-                  ),
                   if (items.isNotEmpty)
                     TextButton(
                       onPressed: () => notificationService.clearAll(),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppColors.error,
+                        foregroundColor: AppColors.danger,
                       ),
                       child: const Text('Xóa tất cả'),
                     ),

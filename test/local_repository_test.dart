@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:token_ledger/services/demo_seed.dart';
+
+import 'support/demo_seed.dart';
+
 import 'package:token_ledger/services/ledger_repository.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 

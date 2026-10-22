@@ -68,7 +68,7 @@ class ProviderQuotaMetric extends StatelessWidget {
           ],
           const SizedBox(height: 16),
           Text(
-            'Reset ${shortDate(window.resetsAt)} · ${shortTime(window.resetsAt)}',
+            'Đặt lại ${shortDate(window.resetsAt)} · ${shortTime(window.resetsAt)}',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],

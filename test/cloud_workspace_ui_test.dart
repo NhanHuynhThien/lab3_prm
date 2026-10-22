@@ -27,7 +27,8 @@ void main() {
           expect(tester.takeException(), isNull);
           await h.nav(tester, 'Cá nhân');
           expect(find.text('User A'), findsOneWidget);
-          expect(find.text('Đã kết nối'), findsNWidgets(2));
+          expect(find.text('Đã kết nối'), findsOneWidget);
+          expect(find.text('Đã đăng nhập Google'), findsOneWidget);
           if (const bool.fromEnvironment('CLOUD_AUDIT_IMAGES')) {
             await tester.runAsync(() async {
               final render =

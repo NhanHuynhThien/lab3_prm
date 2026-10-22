@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/ledger.dart';
 import '../services/ledger_validation.dart';
-import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../widgets/common.dart';
@@ -123,11 +122,17 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
 
   Future<void> _save() async {
     if (_saving) return;
-    if (!_key.currentState!.validate()) return;
+    if (!_key.currentState!.validate()) {
+      setState(
+        () => _error = 'Kiểm tra các trường được đánh dấu trước khi lưu.',
+      );
+      return;
+    }
     if (_input.text.trim().isEmpty != _output.text.trim().isEmpty) {
       setState(
         () => _error = 'Nhập cả input và output token, hoặc để trống cả hai nếu chưa biết.',
       );
+      FocusScope.of(context).unfocus();
       return;
     }
     setState(() {
@@ -226,10 +231,13 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
         title: widget.session == null
             ? 'Ghi phiên sử dụng'
             : 'Sửa phiên sử dụng',
-        footer: SaveButton(
-          label: 'Lưu phiên sử dụng',
-          saving: _saving,
-          onPressed: _save,
+        footer: FormSaveFooter(
+          error: _error,
+          child: SaveButton(
+            label: 'Lưu phiên sử dụng',
+            saving: _saving,
+            onPressed: _save,
+          ),
         ),
         child: Form(
           key: _key,
@@ -275,14 +283,6 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
               ),
               const SizedBox(height: 24),
               UsageNoteField(controller: _note),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(
-                    _error!,
-                    style: const TextStyle(color: AppColors.danger),
-                  ),
-                ),
             ],
           ),
         ),

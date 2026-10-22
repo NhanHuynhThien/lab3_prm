@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/models/auth_session.dart';
 import 'package:token_ledger/screens/profile_screen.dart';
 import 'package:token_ledger/viewmodels/auth_viewmodel.dart';
-import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 
 import 'support/auth_fakes.dart';
 import 'support/auth_gate_harness.dart';
@@ -62,7 +61,7 @@ void main() {
         );
         await h.tap(tester, 'Đăng xuất Google');
         await h.settle(tester);
-        expect(find.text('Mở không gian demo'), findsOneWidget);
+        expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
         expect(find.text('Người B'), findsNothing);
         expect(h.repository.loads, 0);
         expect(h.repository.saves, 0);
@@ -126,7 +125,7 @@ void main() {
         expect(find.text('Đang đăng xuất...'), findsOneWidget);
         h.service.signOutGate!.complete();
         await h.settle(tester);
-        expect(find.text('Mở không gian demo'), findsOneWidget);
+        expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
       } finally {
         await h.close(tester);
       }
@@ -143,9 +142,7 @@ void main() {
         await h.settle(tester);
         expect(find.text('Thử kết nối lại'), findsOneWidget);
         expect(h.repository.loads, 0);
-        await h.tap(tester, 'Mở không gian demo');
-        await h.settle(tester);
-        expect(find.text('Ngân sách còn lại · Kỳ hiện tại'), findsOneWidget);
+        expect(find.text('Mở không gian demo'), findsNothing);
         h.service.initializationGate!.complete();
         await tester.pump();
       } finally {
@@ -176,14 +173,7 @@ void main() {
             await h.settle(tester);
             expect(find.text('Nguyễn Văn An · TokenLedger'), findsOneWidget);
             if (scale == 1) await h.capture(tester, 'profile-${width.toInt()}');
-            await h.tap(tester, 'Mở demo local riêng biệt');
-            await h.settle(tester);
-            expect(
-              find.text('Ngân sách còn lại · Kỳ hiện tại'),
-              findsOneWidget,
-            );
-            h.container.read(demoSessionProvider.notifier).leave();
-            await h.settle(tester);
+            expect(find.text('Mở demo local riêng biệt'), findsNothing);
             expect(find.text('Nguyễn Văn An · TokenLedger'), findsOneWidget);
             expect(tester.takeException(), isNull);
           } finally {

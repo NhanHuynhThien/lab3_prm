@@ -1,7 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/models/ledger.dart';
-import 'package:token_ledger/services/demo_seed.dart';
-import 'package:token_ledger/services/ledger_validation.dart';
+
+import 'support/demo_seed.dart';
+
 import 'package:token_ledger/services/usage_calculator.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 import 'package:token_ledger/viewmodels/reporting_viewmodel.dart';
@@ -122,27 +123,6 @@ void main() {
     expect(c.read(dashboardProjectionProvider).summary.costMicros, 12840000);
     c.read(dataScopeProvider.notifier).select(DataScope.legacy);
     expect(c.read(dashboardProjectionProvider).summary.costMicros, 1000);
-  });
-
-  test('demo reset/clear retain manual/legacy records even with old seed ID collisions', () async {
-    final repo = MemoryRepository()
-      ..data = LedgerData(
-        accounts: [account(id: 'codex')],
-        sessions: [usage('seed-0', now, accountId: 'codex', cost: 77)],
-      );
-    final c = createSchemaTestOwner(repo, now);
-    await c.read(ledgerProvider.future);
-    final vm = c.read(ledgerProvider.notifier);
-    await vm.resetDemo();
-    expect(repo.data!.account('codex')!.isDemo, isFalse);
-    expect(repo.data!.sessions.first.costMicros, 77);
-    expect(repo.data!.sessions.where((s) => s.isDemo).length, 12);
-    LedgerValidation.snapshot(repo.data!);
-    await vm.resetDemo();
-    expect(repo.data!.sessions.length, 13);
-    await vm.clearDemo();
-    expect(repo.data!.sessions.single.id, 'seed-0');
-    expect(repo.data!.accounts.single.id, 'codex');
   });
 
   test('account cycle drilldown matches budget and search across calendar-month boundary', () async {

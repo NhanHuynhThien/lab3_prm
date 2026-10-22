@@ -263,5 +263,6 @@ class _RingPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _RingPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.shares != shares;
 }

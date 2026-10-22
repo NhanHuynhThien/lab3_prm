@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/models/ledger.dart';
-import 'package:token_ledger/services/demo_seed.dart';
+
+import 'demo_seed.dart';
+
 import 'package:token_ledger/services/ledger_repository.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 

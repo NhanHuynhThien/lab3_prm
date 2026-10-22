@@ -2,38 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../screens/provider_connections_screen.dart';
-import '../theme/app_theme.dart';
 import '../viewmodels/provider_sync_viewmodel.dart';
+import '../viewmodels/provider_sources_viewmodel.dart';
+import '../viewmodels/gemini_activity_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import 'common.dart';
 import 'provider_overview_card.dart';
+import 'provider_source_picker.dart';
 
-class ProviderSyncSummary extends ConsumerStatefulWidget {
+class ProviderSyncSummary extends ConsumerWidget {
   const ProviderSyncSummary({super.key});
   @override
-  ConsumerState<ProviderSyncSummary> createState() => _ProviderSummaryState();
-}
-
-class _ProviderSummaryState extends ConsumerState<ProviderSyncSummary> {
-  String _selected = 'codex';
-  static const _labels = {
-    'codex': 'Codex',
-    'claude': 'Claude',
-    'google': 'Gemini',
-    'antigravity': 'Antigravity',
-  };
-
-  void _open() => Navigator.push(
-    context,
-    MaterialPageRoute<void>(builder: (_) => const ProviderConnectionsScreen()),
-  );
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(providerSyncProvider);
-    final rows = state.snapshot?.providers ?? [];
-    final usage = rows.where((r) => r.id == _selected).firstOrNull;
+    final rows = ref.watch(providerSourcesProvider);
+    final selected = ref.watch(selectedSourceProvider);
+    final usage = rows.firstWhere((r) => r.id == selected);
     final now = ref.watch(nowProvider);
+    void open() => Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => const ProviderConnectionsScreen(),
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -46,58 +37,36 @@ class _ProviderSummaryState extends ConsumerState<ProviderSyncSummary> {
                   ? null
                   : state.enabled
                   ? ref.read(providerSyncProvider.notifier).refresh
-                  : _open,
+                  : open,
               icon: const Icon(Icons.sync_rounded),
             ),
           ],
         ),
         Text(
           state.working
-              ? 'Đang đọc nguồn trên Mac...'
-              : rows.isEmpty
-              ? 'Chưa kết nối nguồn dữ liệu'
-              : '${rows.where((r) => r.status == 'ready').length}/3 nguồn đã có số liệu',
+              ? 'Đang cập nhật nguồn trên Mac...'
+              : '${rows.where((r) => r.status == 'ready').length}/${rows.length} nguồn có dữ liệu · Chọn nguồn để xem',
           style: Theme.of(context).textTheme.bodySmall,
         ),
+        const SizedBox(height: 12),
+        const ProviderSourcePicker(),
         const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final entry in _labels.entries)
-              ChoiceChip(
-                label: Text(entry.value),
-                selected: _selected == entry.key,
-                onSelected: (_) => setState(() => _selected = entry.key),
-                showCheckmark: false,
-                materialTapTargetSize: MaterialTapTargetSize.padded,
-              ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (state.working && rows.isEmpty)
-          const LinearProgressIndicator(semanticsLabel: 'Đang đọc nguồn AI'),
-        if (state.error != null) ...[
-          const SizedBox(height: 12),
-          Semantics(
-            liveRegion: true,
+        if (state.error != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
             child: Text(
               state.error!,
-              style: const TextStyle(color: AppColors.danger),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
-          const SizedBox(height: 12),
-        ],
-        AnimatedSwitcher(
-          duration: AppMotion.duration(context, AppMotion.short),
-          child: ProviderOverviewCard(
-            key: ValueKey(_selected),
-            name: _labels[_selected]!,
-            usage: usage,
-            now: now,
-            onDetails: _open,
-            unsupported: _selected == 'antigravity',
-          ),
+        if (state.working && rows.every((r) => r.status != 'ready'))
+          const LinearProgressIndicator(semanticsLabel: 'Đang đọc nguồn AI'),
+        ProviderOverviewCard(
+          name: usage.name,
+          usage: usage,
+          now: now,
+          onDetails: open,
+          activity: ref.watch(geminiActivityProvider).summary,
         ),
       ],
     );

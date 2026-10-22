@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/usage_calculator.dart';
 import '../models/cloud_sync_status.dart';
-import '../widgets/provider_sync_summary.dart';
+import '../widgets/provider_analytics_panel.dart';
 import '../widgets/provider_ledger_feedback.dart';
 import '../widgets/data_scope_picker.dart';
 import 'usage_form_screen.dart';
@@ -40,7 +40,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     final shares = projection.shares;
     final total = projection.total;
     String format(int v) => switch (_metric) {
-      UsageMetric.cost => money(v),
+      UsageMetric.cost => preciseMoney(v),
       UsageMetric.tokens => compactTokens(v),
       UsageMetric.sessions => '$v',
     };
@@ -49,10 +49,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       children: [
         const PageHeading(
           'Phân tích sử dụng',
-          'Công việc nào đang dùng nhiều nguồn lực AI nhất?',
+          'Hạn mức cần chú ý, model đang dùng và độ đầy đủ của dữ liệu.',
         ),
         if (cloud) ...[
-          const ProviderSyncSummary(),
+          const ProviderAnalyticsPanel(),
           const SizedBox(height: 24),
           const SectionTitle('Phân tích các phiên tự ghi'),
           const Text(
@@ -192,7 +192,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               const SizedBox(height: 16),
               Text(
-                'Chi phí thực do bạn xác nhận: ${money(summary.actualCostMicros)} · Nhập tay: ${money(summary.manualCostMicros)} · Chưa phân loại: ${money(summary.unspecifiedCostMicros)}',
+                'Chi phí thực do bạn xác nhận: ${preciseMoney(summary.actualCostMicros)} · Nhập tay: ${preciseMoney(summary.manualCostMicros)} · Chưa phân loại: ${preciseMoney(summary.unspecifiedCostMicros)}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 8),
@@ -224,16 +224,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     child: Column(
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                a.alias,
-                                style: Theme.of(context).textTheme.labelLarge,
-                              ),
-                            ),
-                            Text(format(value)),
-                          ],
+                        AdaptivePair(
+                          leading: Text(
+                            a.alias,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          trailing: Text(format(value)),
                         ),
                         const SizedBox(height: 8),
                         AnimatedProgress(value: total == 0 ? 0 : value / total),

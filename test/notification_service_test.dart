@@ -33,9 +33,10 @@ void main() {
     late FakeNotificationTransport transport;
     late NotificationService service;
 
-    setUp(() {
+    setUp(() async {
       transport = FakeNotificationTransport();
       service = NotificationService(transport);
+      await service.bindOwner('test-owner');
     });
 
     tearDown(() async {
@@ -45,15 +46,15 @@ void main() {
     });
 
     test(
-      'bindOwner seeds welcome notification and requests permission',
+      'login does not synthesize notifications or request permissions',
       () async {
         await service.bindOwner('user_test_uid');
 
-        expect(service.permissionGranted, isTrue);
+        expect(service.permissionGranted, isFalse);
+        expect(service.deviceToken, isNull);
+        expect(service.items, isEmpty);
+        expect(await service.requestPermission(), isTrue);
         expect(service.deviceToken, 'sample_fcm_token_123');
-        expect(service.items, isNotEmpty);
-        expect(service.items.first.id, 'welcome_notification');
-        expect(service.unreadCount, 1);
       },
     );
 
@@ -114,7 +115,14 @@ void main() {
     });
 
     test('clearAll empties the notification center', () {
-      service.sendDemoNotification();
+      service.addNotification(
+        NotificationItem(
+          id: 'real-message',
+          title: 'Budget update',
+          body: 'Received from transport',
+          receivedAt: DateTime.now(),
+        ),
+      );
       expect(service.items, isNotEmpty);
 
       service.clearAll();
@@ -124,7 +132,8 @@ void main() {
 
     test('bindOwner(null) clears state and resets device token', () async {
       await service.bindOwner('uid_123');
-      expect(service.items, isNotEmpty);
+      await service.requestPermission();
+      expect(service.deviceToken, isNotNull);
 
       await service.bindOwner(null);
       expect(service.items, isEmpty);

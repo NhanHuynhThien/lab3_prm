@@ -6,7 +6,6 @@ import '../screens/shell_screen.dart';
 import '../models/auth_session.dart';
 import '../services/auth_service.dart';
 import '../services/cloud_ledger_repository.dart';
-import '../services/ledger_repository.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/cloud_ledger_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
@@ -22,18 +21,6 @@ class AuthGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(featureSessionProvider);
-    // Explicit local sandbox: neither initializes Auth nor exposes cloud data.
-    if (ref.watch(demoSessionProvider)) {
-      return _WorkspaceScope(
-        key: ValueKey('demo-local'),
-        auth: ref.read(authServiceProvider),
-        parent: ProviderScope.containerOf(context),
-        clock: ref.read(clockProvider),
-        local: ref.read(ledgerRepositoryProvider),
-        factory: ref.read(cloudRepositoryFactoryProvider),
-        leaveDemo: () => ref.read(demoSessionProvider.notifier).leave(),
-      );
-    }
     final session = ref.watch(authSessionProvider);
     if (session.isLoading) {
       return const Scaffold(
@@ -51,7 +38,6 @@ class AuthGate extends ConsumerWidget {
         parent: ProviderScope.containerOf(context),
         clock: ref.read(clockProvider),
         factory: ref.read(cloudRepositoryFactoryProvider),
-        openDemo: () => ref.read(demoSessionProvider.notifier).enter(),
       );
     }
     return const _SessionNavigator(
@@ -90,22 +76,17 @@ class _SessionNavigatorState extends State<_SessionNavigator> {
 class _WorkspaceScope extends StatefulWidget {
   const _WorkspaceScope({
     super.key,
-    this.user,
+    required this.user,
     required this.auth,
     required this.parent,
     required this.clock,
     required this.factory,
-    this.local,
-    this.openDemo,
-    this.leaveDemo,
   });
-  final AuthUser? user;
+  final AuthUser user;
   final AuthService auth;
   final ProviderContainer parent;
   final DateTime Function() clock;
-  final LedgerRepository? local;
   final CloudLedgerRepository Function() factory;
-  final VoidCallback? openDemo, leaveDemo;
   @override
   State<_WorkspaceScope> createState() => _WorkspaceScopeState();
 }
@@ -127,7 +108,7 @@ class _WorkspaceScopeState extends State<_WorkspaceScope> {
   late final _container = ProviderContainer(
     overrides: [
       authServiceProvider.overrideWithValue(widget.auth),
-      if (widget.user != null) ...[
+      ...[
         analyticsServiceProvider.overrideWithValue(
           widget.parent.read(analyticsServiceProvider),
         ),
@@ -135,19 +116,31 @@ class _WorkspaceScopeState extends State<_WorkspaceScope> {
           widget.parent.read(remoteConfigServiceProvider),
         ),
       ],
+      crashlyticsServiceProvider.overrideWithValue(
+        widget.parent.read(crashlyticsServiceProvider),
+      ),
+      notificationServiceProvider.overrideWithValue(
+        widget.parent.read(notificationServiceProvider),
+      ),
+      storageServiceProvider.overrideWithValue(
+        widget.parent.read(storageServiceProvider),
+      ),
+      pdfReportServiceProvider.overrideWithValue(
+        widget.parent.read(pdfReportServiceProvider),
+      ),
+      reportManagementServiceProvider.overrideWithValue(
+        widget.parent.read(reportManagementServiceProvider),
+      ),
       authActionProvider.overrideWith(
         () => _WorkspaceAuthActions(widget.parent),
       ),
       clockProvider.overrideWithValue(widget.clock),
-      cloudOwnerProvider.overrideWithValue(widget.user?.uid),
+      cloudOwnerProvider.overrideWithValue(widget.user.uid),
       providerSyncServiceFactoryProvider.overrideWithValue(
         widget.parent.read(providerSyncServiceFactoryProvider),
       ),
       cloudRepositoryFactoryProvider.overrideWithValue(widget.factory),
-      if (widget.local != null)
-        ledgerRepositoryProvider.overrideWithValue(widget.local!),
-      if (widget.user != null)
-        ledgerProvider.overrideWith(CloudLedgerViewModel.new),
+      ledgerProvider.overrideWith(CloudLedgerViewModel.new),
     ],
   );
   @override
@@ -158,27 +151,19 @@ class _WorkspaceScopeState extends State<_WorkspaceScope> {
 
   @override
   Widget build(BuildContext context) {
-    final navigator = _SessionNavigator(
-      home: ShellScreen(
-        user: widget.user,
-        onOpenDemo: widget.openDemo,
-        onLeaveDemo: widget.leaveDemo,
-      ),
-    );
+    final navigator = _SessionNavigator(home: ShellScreen(user: widget.user));
     return UncontrolledProviderScope(
       container: _container,
-      child: widget.user == null
-          ? navigator
-          : Material(
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    const CloudSyncBanner(),
-                    Expanded(child: navigator),
-                  ],
-                ),
-              ),
-            ),
+      child: Material(
+        child: SafeArea(
+          child: Column(
+            children: [
+              const CloudSyncBanner(),
+              Expanded(child: navigator),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

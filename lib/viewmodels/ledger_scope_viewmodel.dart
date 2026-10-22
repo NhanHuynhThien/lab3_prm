@@ -4,17 +4,6 @@ import '../models/ledger.dart';
 import '../services/usage_calculator.dart';
 import 'ledger_viewmodel.dart';
 
-class DemoSessionViewModel extends Notifier<bool> {
-  @override
-  bool build() => Uri.base.queryParameters['demo'] == '1';
-  void enter() => state = true;
-  void leave() => state = false;
-}
-
-final demoSessionProvider = NotifierProvider<DemoSessionViewModel, bool>(
-  DemoSessionViewModel.new,
-);
-
 class RangeViewModel extends Notifier<UsageRange> {
   @override
   UsageRange build() => UsageRange.month;
@@ -60,6 +49,7 @@ final effectiveDataScopeProvider = Provider.autoDispose<DataScope>((ref) {
       (data?.accounts.any((a) => a.dataSource == DataSource.legacy) ?? false)) {
     return DataScope.legacy;
   }
+  // Retain schema compatibility for old local snapshots; no sandbox route exists.
   return data?.accounts.any((a) => a.isDemo) == true
       ? DataScope.demo
       : DataScope.manual;

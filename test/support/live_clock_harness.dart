@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/models/ledger.dart';
 import 'package:token_ledger/screens/dashboard_screen.dart' show QuotaRow;
-import 'package:token_ledger/services/demo_seed.dart';
+
+import 'demo_seed.dart';
+
 import 'package:token_ledger/theme/app_theme.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 import 'package:token_ledger/viewmodels/reporting_viewmodel.dart';

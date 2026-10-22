@@ -8,6 +8,7 @@ import '../viewmodels/product_features_viewmodel.dart';
 import 'common.dart';
 import 'notification_center_sheet.dart';
 import 'product_feature_cards.dart';
+import 'crash_diagnostics_panel.dart';
 
 class ProductFeaturePanel extends ConsumerWidget {
   const ProductFeaturePanel({super.key});
@@ -18,7 +19,6 @@ class ProductFeaturePanel extends ConsumerWidget {
     final analytics =
         ref.watch(analyticsStatusProvider).asData?.value ??
         const AnalyticsStatus();
-    final crashlytics = ref.watch(crashlyticsStatusProvider).asData?.value;
     final unreadNotifications = ref.watch(unreadNotificationCountProvider);
     final reports =
         ref.watch(reportsListProvider).asData?.value ??
@@ -31,9 +31,7 @@ class ProductFeaturePanel extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SectionTitle(
-                'Cấu hình và đo lường (Remote Config & Analytics)',
-              ),
+              const SectionTitle('Tùy chọn báo cáo'),
               Text(
                 'Phiên gần đây: ${config.recentLimit} · nguồn ${config.recentSource}',
                 key: const ValueKey('config-recent-value'),
@@ -110,10 +108,6 @@ class ProductFeaturePanel extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpace.lg),
 
-        // Panel 2: Crashlytics Diagnostics
-        ProductCrashlyticsCard(status: crashlytics),
-        const SizedBox(height: AppSpace.lg),
-
         // Panel 3: Notifications & FCM
         Panel(
           child: Column(
@@ -148,7 +142,7 @@ class ProductFeaturePanel extends ConsumerWidget {
               const SizedBox(height: AppSpace.sm),
               const Text(
                 'Nhận thông báo đẩy từ Firebase Cloud Messaging và quản lý cảnh báo trong ứng dụng.',
-                style: TextStyle(fontSize: 12, color: AppColors.muted),
+                style: TextStyle(color: AppColors.muted),
               ),
               const SizedBox(height: AppSpace.md),
               Wrap(
@@ -164,19 +158,6 @@ class ProductFeaturePanel extends ConsumerWidget {
                           : 'Xem thông báo',
                     ),
                   ),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      ref
-                          .read(productFeaturesProvider.notifier)
-                          .sendDemoNotification();
-                      showMessage(
-                        context,
-                        'Đã gửi thông báo mẫu vào danh sách!',
-                      );
-                    },
-                    icon: const Icon(Icons.send_outlined, size: 18),
-                    label: const Text('Gửi thông báo mẫu'),
-                  ),
                 ],
               ),
             ],
@@ -186,6 +167,8 @@ class ProductFeaturePanel extends ConsumerWidget {
 
         // Panel 4: PDF Export & Cloud Storage
         ProductPdfStorageCard(reports: reports),
+        const SizedBox(height: AppSpace.lg),
+        const CrashDiagnosticsPanel(),
       ],
     );
   }

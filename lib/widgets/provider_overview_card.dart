@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../models/provider_usage.dart';
+import '../models/antigravity_analysis.dart';
+import '../models/gemini_activity_summary.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import 'common.dart';
-import 'provider_quota_metric.dart';
 import 'provider_model_preview.dart';
+import 'provider_quota_metric.dart';
 
 class ProviderOverviewCard extends StatelessWidget {
   const ProviderOverviewCard({
@@ -14,18 +16,27 @@ class ProviderOverviewCard extends StatelessWidget {
     required this.usage,
     required this.now,
     required this.onDetails,
-    this.unsupported = false,
+    this.activity,
   });
   final String name;
   final ProviderUsage? usage;
   final DateTime now;
   final VoidCallback onDetails;
-  final bool unsupported;
+  final GeminiActivitySummary? activity;
 
   @override
   Widget build(BuildContext context) {
     final row = usage;
     final ready = row?.status == 'ready';
+    final quotas = [...?row?.windows]
+      ..sort((a, b) => b.usedPercent.compareTo(a.usedPercent));
+    final highlighted = row?.id == 'antigravity'
+        ? antigravityGroups(
+            row!,
+            now,
+          ).map((g) => g.limiting ?? g.windows.first).toList()
+        : quotas.take(2).toList();
+    final text = Theme.of(context).textTheme;
     return Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,13 +46,15 @@ class ProviderOverviewCard extends StatelessWidget {
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text(name, style: Theme.of(context).textTheme.headlineSmall),
+              Text(name, style: text.headlineSmall),
               StatusTag(
                 ready
-                    ? row!.plan ?? 'Đã kết nối'
-                    : unsupported
-                    ? 'Chưa hỗ trợ'
-                    : 'Chưa có dữ liệu',
+                    ? quotas.isNotEmpty && row!.stale(now)
+                          ? 'Cần cập nhật'
+                          : 'Có số liệu'
+                    : row?.status == 'error'
+                    ? 'Tạm ngắt'
+                    : 'Chưa kết nối',
                 neutral: !ready,
               ),
             ],
@@ -49,102 +62,94 @@ class ProviderOverviewCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             ready
-                ? '${row!.source} · ${shortTime(row.observedAt!)}'
-                : unsupported
-                ? 'Bộ kết nối Antigravity chưa được triển khai.'
-                : row?.status == 'error'
-                ? 'Không đọc được nguồn. Hãy kiểm tra kết nối.'
-                : 'Cần kết nối nguồn sử dụng của $name.',
-            style: Theme.of(context).textTheme.bodySmall,
+                ? '${row!.source} · cập nhật ${shortTime(row.observedAt!)}'
+                : row?.coverage ?? 'Kết nối nguồn để xem số liệu.',
+            style: text.bodySmall,
           ),
           const SizedBox(height: 24),
-          if (ready) ...[
-            if (row!.windows.isNotEmpty)
+          if (!ready) ...[
+            const Icon(Icons.hub_outlined, size: 32, color: AppColors.muted),
+            const SizedBox(height: 12),
+            Text('Chưa đủ dữ liệu để đánh giá', style: text.titleMedium),
+            const SizedBox(height: 8),
+            const Text(
+              'Kết nối nguồn hoặc nhập bản xuất của bạn để xem thống kê thực.',
+            ),
+          ] else if (row!.id == 'gemini-web' && activity != null) ...[
+            Wrap(
+              spacing: 32,
+              runSpacing: 16,
+              children: [
+                _Number('Hoạt động · 30 ngày', '${activity!.activityCount}'),
+                _Number('Ngày có sử dụng · UTC', '${activity!.activeDays}'),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Bản xuất không cung cấp token hay hạn mức. Xem tần suất theo ngày trong Phân tích.',
+            ),
+          ] else ...[
+            if (quotas.isNotEmpty) ...[
+              Text('Hạn mức cần theo dõi', style: text.titleMedium),
+              const SizedBox(height: 12),
               LayoutBuilder(
                 builder: (context, box) {
-                  final stack =
-                      box.maxWidth < 260 ||
-                      MediaQuery.textScalerOf(context).scale(14) > 20;
-                  final tiles = [
-                    for (final w in row.windows)
-                      ProviderQuotaMetric(usage: row, window: w, now: now),
-                  ];
-                  return stack
-                      ? Column(
-                          children: [
-                            for (final tile in tiles) ...[
-                              tile,
-                              const SizedBox(height: 12),
-                            ],
-                          ],
-                        )
-                      : Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          children: [
-                            for (final tile in tiles)
-                              SizedBox(
-                                width: (box.maxWidth - 16) / 2,
-                                child: tile,
-                              ),
-                          ],
-                        );
+                  final width =
+                      box.maxWidth >= 560 &&
+                          MediaQuery.textScalerOf(context).scale(14) < 22
+                      ? (box.maxWidth - 16) / 2
+                      : box.maxWidth;
+                  return Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      for (final quota in highlighted)
+                        SizedBox(
+                          width: width,
+                          child: ProviderQuotaMetric(
+                            usage: row,
+                            window: quota,
+                            now: now,
+                          ),
+                        ),
+                    ],
+                  );
                 },
-              )
-            else
-              const Text('Hạn mức còn lại: chưa có nguồn xác nhận.'),
-            const SizedBox(height: 12),
+              ),
+              if (quotas.length > highlighted.length)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    'Còn ${quotas.length - highlighted.length} hạn mức trong chi tiết nguồn.',
+                    style: text.bodySmall,
+                  ),
+                ),
+              const SizedBox(height: 24),
+            ],
             Wrap(
               spacing: 32,
               runSpacing: 16,
               children: [
                 _Number(
-                  row.id == 'claude'
-                      ? 'Token context'
-                      : row.id == 'codex'
+                  row.id == 'codex'
                       ? 'Token lifetime · server'
+                      : row.id == 'antigravity'
+                      ? 'Token IDE'
                       : 'Token CLI · 30 ngày',
-                  _tokens(
-                    row.id == 'claude' ? row.contextTokens : row.totalTokens,
-                  ),
+                  compactTokens(row.totalTokens),
                 ),
-                _Number('Model ghi nhận', '${row.models.length}'),
+                if (row.models.isNotEmpty)
+                  _Number('Model có ghi nhận', '${row.models.length}'),
               ],
             ),
-            const SizedBox(height: 24),
-            ProviderModelPreview(usage: row),
-            const SizedBox(height: 20),
-            const Text(
-              'Phí đã thanh toán: chưa có nguồn hóa đơn.',
-              style: TextStyle(color: AppColors.muted),
-            ),
-          ] else ...[
-            Icon(
-              unsupported ? Icons.extension_outlined : Icons.cloud_off_outlined,
-              size: 32,
-              color: AppColors.muted,
-            ),
+            if (row.models.isNotEmpty) ...[
+              const Divider(height: 32),
+              ProviderModelPreview(usage: row),
+            ],
             const SizedBox(height: 16),
-            Text(
-              unsupported
-                  ? 'Chưa đọc được số liệu Antigravity'
-                  : 'Chưa thể thống kê $name',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              unsupported
-                  ? 'Sẽ hiển thị model và quota khi có bộ kết nối thật.'
-                  : 'Chưa có số liệu không có nghĩa là bạn chưa sử dụng. '
-                        'Đăng nhập Google chỉ xác định tài khoản TokenLedger.',
-            ),
+            Text(row.coverage, style: text.bodySmall),
           ],
-          if (row != null && !ready && row.models.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            const Text('Model từ bản đã đọc trước đó'),
-            ProviderModelPreview(usage: row),
-          ],
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
@@ -172,7 +177,3 @@ class _Number extends StatelessWidget {
     ],
   );
 }
-
-String _tokens(int? value) => value != null && value >= 1000000000
-    ? '${(value / 1000000000).toStringAsFixed(2)}B'
-    : compactTokens(value);

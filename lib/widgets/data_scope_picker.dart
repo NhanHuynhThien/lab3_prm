@@ -26,6 +26,7 @@ class DataScopePicker extends ConsumerWidget {
               onSelected: (scope) =>
                   ref.read(dataScopeProvider.notifier).select(scope),
               itemBuilder: (_) => DataScope.values
+                  .where((scope) => scope != DataScope.demo)
                   .map(
                     (scope) =>
                         PopupMenuItem(value: scope, child: Text(scope.label)),

@@ -62,9 +62,14 @@ class PdfReportService {
           pw.SizedBox(height: 12),
           PdfReportBuilders.buildSummaryCards(
             sessions.length,
-            totalCostMicros,
-            totalTokens,
+            sessions.any((s) => s.costMicros != null) ? totalCostMicros : null,
+            sessions.any((s) => s.knownTokens != null) ? totalTokens : null,
             accounts.length,
+          ),
+          pw.SizedBox(height: 12),
+          pw.Text(
+            'Sổ ghi nhận: ${sessions.where((s) => s.costMicros != null).length}/${sessions.length} phiên có chi phí; ${sessions.where((s) => s.knownTokens != null).length}/${sessions.length} có token. Số liệu thiếu không được xem là 0. Không bao gồm snapshot CLI/nguồn AI.',
+            style: const pw.TextStyle(fontSize: 10),
           ),
           pw.SizedBox(height: 24),
           PdfReportBuilders.buildAccountTable(accounts, sessions),

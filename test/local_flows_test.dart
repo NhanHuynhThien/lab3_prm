@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:token_ledger/screens/accounts_screen.dart';
 import 'package:token_ledger/screens/shell_screen.dart';
 import 'package:token_ledger/screens/usage_form_screen.dart';
-import 'package:token_ledger/services/demo_seed.dart';
+
+import 'support/demo_seed.dart';
+
 import 'package:token_ledger/services/ledger_repository.dart';
 import 'package:token_ledger/services/usage_calculator.dart';
 import 'package:token_ledger/theme/app_theme.dart';
@@ -16,7 +17,6 @@ import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 
 import 'ledger_stability_test.dart' show PendingRepository;
 import 'ledger_viewmodel_test.dart' show MemoryRepository;
-import 'local_repository_test.dart' show FaultyPreferences;
 
 void main() {
   final now = DateTime(2026, 10, 21, 10);
@@ -152,66 +152,23 @@ void main() {
       },
     );
 
-    testWidgets(
-      'B05 recovery Retry/cancel preserve original; confirm backs it up at ${width.toInt()}dp',
-      (tester) async {
-        SharedPreferences.setMockInitialValues({storage: '{original broken'});
-        final prefs = await SharedPreferences.getInstance();
-        final container = owner(LocalLedgerRepository(prefs));
-        addTearDown(container.dispose);
-        await open(tester, container, const ShellScreen(), width: width);
-        expect(find.text('Không thể tải dữ liệu'), findsOneWidget);
-        await tester.tap(find.text('Thử lại'));
-        await tester.pumpAndSettle();
-        expect(prefs.getString(storage), '{original broken');
-        await tester.tap(find.text('Khôi phục dữ liệu local'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Hủy'));
-        await tester.pumpAndSettle();
-        expect(prefs.getString(storage), '{original broken');
-        expect(prefs.get(backup), isNull);
-        await tester.tap(find.text('Khôi phục dữ liệu local'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('Sao lưu và khôi phục'));
-        await tester.pumpAndSettle();
-        expect(
-          jsonDecode(prefs.getString(backup)!)['value'],
-          '{original broken',
-        );
-        expect(container.read(ledgerProvider).requireValue.sessions.length, 12);
-        expect(find.text('Không thể tải dữ liệu'), findsNothing);
-        expect(tester.takeException(), isNull);
-        container.dispose();
-      },
-    );
-  }
-
-  testWidgets(
-    'B05 failed recovery stays on error with retry and never signals success',
-    (tester) async {
-      final prefs = FaultyPreferences()
-        ..values[storage] = '{broken'
-        ..failKey = backup;
+    testWidgets('corrupt local data stays protected through retry at $width', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({storage: '{original broken'});
+      final prefs = await SharedPreferences.getInstance();
       final container = owner(LocalLedgerRepository(prefs));
       addTearDown(container.dispose);
-      await open(tester, container, const ShellScreen());
-      await tester.tap(find.text('Khôi phục dữ liệu local'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Sao lưu và khôi phục'));
-      await tester.pumpAndSettle();
+      await open(tester, container, const ShellScreen(), width: width);
       expect(find.text('Không thể tải dữ liệu'), findsOneWidget);
-      expect(find.textContaining('Không tạo được bản sao'), findsOneWidget);
-      expect(prefs.values[storage], '{broken');
+      await tester.tap(find.text('Thử lại'));
+      await tester.pumpAndSettle();
+      expect(prefs.getString(storage), '{original broken');
+      expect(find.text('Khôi phục dữ liệu local'), findsNothing);
+      expect(prefs.get(backup), isNull);
       expect(container.read(ledgerProvider).hasError, isTrue);
-      prefs.failKey = null;
-      await tester.tap(find.text('Khôi phục dữ liệu local'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Sao lưu và khôi phục'));
-      await tester.pumpAndSettle();
-      expect(container.read(ledgerProvider).hasValue, isTrue);
-      container.dispose();
-    },
-  );
+    });
+  }
 
   testWidgets(
     'B06 double tap then forced route removal does not pop another route or duplicate save',

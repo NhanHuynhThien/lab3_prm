@@ -41,7 +41,7 @@ void main() {
     },
   );
 
-  for (final demo in [false, true]) {
+  for (final demo in [false]) {
     testWidgets('owner auto-connect is session scoped; demo=$demo', (
       tester,
     ) async {
@@ -51,7 +51,6 @@ void main() {
         ..repository = TrackingRepository();
       await h.open(
         tester,
-        demo: demo,
         autoConnect: ProviderAutoConnect(
           ownerEmail: owner.email!,
           token: token,
@@ -69,7 +68,18 @@ void main() {
           demo ? isNull : isNotNull,
         );
         if (!demo) {
-          expect(find.textContaining('codex-test-model'), findsOneWidget);
+          expect(find.text('ChatGPT / Codex'), findsOneWidget);
+          expect(
+            scope
+                .read(providerSyncProvider)
+                .snapshot!
+                .providers
+                .first
+                .models
+                .first
+                .model,
+            'codex-test-model',
+          );
           scope.read(providerSyncProvider.notifier).disconnect();
           await tester.pumpAndSettle();
           expect(fake.calls, 1);

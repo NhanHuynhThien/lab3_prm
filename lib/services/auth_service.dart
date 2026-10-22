@@ -12,7 +12,7 @@ class UnavailableAuthService implements AuthService {
   const UnavailableAuthService();
   static const failure = AuthFailure(
     AuthProblem.configuration,
-    'Chưa có kết nối đăng nhập. Bạn vẫn có thể mở không gian demo local.',
+    'Chưa có kết nối đăng nhập. Hãy kiểm tra cấu hình Firebase.',
   );
   @override
   Future<void> initialize() => Future.error(failure);

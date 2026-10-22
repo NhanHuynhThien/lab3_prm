@@ -18,10 +18,7 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# Team launch configuration is tracked; machine settings stay local.
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -82,4 +79,13 @@ __pycache__/
 .venv/
 venv/
 
-firebase.json
+# Local service caches, captures, exports and package artifacts
+/firebase-debug.log*
+/firestore-debug.log*
+/ui-debug.log*
+*.apk
+*.aab
+*.ipa
+*.profraw
+*.profdata
+*.lcov

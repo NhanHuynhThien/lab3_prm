@@ -79,12 +79,8 @@ void main() {
         expect(h.stores['B']!.activeListeners, 4);
         await h.nav(tester, 'Cá nhân');
         expect(find.text('User B'), findsOneWidget);
-        expect(find.text('Đã kết nối'), findsNWidgets(2));
-        await h.tap(tester, 'Mở demo local riêng biệt');
-        expect(find.text('Ngân sách còn lại · Kỳ hiện tại'), findsOneWidget);
-        expect(h.stores['B']!.activeListeners, 0);
-        await h.nav(tester, 'Cá nhân');
-        await h.tap(tester, 'Thoát không gian demo');
+        expect(find.text('Đã đăng nhập Google'), findsOneWidget);
+        expect(find.text('Mở demo local riêng biệt'), findsNothing);
         await h.nav(tester, 'Tài khoản');
         expect(find.text('Private A'), findsNothing);
         expect(h.stores['B']!.documents, isEmpty);
@@ -120,7 +116,7 @@ void main() {
         expect(find.text('Private A'), findsOneWidget);
         await h.nav(tester, 'Cá nhân');
         await h.tap(tester, 'Đăng xuất Google');
-        expect(find.text('Mở không gian demo'), findsOneWidget);
+        expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
         expect(h.stores['A']!.activeListeners, 0);
       } finally {
         await h.close(tester);
@@ -133,21 +129,15 @@ void main() {
     (tester) async {
       await h.open(tester, corrupt: true);
       try {
-        expect(find.text('Hoạt động AI'), findsOneWidget);
-        await h.reveal(
-          tester,
-          find.textContaining('Không đọc được dữ liệu cloud'),
-        );
-        expect(
-          find.textContaining('Không đọc được dữ liệu cloud'),
-          findsOneWidget,
-        );
+        expect(find.text('Dashboard agent'), findsOneWidget);
+        await h.reveal(tester, find.textContaining('Chưa đọc được dữ liệu'));
+        expect(find.textContaining('Chưa đọc được dữ liệu'), findsOneWidget);
         expect(h.root.exists(ledgerProvider), isFalse);
         await h.nav(tester, 'Cá nhân');
         expect(find.text('Lỗi kết nối'), findsOneWidget);
-        expect(find.text('Đã kết nối'), findsOneWidget);
+        expect(find.text('Đã đăng nhập Google'), findsOneWidget);
         await h.tap(tester, 'Đăng xuất Google');
-        expect(find.text('Mở không gian demo'), findsOneWidget);
+        expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
         expect(h.stores['A']!.documents.length, 1);
       } finally {
         await h.close(tester);

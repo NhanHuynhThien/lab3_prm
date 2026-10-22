@@ -87,8 +87,8 @@ class PdfReportBuilders {
 
   static pw.Widget buildSummaryCards(
     int sessionCount,
-    int costMicros,
-    int tokenCount,
+    int? costMicros,
+    int? tokenCount,
     int accountCount,
   ) {
     return pw.Row(

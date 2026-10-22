@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/export_report.dart';
+import '../models/ledger.dart';
+import '../services/manual_report_projection.dart';
 import '../theme/app_theme.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
@@ -34,8 +36,15 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final accounts = ref.watch(ledgerProvider).value?.accounts ?? [];
-    final sessions = ref.watch(filteredSessionsProvider);
+    final data = ref.watch(ledgerProvider).asData?.value;
+    final projection = ManualReportProjection(
+      data: data ?? LedgerData(accounts: [], sessions: []),
+      now: ref.watch(nowProvider),
+      period: _selectedPeriod,
+      scope: ref.watch(effectiveDataScopeProvider),
+    );
+    final accounts = projection.accounts;
+    final sessions = projection.sessions;
 
     int totalCostMicros = 0;
     int totalTokens = 0;
@@ -72,7 +81,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
               ),
               const SizedBox(height: AppSpace.sm),
               const Text(
-                'Tạo tài liệu PDF chuyên nghiệp thống kê các phiên sử dụng, chi phí USD và hạn mức AI.',
+                'Báo cáo các phiên trong sổ ghi nhận theo kỳ bên dưới. Số liệu nguồn AI/CLI được xem riêng trong Phân tích.',
                 style: TextStyle(color: AppColors.muted, fontSize: 13),
               ),
               const SizedBox(height: AppSpace.md),
@@ -87,6 +96,12 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
                 totalCostMicros: totalCostMicros,
                 accountCount: accounts.length,
                 totalTokens: totalTokens,
+                knownCostCount: sessions
+                    .where((s) => s.costMicros != null)
+                    .length,
+                knownTokensCount: sessions
+                    .where((s) => s.knownTokens != null)
+                    .length,
               ),
               if (_isWorking) ...[
                 const SizedBox(height: AppSpace.md),
@@ -105,7 +120,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
                 const SizedBox(height: AppSpace.md),
                 Text(
                   _errorMessage!,
-                  style: const TextStyle(color: AppColors.error, fontSize: 13),
+                  style: const TextStyle(color: AppColors.danger, fontSize: 13),
                 ),
               ],
               if (_completedReport != null) ...[
@@ -122,8 +137,10 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
   }
 
   Widget _buildActions(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Wrap(
+      alignment: WrapAlignment.end,
+      spacing: 8,
+      runSpacing: 8,
       children: [
         TextButton(
           onPressed: _isWorking ? null : () => Navigator.pop(context),
@@ -183,17 +200,23 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
 
     try {
       final reportManager = ref.read(reportManagementServiceProvider);
-      final accounts = ref.read(ledgerProvider).value?.accounts ?? [];
-      final sessions = ref.read(filteredSessionsProvider);
+      final data = ref.read(ledgerProvider).requireValue;
+      final projection = ManualReportProjection(
+        data: data,
+        now: ref.read(clockProvider)(),
+        period: _selectedPeriod,
+        scope: ref.read(effectiveDataScopeProvider),
+      );
       final user = ref.read(authSessionProvider).asData?.value;
 
       final report = await reportManager.generateReport(
-        periodLabel: _selectedPeriod,
-        accounts: accounts,
-        sessions: sessions,
+        periodLabel: projection.label,
+        accounts: projection.accounts,
+        sessions: projection.sessions,
         userEmail: user?.email,
       );
 
+      if (!mounted) return;
       if (uploadToCloud) {
         setState(() {
           _statusText = 'Đang tải lên Firebase Cloud Storage...';
@@ -211,7 +234,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
           setState(() {
             _isWorking = false;
             _completedReport = uploaded;
-            _statusText = 'Hoàn tất!';
+            _statusText = 'Đã hoàn tất.';
           });
         }
       } else {
@@ -219,7 +242,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
           setState(() {
             _isWorking = false;
             _completedReport = report;
-            _statusText = 'Đã tạo xong!';
+            _statusText = 'Đã tạo báo cáo.';
           });
         }
         if (report.localPath != null) {

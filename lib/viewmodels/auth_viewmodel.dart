@@ -16,7 +16,7 @@ final authSessionProvider = StreamProvider<AuthUser?>((ref) async* {
   } on TimeoutException {
     throw const AuthFailure(
       AuthProblem.network,
-      'Kết nối đăng nhập mất nhiều thời gian. Hãy thử lại hoặc mở demo local.',
+      'Kết nối đăng nhập mất nhiều thời gian. Hãy kiểm tra mạng và thử lại.',
     );
   }
   yield* service.userChanges;

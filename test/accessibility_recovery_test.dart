@@ -28,76 +28,30 @@ void main() {
   });
 
   for (final width in [360.0, 412.0]) {
-    testWidgets(
-      'B12 reset/clear cancel, failure, pending and successful recovery $width',
-      (tester) async {
-        final repo = StateRepository();
-        final container = h.owner(repo);
-        await container.read(ledgerProvider.future);
-        final vm = container.read(ledgerProvider.notifier);
-        await vm.deleteUsage(repo.data!.sessions.first.id);
-        final before = repo.data!;
-        try {
-          await h.open(
-            tester,
-            container,
-            const Scaffold(body: ProfileScreen()),
-            width: width,
-          );
-          await tester.pumpAndSettle();
-          await h.reveal(tester, find.text('Xóa dữ liệu demo'));
-          await tester.tap(find.text('Xóa dữ liệu demo'));
-          await tester.pumpAndSettle();
-          expect(find.textContaining('không thể hoàn tác'), findsOneWidget);
-          await tester.tap(find.text('Hủy'));
-          await tester.pumpAndSettle();
-          expect(repo.data, same(before));
-          repo.failWrites = true;
-          await tester.tap(find.text('Khôi phục dữ liệu mẫu'));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('Xác nhận'));
-          await tester.pumpAndSettle();
-          expect(repo.data, same(before));
-          expect(find.textContaining('disk full'), findsOneWidget);
-          repo.failWrites = false;
-          await h.reveal(tester, find.text('Khôi phục dữ liệu mẫu'));
-          await tester.tap(find.text('Khôi phục dữ liệu mẫu'));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('Xác nhận'));
-          await tester.pumpAndSettle();
-          expect(repo.data!.sessions.length, 12);
-          repo.writing = Completer<void>();
-          final writes = repo.writes;
-          await tester.tap(find.text('Xóa dữ liệu demo'));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('Xác nhận'));
-          await tester.pump();
-          expect(
-            tester
-                .widget<OutlinedButton>(
-                  find.widgetWithText(OutlinedButton, 'Thoát không gian demo'),
-                )
-                .onPressed,
-            isNull,
-          );
-          expect(repo.writes, writes + 1);
-          expect(repo.data!.sessions.length, 12);
-          repo.writing!.complete();
-          repo.writing = null;
-          await tester.pumpAndSettle();
-          expect(repo.data!.accounts, isEmpty);
-          expect(repo.data!.sessions, isEmpty);
-          await h.reveal(tester, find.text('Khôi phục dữ liệu mẫu'));
-          await tester.tap(find.text('Khôi phục dữ liệu mẫu'));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('Xác nhận'));
-          await tester.pumpAndSettle();
-          expect(repo.data!.accounts.length, 3);
-        } finally {
-          await h.close(tester, container);
-        }
-      },
-    );
+    testWidgets('Profile has no sandbox or sample data controls $width', (
+      tester,
+    ) async {
+      final repo = StateRepository();
+      final container = h.owner(repo);
+      await container.read(ledgerProvider.future);
+      final before = repo.data;
+      try {
+        await h.open(
+          tester,
+          container,
+          const Scaffold(body: ProfileScreen()),
+          width: width,
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Xóa dữ liệu demo'), findsNothing);
+        expect(find.text('Khôi phục dữ liệu mẫu'), findsNothing);
+        expect(find.text('Mở demo local riêng biệt'), findsNothing);
+        expect(repo.data, same(before));
+        expect(tester.takeException(), isNull);
+      } finally {
+        await h.close(tester, container);
+      }
+    });
   }
 
   testWidgets(

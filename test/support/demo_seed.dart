@@ -1,5 +1,5 @@
-import '../models/ledger.dart';
-import 'reporting_calendar.dart';
+import 'package:token_ledger/models/ledger.dart';
+import 'package:token_ledger/services/reporting_calendar.dart';
 
 /// Deliberately fictional manual entries. These are not provider prices or balances.
 LedgerData createDemoSeed(

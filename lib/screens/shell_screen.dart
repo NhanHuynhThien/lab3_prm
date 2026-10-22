@@ -8,6 +8,7 @@ import '../viewmodels/product_features_viewmodel.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/common.dart';
 import '../widgets/desktop_sidebar.dart';
+import '../widgets/notification_button.dart';
 import 'accounts_screen.dart';
 import 'analytics_screen.dart';
 import 'dashboard_screen.dart';
@@ -15,10 +16,9 @@ import 'history_screen.dart';
 import 'profile_screen.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
-  const ShellScreen({super.key, this.user, this.onOpenDemo, this.onLeaveDemo});
+  const ShellScreen({super.key, this.user});
 
   final AuthUser? user;
-  final VoidCallback? onOpenDemo, onLeaveDemo;
 
   @override
   ConsumerState<ShellScreen> createState() => _ShellScreenState();
@@ -27,6 +27,20 @@ class ShellScreen extends ConsumerStatefulWidget {
 class _ShellScreenState extends ConsumerState<ShellScreen>
     with SingleTickerProviderStateMixin {
   int _index = 0;
+  final _visited = <int>{0};
+  AuthUser? _profileUser;
+  late final _pages = <Widget>[
+    RepaintBoundary(
+      child: DashboardScreen(
+        onAccounts: () => _selectTab(1),
+        onAnalytics: () => _selectTab(2),
+      ),
+    ),
+    const RepaintBoundary(child: AccountsScreen()),
+    const RepaintBoundary(child: AnalyticsScreen()),
+    RepaintBoundary(child: ProfileScreen(user: widget.user)),
+  ];
+
   static const _screenNames = ['overview', 'accounts', 'analytics', 'profile'];
   static const labels = ['Tổng quan', 'Tài khoản AI', 'Phân tích', 'Cá nhân'];
   static const icons = [
@@ -69,13 +83,16 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
 
   void _selectTab(int index) {
     if (_index == index) return;
-    setState(() => _index = index);
+    setState(() {
+      _index = index;
+      _visited.add(index);
+    });
     ref.read(productFeaturesProvider.notifier).screen(_screenNames[index]);
     _tabFade.duration = AppMotion.duration(context, AppMotion.short);
     if (MediaQuery.disableAnimationsOf(context)) {
       _tabFade.value = 1;
     } else {
-      _tabFade.forward(from: .65);
+      _tabFade.forward(from: 0);
     }
   }
 
@@ -87,31 +104,39 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     final user = restored?.uid == widget.user?.uid ? restored : widget.user;
     final wide = MediaQuery.sizeOf(context).width >= AppSpace.wide;
 
-    final page = IndexedStack(
-      index: _index,
+    if (_profileUser != user) {
+      _profileUser = user;
+      _pages[3] = RepaintBoundary(child: ProfileScreen(user: user));
+    }
+    final page = Stack(
+      fit: StackFit.expand,
       children: [
-        RepaintBoundary(
-          child: DashboardScreen(
-            onAccounts: () => _selectTab(1),
-            onAnalytics: () => _selectTab(2),
+        for (final i in _visited)
+          Offstage(
+            key: ValueKey('workspace-tab-$i'),
+            offstage: i != _index,
+            child: TickerMode(enabled: i == _index, child: _pages[i]),
           ),
-        ),
-        const RepaintBoundary(child: AccountsScreen()),
-        const RepaintBoundary(child: AnalyticsScreen()),
-        RepaintBoundary(
-          child: ProfileScreen(
-            user: user,
-            onOpenDemo: widget.onOpenDemo,
-            onLeaveDemo: widget.onLeaveDemo,
-          ),
-        ),
       ],
     );
 
     final content = FadeTransition(
       key: const ValueKey('tab-transition'),
-      opacity: _tabFade.drive(CurveTween(curve: AppMotion.curve)),
-      child: page,
+      opacity: _tabFade.drive(
+        Tween<double>(
+          begin: .92,
+          end: 1,
+        ).chain(CurveTween(curve: AppMotion.curve)),
+      ),
+      child: SlideTransition(
+        position: _tabFade.drive(
+          Tween<Offset>(
+            begin: const Offset(0, .012),
+            end: Offset.zero,
+          ).chain(CurveTween(curve: AppMotion.curve)),
+        ),
+        child: page,
+      ),
     );
 
     return Scaffold(
@@ -141,12 +166,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               const Spacer(),
-                              StatusTag(
-                                widget.user == null
-                                    ? 'Demo local'
-                                    : 'Firestore',
-                                neutral: true,
-                              ),
+                              const NotificationButton(),
+                              const SizedBox(width: 8),
+                              StatusTag('Đã đăng nhập', neutral: true),
                               const SizedBox(width: 16),
                               IconButton(
                                 tooltip: 'Cá nhân & trạng thái kết nối',
@@ -182,8 +204,13 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                     padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
                     child: Row(
                       children: [
-                        const BrandLockup(compact: true),
-                        const Spacer(),
+                        const Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: BrandLockup(compact: true),
+                          ),
+                        ),
+                        const NotificationButton(),
                         IconButton(
                           tooltip: 'Lịch sử sử dụng',
                           onPressed: () => Navigator.push(

@@ -21,16 +21,15 @@ class Panel extends StatelessWidget {
   final Color color;
   final EdgeInsets padding;
   @override
-  Widget build(BuildContext context) => Container(
-    padding: padding,
-    decoration: BoxDecoration(
-      color: color,
+  Widget build(BuildContext context) => Material(
+    color: color,
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(AppSpace.cardRadius),
-      border: color == AppColors.surface
-          ? Border.all(color: AppColors.line)
-          : null,
+      side: color == AppColors.surface
+          ? const BorderSide(color: AppColors.line)
+          : BorderSide.none,
     ),
-    child: child,
+    child: Padding(padding: padding, child: child),
   );
 }
 
@@ -78,7 +77,10 @@ class SectionTitle extends StatelessWidget {
     child: Row(
       children: [
         Expanded(
-          child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+          child: Semantics(
+            header: true,
+            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+          ),
         ),
         if (action != null)
           TextButton(onPressed: onAction, child: Text(action!)),
@@ -88,31 +90,47 @@ class SectionTitle extends StatelessWidget {
 }
 
 class PageHeading extends StatelessWidget {
-  const PageHeading(this.title, this.subtitle, {super.key, this.action});
+  const PageHeading(
+    this.title,
+    this.subtitle, {
+    super.key,
+    this.action,
+    this.centered = false,
+  });
   final String title, subtitle;
   final Widget? action;
+  final bool centered;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, c) {
       final text = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: centered
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: [
           Semantics(
             header: true,
             child: Text(
               title,
+              textAlign: centered ? TextAlign.center : TextAlign.start,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
           ),
           const SizedBox(height: 6),
-          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            subtitle,
+            textAlign: centered ? TextAlign.center : TextAlign.start,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       );
       return Padding(
         padding: const EdgeInsets.only(bottom: 24),
-        child: c.maxWidth < 520
+        child: centered || c.maxWidth < 520
             ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: centered
+                    ? CrossAxisAlignment.center
+                    : CrossAxisAlignment.start,
                 children: [
                   text,
                   if (action != null)

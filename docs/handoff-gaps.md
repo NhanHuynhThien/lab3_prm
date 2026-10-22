@@ -1,98 +1,18 @@
-# Handoff gaps — hiện trạng21/10/2026
+# Handoff gaps và quyết định xử lý
 
-## Analytics/Remote Config và manual web checks —21/10/2026
+Cập nhật22/10/2026 theo [PDF17trang](ASSIGNMENT_REQUIREMENTS.md). Nguồn Lab2 là Figma và flutter-handoff trong [fidelity-check](fidelity-check.md). Topic StudentPay→TokenLedger đã được giảng viên chấp thuận theo user21/10; không suy thành đã duyệt fidelity hoặc miễn Firebase/tests.
 
-Người dùng xác nhận toàn bộ đợt manual web1–7 đạt: account edit/budget, usage totals/purpose drilldown, unknown data, validation/Back draft, archive/restore/history guard, empty-account delete, multi-quota/bounds; trước đó đã xác nhận reload/A-B isolation và offline/Retry. Đây là user-reported web evidence, không phải Android/ARTEMIS/concurrency stress hoặc console do agent kiểm.
-
-Đã thêm Analytics13.0.0 và RemoteConfig7.0.0, typed/noPII event allowlist, UID-serialized lifecycle/dedupe/success-only cloud mutations và tab/account/usage detail events; demo no-op. Remote Config defaults overview_recent_limit3/budget_warning_percent80, parse/clamp/cache/fallback/retry/single-flight; dashboard recent rows/warning thực thay đổi qua projections, không cắt dataset hoặc đổi tiền/token. Profile có effective values/source/check time/refresh và Analytics SDK status; Crashlytics vẫn chưa nối. Đọc [plan Analytics](analytics-plan.md) và [implementation/manual guide](analytics-remote-config.md).
-
-Verification cuối xem test-report; không coi SDK state hoặc fake tests là DebugView/console evidence. Remote Config publish→app before-after, DebugView mỗi event, Android/ARTEMIS vẫn pending; PDF export/upload events chỉ planned. FCM/Crash/PDF và Final modules chưa làm. Không Android emulator/billing/deploy hoặc push trong lượt này. Các câu SDK Analytics/RC còn pending ở checkpoint dưới đây đã được cập nhật implementation mới; giữ history/results đúng thời điểm.
-
-
-## Cập nhật yêu cầu21/10 — ưu tiên hơn checkpoint phía dưới
-
-[Baseline Lab3 + Final](ASSIGNMENT_REQUIREMENTS.md) đã đối chiếu đủ hai PDF mới. Giảng viên chấp thuận đổi sang TokenLedger theo xác nhận trực tiếp của người dùng21/10; các câu còn chờ duyệt chủ đề phía dưới là lịch sử. Không suy thành duyệt roles Final, miễn Storage/tests hoặc nghiệm thu UI.
-
-Auth/Firestore workspace/rules/indexes đã có tại main484cc41;299 Flutter tests/142 Rules API cases là evidence trước lượt docs, manual CRUD/A-B/native còn chờ. Đề mới yêu cầu ARTEMIS (không MobAI), AI review5 findings/3 separate fixes, report8–12p/slides12–15/video5–10m. Final cần roles/admin/shared core/cross-role/Gemini/AppCheck và Emulator tests; PDF L3 Storage khác Final device save/share. Baseline mới giữ mọi việc còn mở, không tick từ lượt docs này. Các checkpoint phía dưới chỉ có hiệu lực trong scope/time ghi tại từng mục.
-
-
-## Cloud workspace/rules —21/10/2026, mục3–5
-
-Đã nối4 tab với Firestore theo UID, CloudLedgerViewModel dùng4 streams ghép nhất quán, full-dataset reporting, CRUD/quota/settings atomic, revision từ lúc mở form, last-good/cache/pending/error/retry giữ draft/filter. Mỗi UID/demo có ProviderContainer/Navigator riêng, root auth action coordinator dùng chung; logout/change UID dọn state/listeners/routes, không seed/upload local vào cloud. Factory tắt Firestore disk persistence. [Workspace hướng dẫn](firestore-workspace.md) ghi thiết kế và manual checks.
-
-Rules default deny/owner/schema/relations/counters/quota labels/receipts đã code và deploy với5 indexes vào tokenledger-lab3/(default), Standard/asia-southeast1. Rules Test API142 cases pass (mocks trước/sau, không emulator/doc writes), live source hash khớp local và unauth GET403. Index readiness xem test-report, không suy deploy accepted thành READY. Full299 Flutter tests pass162s, analyzer sạch, web release48.3s;46 lib/22 test Dart files (2 helpers).25 tests VM/workspace mới;15 Auth tests cập nhật giữ assertions. Native/A-B thật/SDK transactions qua mạng/F1–F3 manual gates vẫn cần nghiệm thu. FCM/RC/Crash/Analytics SDK/PDF/Figma sync chưa làm. Không emulator/billing/commit/push.
-
-
-## Firestore foundation —21/10/2026, mục1–2
-
-Đã thêm cloud_firestore7.0.0, thiết kế envelope/paths theo UID, CloudLedgerRepository streams/atomic CRUD và SDK adapter cho account/usage/quota. Counters/revisions/quota label reservations và operation receipts commit cùng transaction, không upload snapshot local.35 tests repository mới pass; full regression274 tests pass138s trước lần siết receipt/path validation cuối, sau đó35 tests liên quan pass lại; analyzer sạch và web build xem test-report. Source44 lib/20 test Dart files, gồm2 support helpers. [Data contract](firestore-data-contract.md) ghi mapping/invariants/query/indexes và lifecycle. Chưa nối UI/VM, chưa viết/deploy rules/indexes hoặc kiểm database thật; các backend gates còn pending. Không emulator, billing, telemetry hoặc publication.
-
-Người dùng báo Google web login/reload/logout và Authentication Users đã thành công, đồng thời đã tạo Firestore. Đây là xác nhận người dùng; native/Play services/release cert và Firestore integration chưa được kiểm bởi agent.
-
-
-## Firebase/Auth C01–C03 —21/10/2026
-
-Người dùng đã cho phép tiếp tục Firebase và cung cấp config project `tokenledger-lab3`. Core/Auth/Google SDK, service/VM, loading/cancel/error/Retry, auth guard/Profile và sandbox demo đã có code. Google provider/localhost và debug SHA được kiểm trực tiếp qua API/CLI; không gọi ledger trước auth hoặc đưa seed vào dữ liệu cloud. Profile authenticated hiện identity thật từ SDK, dữ liệu Firestore chưa nối. Full239 tests pass140s, analyzer sạch, web JS build45.3s; Gradle processDebugGoogleServices pass112s, không build APK/chạy máy ảo. [Auth setup](firebase-auth-setup.md) ghi source/flows/config/evidence và manual OAuth/native còn cần kiểm; GATE-01 chưa đạt. Không đổi billing, bật Analytics SDK hoặc các services ngoài Auth. Làm trên main sau PR#1; lượt này chưa commit/push.
-
-## Bước2 — visual handoff P0,21/10/2026
-
-Đã cập nhật live Figma theo source checkpoint `d4b6167`:8 màn360/412,3 phần cuộn P0,6 feedback specimens và provider/cost-basis continuation;7 local components,455 text nodes/120 instances,0 image fills.8 original annotations và8 notes trang07 đã sync. Đã xem QA412/component states Lab2, app renders360/412 và ảnh Figma sau fixes. [Visual handoff](visual-handoff-21-10.md) giữ bảng3 phía, node links, môi trường, sai khác và giới hạn. Audit local F11–F13 đã có evidence; chưa pixel-perfect/sign-off/GATE-08/native/backend/submission. Lượt này không sửa Flutter hoặc chạy lại tests/build;83 runtime hashes giữ nguyên. Không emulator/Firebase/push.
-
-Hiện trạng mới sau A04: [local P0 upgrade](local-p0-upgrade.md) đã giải quyết phần local model/default purposes/multi-window/source/cycle của HG06/HG09, mở rộng form/retry HG03/HG07 và source isolation HG04. Bảng HG dưới đây đã cập nhật implementation sau A04; backend/native/lecturer/final fidelity vẫn pending. Không đánh toàn gap đã đóng theo local tests.
-
-HG01–HG10 giữ đúng nghĩa trong [plan mục2](IMPLEMENTATION_PLAN.md), không đánh số lại các lỗi kỹ thuật thành gap gốc khác. Phần chi tiết scaffold phía dưới là lịch sử; bảng này và [scope decisions SD01–SD08](scope-decisions.md) là trạng thái hiện hành. A03–A06 là audit docs; lượt upgrade sau đó có code/test/build, kết quả cuối ở test-report.
-
-| Gap gốc | Resolution hiện có | Verification / phần còn lại |
+| Gap handoff | Cách xử lý trong source | Trạng thái/bằng chứng |
 |---|---|---|
-| HG01 Root DESIGN lịch sử khác final | Dùng Lab2 reference/theme; đã xem8 final360/8 QA412 và component/state boards live | Visual handoff có mockups360/412/annotations P0; local audit hoàn tất, pixel/native/lecturer sign-off pending |
-| HG02 Handoff chưa có Flutter code |46 lib files, theme/components/screens Riverpod, cloud repository/VM đã có | Bộ tests hiện hành trong test-report; manual backend/native acceptance còn chờ |
-| HG03 Preset/form giả | Form thật, validation chung, draft/Back/Retry/stable ID | Form safety/stability/local flows tests; native IME hoãn |
-| HG04 Dataset prototype độc lập | Shared local ledger/projections/calculator, source isolation và demo-safe reset đã có | Firestore/UID/atomic counters và cloud demo isolation chưa có; C05–C15/SD07 pending |
-| HG05 iOS chrome trong bài Android | App dùng SafeArea/Material system bars, không vẽ Dynamic Island | Flutter simulated insets đã test; APK trước polish không thay native test source hiện hành |
-| HG06 Thiếu login/quota/provider/usage | Có demo entry/metadata/usage/purpose/model/defaults/multi-window/source/cycle/IANA; S09–S12 local thích nghi | Google Auth có service/VM/guard/Profile và automated checks; live OAuth/native và S13–S14 chưa nghiệm thu. Numeric quota allowances/estimates không thuộc mode hiện tại; full Firebase/fidelity pending |
-| HG07 Loading/error minh họa | Async local states/typed failures/Retry/recovery và confirmed mutations thật | Tests load/write/backup/dispose/reload đã có; Auth có cancel/network/config/Retry tests; query/PDF upload states chờ backend |
-| HG08 Chưa kiểm keyboard/text lớn/accessibility | Ma trận360/412/768/1440, scale1/1.3/2, semantics/focus/targets/contrast/reduced motion | Tests/ảnh Flutter trong fidelity-check; TalkBack/IME/native hoãn, không claim widget tests thay chúng |
-| HG09 Chưa rõ remaining tiền/token/% | USD micros/null-vs-zero/coverage/basis breakdown, budget theo cycle/source, quota windows manual stale không cộng% | Calculator/schema/VM/calendar/live clock/form tests; numeric allowance/pricing mode/backend/native còn pending |
-| HG10 Chấp thuận đổi chủ đề | Giảng viên đã chấp thuận theo người dùng21/10; design mapping/annotations có | Gap approval đã đóng theo provenance user; traceability và final UI acceptance còn riêng, không suy thành duyệt roles Final/miễn Storage |
+| Nghiệp vụ chia tiền khác quản lý AI | Map8screens sang account/usage/purpose/quota; giữ 3 flows tạo usage, drilldown, quản lý account | Mapping tại fidelity; native từng case ở test report |
+| Không định nghĩa rõ token/quota/cost | USD integer micros; null khác0; quota độc lập/stale; actual/manual/unknown có nhãn | Models/calculator tests; provider history không thành hóa đơn |
+| Login/Profile chưa đủ Google state | Google-only AuthGate; Profile từ SDK; UID keyed container/navigator; không seed/bypass | Login/native restore đã quan sát; logout/A-B native đầy đủ còn thiếu |
+| Tạo/sửa/xóa khi mạng lỗi/Back | Shared validation, DraftGuard, stable IDs/receipts/revisions, keep draft/last-good/Retry, guard double tap | Unit/widget pass; native token-pair error footer cần retest |
+| Không có VM riêng cho mọi screen/state | Shared Riverpod providers tránh duplicate business state | Purpose/forms/export mapping còn cần làm rõ/refactor theo §5; không tạo VM rỗng |
+| Màn nguồn AI không có trong Lab2 | Dashboard agent riêng; picker/analysis/source setup theo tokens; Gemini/Antigravity coverage rõ | Figma22/10 chưa annotate |
+| Provider chỉ cho quota, không token/task/cost | Giữ unknown, official Antigravity4windows; Codex/Claude CLI có detail theo log; Gemini web chỉ activity | Không giả forecast/model usage/billing; xem provider-sync |
+| Desktop/chữ lớn/iOS chrome | Android SafeArea,4tabs; desktop sidebar; responsive/TextScaler/reduced motion | Widget360/412/1440,text1/2; native exact360/412/TalkBack còn thiếu |
+| PDF/notification/RC/Crash/Analytics không có handoff đầy đủ | Có services/controls/views nhưng không giả dữ liệu để đủ màn | Storage/metadata/routing/events/console gaps trong requirements audit |
+| Đề cũ lẫn ARTEMIS/Final | Dùng đúng Lab3 PDF17trang/MobAI/7docs/report5–10p/video3–5m | Bỏ các roadmap/baseline cũ khỏi docs; lịch sử prompt giữ nguyên trong AI log |
 
-HG01–HG10 có resolution hoặc phần pending rõ, không đồng nghĩa tất cả gap đã đóng. DESIGN-03 là hoàn tất **ghi nhận gap**, các gates giữ pending. Backend không được coi là done theo local tests; đã có annotated mockups, nhưng pixel/native/lecturer sign-off, MobAI và release vẫn thiếu.
-
-## Lịch sử gaps khi dựng scaffold và local stability
-
-Các số lượng30 source/106 tests, Figma pending và B11 pending dưới đây chỉ mô tả thời điểm cũ; B11–B13 resolution sau đó đã thay thế. Không dùng đường dẫn Lab2 sibling để build fresh clone.
-
-| Gap | Quyết định trong code | Kiểm chứng / phần còn lại |
-|---|---|---|
-| Root DESIGN.md lịch sử khác final | Dùng `lab2_prm/design/DESIGN.md` cho màu/type/radius | Theme manual review; live Figma pending |
-| Không có Flutter Lab2 code | Xây reusable theme/widgets trước screens |30 source Dart files + 8 test files sau B03–B07 ngày21/10 |
-| Prototype chỉ preset tiền | Form account/usage thật, nullable metrics, validation, draft giữ khi chọn purpose |21/10: guard Back cho3 form; widget tests draft/lỗi lưu/retry/keyboard pass |
-| Nghiệp vụ mới khác hóa đơn | Map8 màn sang account/usage/purpose/analytics | DC02–DC06; giảng viên acceptance pending |
-| Login/profile chưa thiết kế đủ | Demo entry/profile cùng tokens, Google pending | Không claim Auth tích hợp |
-| Backend chưa cấu hình | Interface repository + local implementation | Firebase pending theo yêu cầu |
-| iOS chrome trong final | Dùng platform appbar/SafeArea, không vẽ iPhone UI |21/10: doctor xác nhận Android toolchain có; native results ghi trong test-report |
-| Token/quota/cost chưa có định nghĩa | USD micros, missing khác0, quota snapshot nhập tay độc lập | Calculator/VM tests |
-| Validation khác nhau giữa form và VM | LedgerValidation dùng chung, Unicode graphemes, bounds/null/zero/date/quota/references |106 tests toàn suite; quota-time bypass qua saveAccount đã chặn |
-| Storage hỏng không vào được Profile để reset | Lazy repo init; error/Retry + confirmed recovery, backup raw trước replace | Load/init/read/write/schema/backup/recovery UI/failure tests; schema1 giữ nguyên |
-| ID timestamp và reload/dispose khi đang save | UUIDv4 và VM write/reload/epoch/mounted guards | Cùng clock/lùi clock/retry/concurrency/dispose/forced route removal tests; multi-window vẫn ngoài scope |
-| Reporting không tự đổi khi thời gian trôi | Reactive nowProvider, minute/reset deadline, pause/resume/dispose; UTC-local thống nhất |10 live clock tests; không tự seed lại hoặc reset quota |
-| Timezone và quota cycle | Local demo theo timezone thiết bị/tháng dương lịch; stale quota khi reset | IANA timezone/cycle tùy chỉnh còn pending |
-| Desktop layout chưa có Lab2 | Framed-sheet sidebar responsive; mobile4 tab | Browser screenshots và widget360/412/768/1440 |
-| Visual inspector dựa vào DOM | Flutter dùng CanvasKit, DOM inspector không thấy canvas text/h1 | Dùng ảnh thật + Flutter widget tests; không claim DOM gate pass |
-| Chart/legend/sidebar tràn khi chữ lớn hoặc số tiền dài | Chart đo label + cuộn ngang, caption donut có fallback, AdaptivePair và sidebar cuộn | B08–B10: ma trận360/412/768/1440×800, scale1/1.3/2, seed/stress; xem fidelity-check |
-| Appbar/helper bị cắt nhưng không luôn báo RenderFlex | Toolbar theo scaler, title2 dòng, helper/error12 dòng | Ảnh Flutter font thật + title bounds assertions, keyboard focus/CTA tests |
-| Component states/targets thiếu audit chung | Material themes min48/CTA52, SaveButton/LoadingFeedback; gallery chỉ trong test | 9 families, pressed/focus/filled/disabled/loading/error/empty/dialog/selection; B11 accessibility đầy đủ vẫn pending |
-
-## Portability sau publication 20/10
-
-Repo dùng [lab2-ui-reference](lab2-ui-reference.md) và Figma gốc thay các bản copy ảnh/text nguồn. Flutter build chỉ đọc source/font/platform assets; không phụ thuộc sibling Lab2 hoặc bộ skill local.
-
-
-## B11–B13 resolutions —21/10/2026
-
-- Custom tap rows thiếu role/focus: ActionSurface semantics/min48/Tab+Enter/focus outline, guideline checks Purpose/4 tabs360/412. Border/range label contrast được sửa, không đổi palette.
-- Reduced motion chưa bao phủ route/dialog/sheet/busy hoặc đổi setting giữa fade: thêm bypass/noAnimation/static status, giữ tab/filter/scroll; saving khóa keyboard focus.
-- Reload/cold load trên route có thể requireValue crash/mất controls: ledgerFeedback + nullable init đọc; controllers/DraftGuard giữ qua lỗi, not-found không resurrect session. ConfirmedActionButton/Profile guard repeated confirm/dispose và không báo success khi write fail.
-- Live Figma annotation trước đây pending: đã xem8 final360, annotate8 original nodes và thêm page233:2/board233:3 gồm16 handoff cards. Từng link ở fidelity-check.md. DESIGN-05/full QA412/state/component review/final fidelity chưa tự đạt từ annotations.
-- Brand geometry/initials:3 tests xác minh SVG/painter/native/PWA/favicon/maskable; initials grapheme có label không phải logo provider. Không thêm tài sản runtime hoặc tái tạo icon không cần thiết.
-
-Native TalkBack/IME và MobAI vẫn hoãn; Flutter engine guidelines không thay Android evidence. Firebase/Notifications/Reports còn pending. Không emulator/delegation/commit/push.
+Thiết kế thay đổi có lý do trong [design log](design-change-log.md); annotations21/10 không tự đại diện UI22/10. [Code review](code-review.md) ghi robustness/security findings; [test report](test-report.md) phân biệt kết quả thực với pending. Không giải quyết gap bằng runtime demo, open rules, fabricate MobAI/Console evidence hoặc tự bật billing.

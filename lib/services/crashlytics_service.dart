@@ -78,7 +78,7 @@ class CrashlyticsService {
         );
       } else {
         await _transport?.setUserIdentifier('');
-        await _transport?.setCustomKey('user_type', 'demo_sandbox');
+        await _transport?.setCustomKey('user_type', 'signed_out');
         _publish(
           CrashlyticsStatus(
             enabled: false,

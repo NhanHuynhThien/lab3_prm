@@ -7,6 +7,7 @@ import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/provider_sync_viewmodel.dart';
 import '../widgets/common.dart';
 import '../widgets/provider_usage_card.dart';
+import '../widgets/gemini_web_import_panel.dart';
 
 class ProviderConnectionsScreen extends ConsumerStatefulWidget {
   const ProviderConnectionsScreen({super.key});
@@ -38,7 +39,7 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
         padding: const EdgeInsets.all(AppSpace.lg),
         children: [
           const Text(
-            'Đọc số liệu từ Codex, Claude Code và Gemini CLI trên máy đã ghép nối. '
+            'Đọc số liệu từ Codex, Claude Code, Gemini CLI và Antigravity trên máy đã ghép nối. '
             'Google login không tự cấp quyền đọc các gói đăng ký này.',
           ),
           const SizedBox(height: 12),
@@ -48,7 +49,8 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
             children: [
               StatusTag('ChatGPT / Codex', neutral: true),
               StatusTag('Claude', neutral: true),
-              StatusTag('Gemini', neutral: true),
+              StatusTag('Gemini CLI', neutral: true),
+              StatusTag('Antigravity', neutral: true),
             ],
           ),
           const SizedBox(height: 16),
@@ -66,9 +68,7 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
                 if (owner == null)
                   const Padding(
                     padding: EdgeInsets.only(top: 16),
-                    child: Text(
-                      'Đăng nhập Google để ghép nguồn. Demo không đọc dữ liệu provider thật.',
-                    ),
+                    child: Text('Đăng nhập Google để ghép nguồn dữ liệu.'),
                   ),
                 if (!state.enabled && owner != null) ...[
                   const SizedBox(height: 16),
@@ -154,6 +154,8 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
               ProviderUsageCard(usage: usage, now: now),
               const SizedBox(height: 16),
             ],
+          const GeminiWebImportPanel(),
+          const SizedBox(height: 16),
           const Panel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,7 +170,7 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
                 SizedBox(height: 12),
                 Text(
                   'Claude cần status line theo docs/provider-sync.md. '
-                  'Google cần lịch sử Gemini CLI. '
+                  'Gemini CLI cần lịch sử phiên; Antigravity dùng agy /usage. '
                   'Chưa có nguồn sẽ hiện “Cần kết nối nguồn”, không dùng dữ liệu mẫu.',
                 ),
               ],

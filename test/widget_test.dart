@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:token_ledger/app.dart';
+import 'package:token_ledger/screens/shell_screen.dart';
 import 'package:token_ledger/screens/usage_form_screen.dart';
 import 'package:token_ledger/theme/app_theme.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
@@ -23,13 +23,11 @@ void main() {
             ledgerRepositoryProvider.overrideWithValue(MemoryRepository()),
             clockProvider.overrideWithValue(() => DateTime(2026, 10, 19, 10)),
           ],
-          child: const TokenLedgerApp(),
+          child: MaterialApp(theme: buildAppTheme(), home: const ShellScreen()),
         ),
       );
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('Mở không gian demo'));
-      await tester.tap(find.text('Mở không gian demo'));
-      await tester.pumpAndSettle();
+
       expect(find.text('Ngân sách còn lại · Kỳ hiện tại'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.tap(
@@ -44,7 +42,7 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Cá nhân').last);
       await tester.pumpAndSettle();
-      expect(find.text('Kết nối Firebase'), findsOneWidget);
+      expect(find.text('Kết nối dữ liệu'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

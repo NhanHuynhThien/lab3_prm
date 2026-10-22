@@ -125,7 +125,7 @@ void main() {
     final first = vm.saveUsage(usage(id: 'first'));
     await expectLater(vm.saveUsage(usage(id: 'second')), throwsStateError);
     await expectLater(vm.deleteUsage('seed-0'), throwsStateError);
-    await expectLater(vm.clearDemo(), throwsStateError);
+    await expectLater(vm.archiveAccount('codex', true), throwsStateError);
     expect(repository.writes, 1);
     expect(container.read(ledgerProvider).requireValue.sessions.length, 12);
     repository.pending!.complete();

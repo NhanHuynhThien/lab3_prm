@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/models/ledger.dart';
-import 'package:token_ledger/services/demo_seed.dart';
+
+import 'support/demo_seed.dart';
+
 import 'package:token_ledger/services/usage_calculator.dart';
 import 'package:token_ledger/utils/formatters.dart';
 

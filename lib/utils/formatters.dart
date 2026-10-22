@@ -1,5 +1,8 @@
 import '../services/reporting_calendar.dart';
 
+String preciseMoney(int? micros) =>
+    money(micros, decimals: micros != null && micros % 10000 != 0 ? 6 : 2);
+
 String money(int? micros, {int decimals = 2}) {
   if (micros == null) return 'Chưa biết';
   RangeError.checkValueInInterval(decimals, 0, 6, 'decimals');
@@ -50,4 +53,24 @@ String usdInput(int? micros) {
       .padLeft(6, '0')
       .replaceFirst(RegExp(r'0+$'), '');
   return '${micros < 0 ? '-' : ''}$whole${fraction.isEmpty ? '' : '.$fraction'}';
+}
+
+String exactTokens(int? value) => value == null
+    ? 'Chưa có số liệu'
+    : value.toString().replaceAllMapped(
+        RegExp(r'\B(?=(\d{3})+(?!\d))'),
+        (_) => '.',
+      );
+String fullDate(DateTime value) =>
+    '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
+String elapsedLabel(int? seconds) {
+  if (seconds == null) return 'Chưa có số liệu';
+  final days = seconds ~/ 86400, hours = seconds % 86400 ~/ 3600;
+  final minutes = seconds % 3600 ~/ 60, rest = seconds % 60;
+  return [
+    if (days > 0) '$days ngày',
+    if (hours > 0) '$hours giờ',
+    if (minutes > 0) '$minutes phút',
+    if (rest > 0 || seconds == 0) '$rest giây',
+  ].join(' ');
 }

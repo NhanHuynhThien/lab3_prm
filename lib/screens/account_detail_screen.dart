@@ -63,7 +63,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
           const DataScopePicker(),
           const SizedBox(height: 16),
           Text(
-            '${a.isDemo ? 'Tài khoản demo' : 'Tài khoản theo dõi'} · ${ReportingCalendar.zoneLabel(a.timezone)} · Kỳ bắt đầu ngày ${a.cycleStartDay}',
+            'Tài khoản theo dõi · ${ReportingCalendar.zoneLabel(a.timezone)} · Kỳ bắt đầu ngày ${a.cycleStartDay}',
           ),
           if (a.defaultModelId != null)
             Text('Model gợi ý: ${a.defaultModelId}'),

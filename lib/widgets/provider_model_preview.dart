@@ -19,10 +19,7 @@ class ProviderModelPreview extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Token ghi nhận theo nguồn, không phải phí đã charge.',
-          style: TextStyle(color: AppColors.muted),
-        ),
+        Text(usage.modelsCoverage, style: TextStyle(color: AppColors.muted)),
         for (final model in models.take(3)) ...[
           const SizedBox(height: 16),
           LayoutBuilder(

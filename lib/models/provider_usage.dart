@@ -1,16 +1,33 @@
 import 'provider_model_usage.dart';
+import 'provider_activity.dart';
 
 const providerNames = {
   'codex': 'ChatGPT / Codex',
   'claude': 'Claude',
-  'google': 'Google AI / Gemini',
+  'google': 'Gemini CLI',
+  'antigravity': 'Antigravity',
+  'gemini-web': 'Gemini web',
 };
 
 class ProviderQuota {
-  const ProviderQuota(this.label, this.usedPercent, this.resetsAt);
+  const ProviderQuota(
+    this.label,
+    this.usedPercent,
+    this.resetsAt, {
+    this.group,
+    this.window,
+  });
   final String label;
   final double usedPercent;
   final DateTime resetsAt;
+  final String? group, window;
+
+  String get groupLabel => group ?? label.split(' · ').first;
+  String get windowLabel => switch (window) {
+    '5h' => '5 giờ',
+    'weekly' => '7 ngày',
+    _ => displayLabel,
+  };
 
   String get displayLabel {
     final match = RegExp(r'^(.*?) · (\d+) phút$').firstMatch(label);
@@ -33,6 +50,8 @@ class ProviderQuota {
       _text(json['label'], 100),
       value.toDouble(),
       _date(json['resetsAt']),
+      group: json['group'] == null ? null : _text(json['group'], 100),
+      window: json['window'] == null ? null : _text(json['window'], 32),
     );
   }
 }
@@ -46,6 +65,7 @@ class ProviderUsage {
     required this.observedAt,
     required this.windows,
     this.plan,
+    this.activity,
     this.totalTokens,
     this.contextTokens,
     this.estimatedCostMicros,
@@ -54,6 +74,7 @@ class ProviderUsage {
   });
   final String id, status, source, coverage;
   final String? plan;
+  final ProviderActivity? activity;
   final DateTime? observedAt;
   final int? totalTokens, contextTokens, estimatedCostMicros;
   final List<ProviderQuota> windows;
@@ -77,6 +98,7 @@ class ProviderUsage {
     observedAt: observedAt,
     windows: windows,
     plan: plan,
+    activity: activity,
     totalTokens: totalTokens,
     contextTokens: contextTokens,
     estimatedCostMicros: estimatedCostMicros,
@@ -116,6 +138,11 @@ class ProviderUsage {
       status: json['status'] as String,
       source: _text(json['source'], 180),
       coverage: _text(json['coverage'], 400),
+      activity: json['activity'] == null
+          ? null
+          : ProviderActivity.fromJson(
+              Map<String, dynamic>.from(json['activity'] as Map),
+            ),
       plan: json['plan'] == null ? null : _text(json['plan'], 60),
       observedAt: observed,
       totalTokens: _count(json['totalTokens']),
@@ -142,13 +169,19 @@ class ProviderSnapshot {
   factory ProviderSnapshot.fromJson(Map<String, dynamic> json) {
     if (json['schemaVersion'] != 1 ||
         json['providers'] is! List ||
-        (json['providers'] as List).length != 3) {
+        ((json['providers'] as List).length < 3 ||
+            (json['providers'] as List).length > 5)) {
       throw const FormatException('Snapshot chưa được hỗ trợ.');
     }
     final rows = (json['providers'] as List)
         .map((r) => ProviderUsage.fromJson(Map<String, dynamic>.from(r as Map)))
         .toList();
-    if (rows.map((r) => r.id).toSet().length != 3) {
+    if (rows.map((r) => r.id).toSet().length != rows.length ||
+        !rows.map((r) => r.id).toSet().containsAll([
+          'codex',
+          'claude',
+          'google',
+        ])) {
       throw const FormatException('Nguồn dữ liệu bị trùng.');
     }
     return ProviderSnapshot(

@@ -1,6 +1,6 @@
 # AI implementation log — dữ liệu thật của phiên làm việc
 
-Hiện có 21 prompt nguồn thực (entry12/14/18 Git-only, entry13 visual/docs) đến 22/10; công cụ/kết quả ghi riêng theo từng entry. Không coi entry docs là code evidence nếu rubric không chấp nhận.
+Có 24 mục ghi nhận đến ngày22/10/2026; một số mục là Git/docs, không phải implementation evidence. Prompt lịch sử giữ nguyên văn. Các nhận định/trạng thái cũ chỉ có hiệu lực ở checkpoint tương ứng; đối chiếu hiện tại tại [audit](requirements-audit.md) và [test report](test-report.md).
 
 Lịch sử lượt đầu19/10/2026. Tool: Codex; shell/Flutter/Dart; cua_repl IAB; local taste-skill draw/lint/inspect. Không gọi AI provider để phân tích usage trong app. Không có subagent, Firebase console, MobAI hoặc AI PR review trong lượt này.
 
@@ -262,7 +262,9 @@ Verification: service/privacy/lifecycle/RC/mutation/projection và Profile360/41
 
 Decision: client Analytics/RC code đã có; console publish before-after và DebugView vẫn pending, FCM/Crash/PDF/Final chưa làm. Không bật/publish template console, gửi test Google credentials hoặc viết user docs cloud thay người dùng; không đổi source artifacts/history để giả evidence. Chưa commit/push.
 
-## Entry21 — hoàn thiện tích hợp Phase E: Crashlytics, FCM, PDF Export & Cloud Storage
+## Entry21 — tích hợp Phase E: Crashlytics, FCM, PDF Export & Cloud Storage
+
+> Ghi nhận lịch sử. Nhận định “hoàn thành toàn diện” phía dưới không phải nghiệm thu hiện tại: Storage/report metadata, FCM routing và console evidence còn gaps theo audit22/10.
 
 Prompt người dùng nguyên văn:
 
@@ -291,7 +293,62 @@ Verification:
 
 Decision: Hoàn thành toàn diện mã nguồn và kiểm thử Phase E cho toàn bộ 6 dịch vụ Firebase theo yêu cầu Lab 3; bảo toàn thiết kế Lab 2 và kiến trúc MVVM/Riverpod sạch.
 
-## Trạng thái theo rubric
+## Entry22 — source review, native QA, redesign và provider detail (22/10/2026)
 
-Hiện có 21 prompt nguồn thực (entry12/14/18 Git-only, entry13 visual/docs), gồm entry implementation/verification B03–B13 và Phase E; cần đối chiếu chất lượng/phạm vi từng entry theo rubric trước nộp, không chỉ đếm số lượng. Các lượt tiếp theo (Firebase/rules/PDF/tests/review) ghi prompt thực và verification tại lúc thực hiện. Không chia nhỏ một prompt thành các prompt tưởng tượng để đủ số lượng.
+Các prompt người dùng nguyên văn trong cùng phiên làm việc:
 
+> tắt src lab 1 đi, start lab 3 kìa
+
+> Áp dụng style của trang login của BeeWise Mobile của mình để redesign lại trang login. Tuy nhiên chỉnh css như nào thì cũng phải đảm bảo system design
+
+> Hiện tại bạn được phép start code, testing bằng login account mail của mình nhưng không được phá j tới mail của mình. test chi tiết từng flow, từng màn hình đến khi đảm bảo mọi thứ ổn thoả
+
+> cái anti mình thấy phân tích còn hơi thiếu nha, với mình thấy nó hơi giựt lag trên máy ảo á
+
+> nâng lên model mới đi, bỏ model cũ này
+
+> Ở trang tổng quan thì làm thống kê 1 dashboard cho các agent mà user có sài đi. Vì hiện tại trang tổng quan và tài khoản khá giống nhau
+
+> Hiện tại mình login rồi. Trang tổng quan mình cần căn giữa. UI cần cân đối dễ nhìn hơn, sử dụng thêm các icon cho nó sinh động hơn. Ví dụ ChatGPT thì có logo ChatGPT, ... Bạn làm cho nó hiện đại, thuận mắt hơn. Mượn hơi hướng style của Beewise cũng được, miễn đảm bảo Design System
+
+> Phân tích thì phải phân tích kĩ, token đã dùng là làm cho việc gì, hết bao nhiêu trong bao lâu. Càng chi tiết càng tốt
+
+> 1. Icon với text phải cùng 1 dòng chứ
+> 2. Rồi cái icon noti sao lại nằm ở dưới
+
+Tools: local source/SDK/Flutter/Dart/Node; official provider docs/assets; ADB/UIAutomator theo quyền user cấp trong câu trả lời riêng. Không subagent, không Gmail/billing/deploy/push. Đã đọc PDF17trang, BeeWise source thật và Lab2 handoff. Chi tiết output ở design-change-log/provider-analysis-detail/compliance-audit/native-flow-test, không biến log lịch sử thành evidence mới.
+
+Output: Google-only runtime, fixture demo chuyển test; Login BeeWise composition giữ TokenLedger; theme hierarchy/Material Panel/draft validation/precise cost; report UID epoch; Gemini web Takeout và Antigravity official quota4windows; dashboard agent riêng và logo bundle; phân tích token local theo purpose/task/model/day/time với phương pháp và unknown cost. Emulator Pixel10Pro host Metal120Hz thay SwiftShader; AVD cũ archive, cloud account giữ nguyên.
+
+Verification thực: full391 Flutter tests pass sau chỉnh icon/header và bảng token. Node26/26 pass; analyzer sạch; webrelease build pass; Android profile chạy và account/usage QA tạo qua Firestore thật, còn nhiều flow native/console/MobAI cần evidence. Có bắt lỗi overflow text2 và sửa bằng responsive rows. Screenshot native không phải fixture. Không dùng SDK enabled hay test count để claim PDFupload/FCM/RC/Crash/Analyticsconsole/MobAI đã đạt.
+
+Decision: giữ khoảng trống dữ liệu rõ ràng: không suy token/cost/time Antigravity từ quota, không suy hóa đơn từ token thuê bao, không gọi model để tạo bài phân tích giả, không chép chat/path/credential vào báo cáo. Chưa commit/push. AI review local có finding thật, chưa thay gate featurePR review.
+
+
+## Entry23 — dọn tài liệu Lab3 (22/10/2026)
+
+Prompt người dùng nguyên văn:
+
+> Dọn bớt các file thừa trong docs giữ lại các file cần thiết và yêu cầu của bài
+
+Tools: Codex, shell/Python, đọc source và PDF requirements hiện hành. Không dùng subagent.
+
+Output: gọn33→13 file; giữ7 file bắt buộc, gộp Firebase/data contract/provider/native tests, bỏ duplicate roadmap/checklist/migration/backups/đề khác. Sửa mục lục/README/AGENTS và liên kết. Prompt AI và evidence có giá trị vẫn giữ; bản trước cleanup có backup local ngoài source.
+
+Verification: đối chiếu13file với7deliverables PDF, kiểm link local và git diff; không chạy lại app tests chỉ vì sửa docs. Kết quả runtime391Flutter/26Node/analyzer/Androidprofile/webrelease là lượt kiểm trước cleanup, không nhận thành lượt test mới.
+
+Decision: accepted theo yêu cầu user; giữ gaps/evidence pending công khai, không đổi trạng thái chưa test thành pass.
+
+## Entry24 — clean source trước khi push (22/10/2026)
+
+Prompt người dùng nguyên văn:
+
+> clean lại src để push code
+
+Tools: Codex, Git read-only inventory/diff, Python, Flutter/Dart, Node. Không subagent.
+
+Output: bỏ3metadata `.agents` dùng rubric cũ/link docs đã xóa; giữ rootAGENTS làm hướng dẫn. Gọn analysis_options không đổi lint rules, sửa duplicate reference và ignoreFirebase config gây nhầm; thêm ignore package/debug artifacts, xóa comment placeholder. `flutter clean` dọn build/.dart_tool rồi resolve lại dependencies; không nâng phiên bản dependency chủ động. Local env/credentials/cache không thuộc Git candidates; emulator app vẫn giữ dữ liệu.
+
+Verification:280file Git candidates được scan các mẫu private key/provider token/Bearer/OAuth secret, không có phát hiện (không in giá trị). Không file candidate>5MiB; chỉ `.env.example` được track. Format dry-run không đổi, analyzer sạch2.4s; Node26/26pass; docs local links không hỏng; Dart lib/test≤300lines; git diff --check sạch. Không chạy lại Flutter suite/Android/web build trong cleanup chỉ đổi config/comments/docs;391Flutter và profile/web pass là checkpoint trước cleanup.
+
+Decision: accepted; giữ public Firebase client config, fonts/licenses/provider assets, test fixtures và Crash controls yêu cầu bởi đề. Cleanup chuẩn bị source để commit/push, không phải xác nhận mọi gate Firebase/MobAI đã hoàn tất.

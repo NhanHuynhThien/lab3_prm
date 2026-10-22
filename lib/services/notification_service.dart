@@ -25,6 +25,7 @@ class NotificationService {
   String? _deviceToken;
   bool _permissionGranted = false;
   bool _closed = false;
+  final _subscriptions = <StreamSubscription<NotificationItem>>[];
 
   Stream<List<NotificationItem>> get notificationsStream =>
       _notificationsController.stream;
@@ -38,24 +39,32 @@ class NotificationService {
 
   void _initListeners() {
     if (_transport == null) return;
-    _transport.onForegroundNotification.listen((item) {
-      addNotification(item);
-    });
-    _transport.onNotificationOpened.listen((item) {
-      addNotification(item);
-      if (item.route != null && item.route!.isNotEmpty) {
-        _openedRouteController.add(item.route!);
-      }
-    });
+    _subscriptions.add(
+      _transport.onForegroundNotification.listen((item) {
+        addNotification(item);
+      }),
+    );
+    _subscriptions.add(
+      _transport.onNotificationOpened.listen((item) {
+        addNotification(item);
+        if (item.route != null && item.route!.isNotEmpty) {
+          _openedRouteController.add(item.route!);
+        }
+      }),
+    );
   }
 
   Future<bool> requestPermission() async {
-    if (_transport == null) return true;
+    if (_transport == null || _ownerId == null || _closed) return false;
+    final owner = _ownerId;
     try {
       final granted = await _transport.requestPermission();
+      if (_closed || owner != _ownerId) return false;
       _permissionGranted = granted;
       if (granted) {
-        _deviceToken = await _transport.getToken();
+        final token = await _transport.getToken();
+        if (_closed || owner != _ownerId) return false;
+        _deviceToken = token;
       }
       return granted;
     } catch (_) {
@@ -64,33 +73,21 @@ class NotificationService {
   }
 
   Future<void> bindOwner(String? uid) async {
-    if (_closed) return;
+    if (_closed || uid == _ownerId) return;
     _ownerId = uid;
-    if (uid != null) {
-      await requestPermission();
-      // Seed with initial contextual reminder if empty
-      if (_items.isEmpty) {
-        _items.add(
-          NotificationItem(
-            id: 'welcome_notification',
-            title: 'Chào mừng bạn đến với TokenLedger',
-            body: 'Bạn đã đăng nhập thành công. Hãy theo dõi ngân sách và mức sử dụng token hàng tháng.',
-            receivedAt: DateTime.now(),
-            isRead: false,
-            route: '/overview',
-          ),
-        );
-        _publish();
-      }
-    } else {
-      _items.clear();
-      _deviceToken = null;
-      _publish();
+    _items.clear();
+    _deviceToken = null;
+    _permissionGranted = false;
+    _publish();
+    if (uid == null || _transport == null) return;
+    final initial = await _transport.getInitialNotification();
+    if (!_closed && _ownerId == uid && initial != null) {
+      addNotification(initial);
     }
   }
 
   void addNotification(NotificationItem item) {
-    if (_closed) return;
+    if (_closed || _ownerId == null) return;
     final existingIndex = _items.indexWhere((i) => i.id == item.id);
     if (existingIndex >= 0) {
       _items[existingIndex] = item;
@@ -125,24 +122,6 @@ class NotificationService {
     _publish();
   }
 
-  void sendDemoNotification({
-    String title = 'Cảnh báo ngân sách AI',
-    String body =
-        'Tài khoản OpenAI Codex đạt 85% hạn mức đã đặt cho tháng này.',
-    String route = '/analytics',
-  }) {
-    final demoItem = NotificationItem(
-      id: 'demo_${DateTime.now().millisecondsSinceEpoch}',
-      title: title,
-      body: body,
-      receivedAt: DateTime.now(),
-      isRead: false,
-      route: route,
-      data: {'source': 'demo_generator'},
-    );
-    addNotification(demoItem);
-  }
-
   void _publish() {
     if (_closed) return;
     _notificationsController.add(List.unmodifiable(_items));
@@ -150,6 +129,9 @@ class NotificationService {
 
   Future<void> close() async {
     _closed = true;
+    for (final subscription in _subscriptions) {
+      await subscription.cancel();
+    }
     await _notificationsController.close();
     await _openedRouteController.close();
   }

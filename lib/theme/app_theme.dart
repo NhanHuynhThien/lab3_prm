@@ -7,7 +7,7 @@ abstract final class AppColors {
   static const background = Color(0xFFFAF8FF);
   static const surface = Color(0xFFFFFFFF);
   static const text = Color(0xFF131B2E);
-  static const muted = Color(0xFF52625C);
+  static const muted = Color(0xFF4C5C55);
   static const border = Color(0xFF73867A);
   static const soft = Color(0xFFE8F7EF);
   static const danger = Color(0xFFBA1A1A);
@@ -35,12 +35,16 @@ abstract final class AppSpace {
   static const button = 52.0;
   static const sidebar = 236.0;
   static const wide = 1000.0;
+  static const dashboardWidth = 1040.0;
+  static const dashboardGridBreakpoint = 720.0;
+  static const providerLogoSize = 32.0;
+  static const providerLogoTile = 56.0;
 }
 
 abstract final class AppMotion {
   static const short = Duration(milliseconds: 180);
-  static const medium = Duration(milliseconds: 320);
-  static const chart = Duration(milliseconds: 650);
+  static const medium = Duration(milliseconds: 240);
+  static const chart = Duration(milliseconds: 280);
   static const curve = Curves.easeOutCubic;
   static Duration duration(BuildContext context, Duration value) =>
       MediaQuery.disableAnimationsOf(context) ? Duration.zero : value;
@@ -90,32 +94,37 @@ ThemeData buildAppTheme() {
     scaffoldBackgroundColor: AppColors.background,
     textTheme: TextTheme(
       displaySmall: base.copyWith(
-        fontSize: 28,
-        height: 36 / 28,
+        fontSize: 32,
+        height: 1.15,
         fontWeight: FontWeight.w700,
         letterSpacing: -.7,
       ),
       headlineSmall: base.copyWith(
-        fontSize: 24,
-        height: 32 / 24,
+        fontSize: 26,
+        height: 1.25,
         fontWeight: FontWeight.w700,
         letterSpacing: -.5,
       ),
       titleLarge: base.copyWith(
-        fontSize: 18,
-        height: 26 / 18,
-        fontWeight: FontWeight.w600,
+        fontSize: 20,
+        height: 1.3,
+        fontWeight: FontWeight.w700,
       ),
       titleMedium: base.copyWith(
         fontSize: 16,
         height: 1.5,
         fontWeight: FontWeight.w600,
       ),
-      bodyLarge: base.copyWith(fontSize: 16, height: 1.5),
-      bodyMedium: base.copyWith(fontSize: 14, height: 20 / 14),
+      titleSmall: base.copyWith(
+        fontSize: 15,
+        height: 1.4,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyLarge: base.copyWith(fontSize: 16, height: 1.55),
+      bodyMedium: base.copyWith(fontSize: 15, height: 1.5),
       bodySmall: base.copyWith(
         fontSize: 14,
-        height: 20 / 14,
+        height: 1.5,
         color: AppColors.muted,
       ),
       labelLarge: base.copyWith(
@@ -123,7 +132,16 @@ ThemeData buildAppTheme() {
         height: 20 / 14,
         fontWeight: FontWeight.w600,
       ),
-      labelSmall: base.copyWith(fontSize: 14, height: 20 / 14),
+      labelMedium: base.copyWith(
+        fontSize: 13,
+        height: 1.4,
+        fontWeight: FontWeight.w600,
+      ),
+      labelSmall: base.copyWith(
+        fontSize: 12,
+        height: 1.4,
+        fontWeight: FontWeight.w500,
+      ),
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.background,
@@ -187,6 +205,19 @@ ThemeData buildAppTheme() {
         borderRadius: BorderRadius.circular(AppSpace.controlRadius),
         borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: AppColors.surface,
+      selectedColor: AppColors.soft,
+      side: const BorderSide(color: AppColors.line),
+      labelStyle: base.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpace.controlRadius),
+      ),
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: Colors.transparent,
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surface,

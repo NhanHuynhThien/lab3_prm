@@ -5,8 +5,10 @@ import 'package:token_ledger/services/ledger_repository.dart';
 import 'package:token_ledger/services/usage_calculator.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 
+import 'support/demo_seed.dart';
+
 class MemoryRepository implements LedgerRepository {
-  LedgerData? data;
+  LedgerData? data = createDemoSeed(DateTime(2026, 10, 19, 10));
   bool failWrites = false;
   @override
   Future<LedgerData?> load() async => data;
@@ -57,7 +59,7 @@ void main() {
     await container.read(ledgerProvider.future);
     repository.failWrites = true;
     final vm = container.read(ledgerProvider.notifier);
-    await expectLater(vm.clearDemo(), throwsStateError);
+    await expectLater(vm.archiveAccount('codex', true), throwsStateError);
     expect(container.read(ledgerProvider).requireValue.accounts.length, 3);
   });
   test(

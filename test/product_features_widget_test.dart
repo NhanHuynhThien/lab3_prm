@@ -167,11 +167,10 @@ void main() {
         hasLength(1),
       );
       expect(transport.fetches, 1);
-      root.read(demoSessionProvider.notifier).enter();
+      auth.emit(null);
       await tester.pumpAndSettle();
       final count = backend.events.length;
-      await tester.tap(find.text('Phân tích').last);
-      await tester.pumpAndSettle();
+      expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
       expect(backend.events, hasLength(count));
       expect(backend.uid, isNull);
       await tester.pumpWidget(const SizedBox());
@@ -201,12 +200,12 @@ void main() {
         ledgerRepositoryProvider.overrideWithValue(MemoryRepository()),
       ],
     );
-    root.read(demoSessionProvider.notifier).enter();
+    auth.emit(null);
     await tester.pumpWidget(
       UncontrolledProviderScope(container: root, child: const TokenLedgerApp()),
     );
     await tester.pumpAndSettle();
-    expect(auth.initializations, 0);
+    expect(auth.initializations, 1);
     expect(backend.calls, isEmpty);
     expect(transport.prepares, 0);
     await tester.pumpWidget(const SizedBox());

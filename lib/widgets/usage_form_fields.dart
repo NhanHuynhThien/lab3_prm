@@ -27,10 +27,7 @@ class UsageAccountSelector extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        session?.dataSource.label ??
-            (selectedAccount?.isDemo == true
-                ? 'Demo giả định · Nhập tay'
-                : 'Dữ liệu nhập tay'),
+        session?.dataSource.label ?? 'Dữ liệu nhập tay',
         style: const TextStyle(color: AppColors.muted),
       ),
       if (selectedAccount?.archived == true)

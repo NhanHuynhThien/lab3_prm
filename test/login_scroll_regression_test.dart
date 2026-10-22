@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:token_ledger/widgets/common.dart';
 import 'package:token_ledger/widgets/google_sign_in_button.dart';
 
 import 'support/auth_fakes.dart';
@@ -26,7 +25,7 @@ void main() {
       await tester.pumpAndSettle();
       final scroll = find.byType(Scrollable).first;
       final position = tester.state<ScrollableState>(scroll).position;
-      final panel = tester.renderObject(find.byType(Panel).first);
+      final panel = tester.renderObject(find.byType(GoogleSignInButton).first);
       expect(find.byType(StretchingOverscrollIndicator), findsNothing);
       final top = await tester.startGesture(tester.getCenter(scroll));
       await top.moveBy(const Offset(0, 180));
@@ -37,7 +36,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.drag(scroll, const Offset(0, -220));
       await tester.pumpAndSettle();
-      expect(position.pixels, greaterThan(0));
+      expect(
+        position.pixels,
+        position.maxScrollExtent > 0 ? greaterThan(0) : 0,
+      );
       position.jumpTo(position.maxScrollExtent);
       await tester.pump();
       final bottom = await tester.startGesture(tester.getCenter(scroll));
@@ -70,11 +72,7 @@ void main() {
             matching: find.byType(Image),
           );
           expect(tester.getSize(icon), const Size(20, 20));
-          final demo = find.text('Mở không gian demo');
-          expect(
-            tester.getTopLeft(google).dy,
-            lessThan(tester.getTopLeft(demo).dy),
-          );
+          expect(find.text('Mở không gian demo'), findsNothing);
           expect(tester.takeException(), isNull);
         } finally {
           await h.close(tester);

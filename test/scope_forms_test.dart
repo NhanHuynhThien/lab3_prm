@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/models/ledger.dart';
 import 'package:token_ledger/screens/account_form_screen.dart';
 import 'package:token_ledger/screens/usage_form_screen.dart';
-import 'package:token_ledger/services/demo_seed.dart';
+
+import 'support/demo_seed.dart';
+
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 
 import 'support/scope_forms_harness.dart';
