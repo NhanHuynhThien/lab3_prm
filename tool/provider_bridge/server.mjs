@@ -61,7 +61,17 @@ export async function collectSnapshot() {
   const [codex, claude, google, antigravity, codexModels, claudeModels] = await Promise.all([
     codexPromise, readClaude(), readGemini(), readAntigravity(), localModelUsage('codex'), localModelUsage('claude')]);
   return { schemaVersion: 1, collectedAt: new Date().toISOString(), providers: [
-    { ...codex, ...codexModels }, { ...claude, ...claudeModels }, google, antigravity] };
+    withLocalUsage(codex, codexModels, now), withLocalUsage(claude, claudeModels, now), google, antigravity] };
+}
+
+// Quota needs the CLI/status line, but local session logs alone already give
+// real token counts; show those instead of hiding the source as "not connected".
+export function withLocalUsage(row, usage, now = new Date()) {
+  const merged = { ...row, ...usage };
+  const total = usage.activity?.totalTokens;
+  if (row.status === 'ready' || !usage.models?.length || total == null) return merged;
+  return { ...merged, status: 'ready', totalTokens: total, observedAt: now.toISOString(),
+    source: 'Phiên lưu trên máy', coverage: `${usage.modelsCoverage} Chưa đọc được quota tài khoản.` };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

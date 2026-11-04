@@ -28,6 +28,7 @@ class FirebaseAuthService implements AuthService {
     FirebaseSessionBackend? backend,
     GoogleIdentityClient? google,
     bool? useWebPopup,
+    this.beforeSignOut,
   }) : _backend = backend ?? FirebaseSdkBackend(),
        _google = google ?? GoogleSdkIdentityClient(),
        _web = useWebPopup ?? kIsWeb;
@@ -35,6 +36,7 @@ class FirebaseAuthService implements AuthService {
   final FirebaseSessionBackend _backend;
   final GoogleIdentityClient _google;
   final bool _web;
+  final Future<void> Function()? beforeSignOut;
   Future<void>? _initialization, _googleInitialization;
   bool _ready = false, _working = false;
 
@@ -94,6 +96,7 @@ class FirebaseAuthService implements AuthService {
 
   @override
   Future<void> signOut() => _run(() async {
+    await beforeSignOut?.call();
     await _backend.signOut();
     if (!_web && _googleInitialization != null) await _google.signOut();
   });

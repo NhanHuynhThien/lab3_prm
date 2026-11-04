@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { readCodex, codexWindows } from './codex.mjs';
 import { sanitizeClaude, readClaude } from './claude.mjs';
 import { geminiMessages, readGemini } from './gemini.mjs';
-import { bridgeServer } from './server.mjs';
+import { bridgeServer, withLocalUsage } from './server.mjs';
 import { request as httpRequest } from 'node:http';
 import { codexModelRecords, claudeModelRecords, modelRows } from './models.mjs';
 
@@ -146,4 +146,15 @@ test('Claude model streaming messages dedupe and count cache input once', () => 
   const rows = modelRows(claudeModelRecords([event(1), event(10)].map(JSON.stringify).join('\n'), now));
   assert.equal(rows[0].totalTokens, 310); assert.equal(rows[0].inputTokens, 300);
   assert.ok(!JSON.stringify(rows).includes('PRIVATE'));
+});
+
+test('local session tokens make a source ready when quota is unavailable', () => {
+  const now = new Date('2026-11-04T00:00:00Z');
+  const usage = { models: [{ model: 'm', totalTokens: 5 }], activity: { totalTokens: 5 }, modelsCoverage: 'Local.' };
+  const row = withLocalUsage({ id: 'codex', status: 'error', windows: [], totalTokens: null }, usage, now);
+  assert.equal(row.status, 'ready');
+  assert.equal(row.totalTokens, 5);
+  assert.equal(row.observedAt, now.toISOString());
+  assert.equal(withLocalUsage({ id: 'codex', status: 'setup' }, { models: [], activity: null }).status, 'setup');
+  assert.equal(withLocalUsage({ id: 'codex', status: 'ready', totalTokens: 9 }, usage).totalTokens, 9);
 });

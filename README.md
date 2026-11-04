@@ -1,82 +1,62 @@
-# TokenLedger — PRM393 Lab 3
+# TokenLedger
 
-Flutter app quản lý tài khoản AI, phiên sử dụng, token, chi phí nhập tay và quota. Android là platform bài lab; web hỗ trợ preview. Topic chuyển từ StudentPay sang TokenLedger đã được giảng viên chấp thuận theo xác nhận người dùng21/10/2026.
+TokenLedger giúp người dùng biết **AI nào đang được sử dụng, token dùng cho việc gì, tốn bao nhiêu và trong khoảng thời gian nào**. Ứng dụng Flutter cho PRM393 Lab 3; chủ đề chuyển từ StudentPay đã được giảng viên duyệt theo xác nhận user 21/10/2026.
 
-## Chuẩn bài và trạng thái
+## Người dùng và nghiệp vụ
 
-Dùng PDF **From Design to Working App with Flutter and Firebase,17trang** do người dùng chỉ định22/10. Đọc [yêu cầu](docs/ASSIGNMENT_REQUIREMENTS.md), [audit chi tiết](docs/requirements-audit.md) và [kiến trúc hiện tại](docs/architecture.md). Bản18trang/ARTEMIS trước đây là tài liệu khác.
+| Chức năng | Người dùng làm gì | Kết quả |
+|---|---|---|
+| Đăng nhập | Dùng tài khoản Google | Workspace riêng theo UID, không có login demo |
+| Tài khoản AI | Thêm/sửa, archive hoặc xóa account rỗng | Quản lý provider/model, ngân sách và lịch sử |
+| Phiên sử dụng | Ghi công việc, mục đích, token, thời gian và chi phí có nguồn | Sổ usage có thể tìm kiếm/sửa/xóa |
+| Tổng quan | Xem các agent/provider thực sự đã sử dụng | Dashboard theo nguồn, không lặp màn tài khoản |
+| Phân tích | Lọc theo kỳ, account, mục đích và xem chi tiết | Tổng token/chi phí, tỷ trọng và coverage nguồn |
+| Quota | Theo dõi từng account và cửa sổ quota | Có thời điểm cập nhật; không cộng quota% giữa account |
+| Nguồn AI | Kết nối companion local hoặc nhập Takeout do user chọn | Chỉ lấy dữ liệu nguồn hỗ trợ; thiếu số liệu hiển thị unknown |
+| Báo cáo | Chọn kỳ, tạo và mở PDF trên thiết bị | Không upload PDF lên cloud |
+| Hồ sơ | Xem tài khoản đăng nhập, thông báo và chẩn đoán | Quản lý phiên và các tích hợp Firebase |
 
-- Google login thật, Profile và Firestore workspace theo UID; **không runtime demo/seed/bypass**. Tạo dữ liệu qua form account/usage/quota.
-- 8 màn kế thừa Lab2 + Login/Profile/Quota; 4 tabs mobile, desktop sidebar. USD micros và null=unknown.
-- PDF/FCM/Crash/Analytics có client implementation nhưng còn gaps và console evidence; **chưa đủ điều kiện nộp hoàn chỉnh**. MobAI/report/video còn thiếu.
-- Provider companion là extension tùy chọn do user yêu cầu; core Firestore flows không cần companion. Codex/Claude/Gemini CLI theo nguồn khả dụng; Antigravity quota qua CLI chính thức; Gemini web qua JSON Takeout do user chọn. Không suy token/phí khi thiếu nguồn và không đọc Gmail/cookies/credentials.
+Ba flow chính: **tạo account → ghi usage → xem phân tích**; **lọc lịch sử → mở chi tiết → sửa/xóa usage**; **xem account → quota/lịch sử → archive**. Lỗi lưu phải giữ draft và cho thử lại; dữ liệu không được lẫn giữa UID khi logout.
 
-## Thiết kế Lab2
+## Quy tắc số liệu và quyền riêng tư
 
-- [Figma gốc + annotations](https://www.figma.com/design/C7FiWYzVXUS8G2cnK5AGos/PRM393-Lab2-SE192382_SE192336).
-- [Lab2 flutter-handoff.md](https://github.com/dmm717/lab2_prm/blob/main/handoff/flutter-handoff.md); bản workspace đọc đối chiếu ở `../lab2_prm/handoff/flutter-handoff.md` (không phải runtime dependency).
-- [Fidelity và mapping8màn](docs/fidelity-check.md), [design changes](docs/design-change-log.md), [handoff gaps](docs/handoff-gaps.md).
-- Login lấy composition BeeWise Mobile của user, giữ logo/Inter/green/mint TokenLedger; các khác biệt token/Figma cần nghiệm thu trong design log.
+- Tiền lưu integer USD micros; `null` là chưa biết, khác số 0. Giá suy từ token phải có nguồn và nhãn estimate, không gọi là hóa đơn.
+- Token/quota/tốc độ/thời gian chỉ xuất hiện khi nguồn có dữ liệu tương ứng. Thời gian gọi API không phải thời gian user làm việc.
+- Firestore owner rules tách dữ liệu cá nhân. Companion là lựa chọn bổ sung, không bắt buộc cho core flows.
+- Admin chỉ vận hành model/bảng giá/thông báo và trạng thái hệ thống; không xem nội dung chat hay toàn bộ sổ token của user.
+- Gemini/FCM/Supabase secret không nằm mobile hoặc frontend bundle. Không đọc Gmail, cookies hoặc thay đổi bảo mật tài khoản Google.
 
-## Chạy app
+## Web quản trị
 
-Toolchain đã dùng22/10: Flutter3.47.5 / Dart3.13.4, AndroidAPI36 ARM64. Giữ `pubspec.lock`.
+Repo độc lập: [lab3_prm_web_admin](https://github.com/NhanHuynhThien/lab3_prm_web_admin). Next.js + shadcn/ui, backend Fastify, DB Supabase cho dữ liệu vận hành. Local checkout ở `../lab3_prm_web_admin/`. Dữ liệu account/usage cá nhân vẫn ở Firestore.
+
+## Chạy mobile
+
+Giữ `pubspec.lock`. Cấu hình local duy nhất là `.env` JSON, Git ignore. Pairing token chỉ phục vụ ghép nối local; build mặc định không nhúng file env vào APK. Nếu dùng companion, chạy `node tool/provider_bridge/setup.mjs` để tạo/cập nhật pairing token. Không đưa Gemini/service-account keys vào file này.
 
 ```sh
 flutter pub get
-cp .env.example .env.local
+# Fresh clone: tạo .env chứa {} nếu chưa có cấu hình local
 flutter devices
 ./tool/start_lab3_120hz.sh
+# Hoặc chọn device:
+flutter run -d <device-id>
 ```
 
-`.env.local` là JSON Dart defines, không commit. Không điền provider API secrets. Firebase client identifiers trong `firebase_options.dart`/`android/app/google-services.json` không phải admin credentials. Emulator cần Google Play services và SHA debug đăng ký đúng Firebase.
-
-Web preview:
+Android cần Google Play services và SHA debug đã đăng ký đúng Firebase project `tokenledger-nhan-20261021`. Emulator Pixel 10 Pro đã cấu hình 120Hz; nghiệm thu bài và performance vẫn cần device thật.
 
 ```sh
-flutter run -d chrome --web-hostname localhost --web-port 4183
-```
-
-Đăng nhập bằng Google, tạo account rồi ghi usage. Signed-out chỉ thấy Login. New user bắt đầu empty; dữ liệu chỉ của UID đó. Không có đường `?demo=1` để bỏ qua login.
-
-### Firebase và storage
-
-Project hiện hành `tokenledger-nhan-20261021` (Spark). Auth/Firestore/RC setup và giới hạn trong [migration notes](docs/firebase-setup.md). Rules/indexes/config ở `firebase/` và `firebase.json`; không deploy chỉ vì build.
-
-PDF đang dùng Firebase Storage transport, nhưng Storage chưa được provision/billing và report metadata chưa lưu Firestore; upload chưa đạt §6.4. PDF cho phép Cloudinary restricted unsigned PDF preset như đường miễn phí; việc chuyển adapter chưa thực hiện. Không đưa secret hoặc service-account key vào app. Analytics của project mới chưa có DebugView evidence; không coi SDK status là Console pass.
-
-### Companion tùy chọn
-
-```sh
-node tool/provider_bridge/server.mjs
-adb reverse tcp:8787 tcp:8787
-```
-
-Bridge chỉ loopback, ghép nối token; [setup/scope](docs/provider-sync.md). Owner auto-connect là opt-in trong `.env.local`, token không in log/commit. Antigravity cần official `agy` CLI đã đăng nhập. Gemini web cần user tự xuất/ chọn Takeout JSON; import local aggregate, không lưu nội dung hội thoại/không lấy mail.
-
-## Source tree
-
-```text
-lib/{models,services,viewmodels,screens,widgets,theme,utils}
-android/                    Android + Google client config
-firebase/                   rules, indexes, RC defaults/template
-assets/                     fonts, Google icon, brand/provider logos
- test/                      unit/widget regression + fixtures
- tool/provider_bridge/      optional local read-only source adapters
- docs/                      13 tài liệu: 7 bắt buộc + setup/architecture/audit
-```
-
-`mobai_tests/` chưa có run/scripts hợp lệ; không tạo placeholder để nhận là hoàn thành. Repo submission cần tên `PRM393_Lab03_<StudentID>`; remote hiện tại vẫn `lab3_prm`.
-
-## Kiểm tra
-
-```sh
-dart format --output=none --set-exit-if-changed lib test
 flutter analyze
 flutter test
 node --test tool/provider_bridge/*.test.mjs
-flutter build apk --debug
-flutter build web --release
 ```
 
-22/10: 391/391 Flutter tests pass,26 Node tests pass, Androidprofile/webrelease build pass, analyzer sạch. Đây là unit/widget verification; native từng flow và Firebase Console có báo cáo riêng, không thay10MobAI. Xem [test report](docs/test-report.md) và [audit](docs/requirements-audit.md).
+04/11: analyzer sạch, 391 Flutter tests pass sau thay đổi bỏ upload PDF. E2E/console/MobAI còn thiếu được đánh dấu riêng, không suy từ unit/widget tests.
+
+## Tiến độ và tài liệu bài
+
+[Xem TASKS.md](TASKS.md) cho toàn bộ việc đã làm, việc cần làm, tiêu chí nghiệm thu, rủi ro và audit theo đề. Đây là nguồn tiến độ duy nhất của mobile.
+
+Đề chuẩn: **From Design to Working App with Flutter and Firebase, 17 trang**. Giữ [yêu cầu chuẩn hóa](docs/ASSIGNMENT_REQUIREMENTS.md) và 7 tài liệu bắt buộc trong `docs/`. User bỏ upload PDF là ngoại lệ với đề gốc; chưa tự coi giảng viên đã miễn. MobAI/report/video và một số evidence Firebase chưa đủ điều kiện nộp hoàn chỉnh.
+
+[Figma Lab 2](https://www.figma.com/design/C7FiWYzVXUS8G2cnK5AGos/PRM393-Lab2-SE192382_SE192336) · [Handoff Lab 2](https://github.com/dmm717/lab2_prm/blob/main/handoff/flutter-handoff.md). Design system: Inter, green `#006C49`, background `#FAF8FF`, mint `#E8F7EF`, radius 20/12 và touch ≥48. Login mượn composition BeeWise theo yêu cầu user.

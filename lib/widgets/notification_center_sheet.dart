@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +11,12 @@ class NotificationCenterSheet extends ConsumerWidget {
   const NotificationCenterSheet({super.key});
 
   static Future<void> show(BuildContext context) {
+    unawaited(
+      ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(notificationServiceProvider).refreshInbox(),
+    );
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -79,7 +87,30 @@ class NotificationCenterSheet extends ConsumerWidget {
               ),
             ),
             const Divider(height: 1),
-            if (items.isEmpty)
+            if (notificationService.inboxLoading)
+              LinearProgressIndicator(
+                value: MediaQuery.disableAnimationsOf(context) ? .5 : null,
+              ),
+            if (notificationService.inboxError != null)
+              Padding(
+                padding: const EdgeInsets.all(AppSpace.md),
+                child: Column(
+                  children: [
+                    Text(
+                      notificationService.inboxError!,
+                      style: const TextStyle(color: AppColors.danger),
+                    ),
+                    TextButton.icon(
+                      onPressed: notificationService.refreshInbox,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Thử tải lại'),
+                    ),
+                  ],
+                ),
+              ),
+            if (items.isEmpty &&
+                !notificationService.inboxLoading &&
+                notificationService.inboxError == null)
               Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 40,
@@ -106,7 +137,7 @@ class NotificationCenterSheet extends ConsumerWidget {
                   ],
                 ),
               )
-            else
+            else if (items.isNotEmpty)
               Flexible(
                 child: ListView.separated(
                   shrinkWrap: true,
@@ -120,6 +151,7 @@ class NotificationCenterSheet extends ConsumerWidget {
                         notificationService.markAsRead(item.id);
                         if (item.route != null && item.route!.isNotEmpty) {
                           Navigator.pop(context);
+                          notificationService.openNotification(item);
                         }
                       },
                       leading: CircleAvatar(
@@ -187,7 +219,7 @@ class NotificationCenterSheet extends ConsumerWidget {
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.danger,
                       ),
-                      child: const Text('Xóa tất cả'),
+                      child: const Text('Ẩn trên máy'),
                     ),
                 ],
               ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,6 +31,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
   int _index = 0;
   final _visited = <int>{0};
   AuthUser? _profileUser;
+  StreamSubscription<String>? _notificationRoute;
   late final _pages = <Widget>[
     RepaintBoundary(
       child: DashboardScreen(
@@ -59,9 +62,25 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
   @override
   void initState() {
     super.initState();
+    final notifications = ref.read(notificationServiceProvider);
+    void open(String route) {
+      if (!mounted) return;
+      final index = [
+        '/overview',
+        '/accounts',
+        '/analytics',
+        '/profile',
+      ].indexOf(route);
+      if (index >= 0) _selectTab(index);
+      notifications.takePendingRoute();
+    }
+
+    _notificationRoute = notifications.onTargetRouteRequested.listen(open);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(productFeaturesProvider.notifier).screen(_screenNames[_index]);
+        final pending = notifications.takePendingRoute();
+        if (pending != null) open(pending);
       }
     });
   }
@@ -78,6 +97,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
   @override
   void dispose() {
     _tabFade.dispose();
+    unawaited(_notificationRoute?.cancel());
     super.dispose();
   }
 

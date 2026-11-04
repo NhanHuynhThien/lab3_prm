@@ -12,7 +12,10 @@ import '../services/pdf_report_service.dart';
 import '../services/remote_config_service.dart';
 import '../services/report_management_service.dart';
 import '../services/storage_service.dart';
+import '../services/platform_api_service.dart';
 import 'auth_viewmodel.dart';
+
+final platformApiProvider = Provider<PlatformApiService?>((ref) => null);
 
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
   final service = AnalyticsService(null);

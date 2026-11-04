@@ -1,8 +1,20 @@
 # TokenLedger — PRM393 Lab 3
 
+## Steering hiện hành —04/11/2026
+
+- Web admin dùng Next.js + shadcn/ui; DB vận hành Supabase, Firebase giữ identity/FCM và mobile data. Chỉ `.env` mỗi app, không env.local/example.
+- Mobile tiến độ duy nhất tại `TASKS.md`; README là nghiệp vụ. Giữ 7 docs bài yêu cầu và ASSIGNMENT_REQUIREMENTS.
+
+- User yêu cầu detailed plan, folder mới và browser setup keys; thực hiện tại `../lab3_prm_web_admin/` theo đường dẫn user chỉ định. Không fork/copy toàn app.
+- **Bỏ upload PDF** theo user; giữ localPDF. Không setup Cloudinary/S3/Storage hoặc bật billing. Ghi scope exception trong plan/audit, không tự coi lecturer đã miễn.
+- Gemini key TokenLedger Backend Dev đã được user xác nhận tại thời điểm tạo, đúng project hiện có, lưu backend local600/Gitignored; không key trong Flutter/adminbundle.
+- User xác nhận tạo `tokenledger-fcm-dev` + role Firebase Cloud Messaging API Admin + JSON local. Chỉ quyền FCM; không Owner/Editor/Firestore/Authadmin/billing. Không tự cấp adminclaim hoặc gửi push tới người khác.
+- Newplatform kế hoạch Reactadmin/NodeAPI, backendadmin chỉ operational data; không đọc userchat/usage hàng loạt. Console/image guidance bổ sung device thật, webadmin và slide giải thích.
+- Kết quả391Flutter/26Node ở22/10 là lịch sử; không nhận thành verification04/11.
+
 ## Chuẩn hiện hành — 22/10/2026
 
-Người dùng chỉ định PDF **PRM393 - Lab 3 From Design to Working App with Flutter and Firebase.pdf**, **17 trang**. Đọc `docs/ASSIGNMENT_REQUIREMENTS.md` và `docs/requirements-audit.md` trước khi tiếp tục. Bản 18 trang/ARTEMIS và Final là tài liệu khác, không điều khiển lượt này. Prompt và checkpoint lịch sử giữ ở `docs/implementation-ai-log.md`; chỉ `docs/requirements-audit.md` điều khiển trạng thái hiện tại.
+Người dùng chỉ định PDF **PRM393 - Lab 3 From Design to Working App with Flutter and Firebase.pdf**, **17 trang**. Đọc `docs/ASSIGNMENT_REQUIREMENTS.md` và `TASKS.md` trước khi tiếp tục. Bản 18 trang/ARTEMIS và Final là tài liệu khác, không điều khiển lượt này. Prompt và checkpoint lịch sử giữ ở `docs/implementation-ai-log.md`; chỉ `TASKS.md` điều khiển trạng thái hiện tại.
 
 - Lab 3: ≥8 màn Lab2, 3 flows thật/error recovery; MVVM/Riverpod; Google Auth, Firestore CRUD/query/realtime/owner rules, PDF upload + URL/metadata Firestore, FCM, ≥2 RC, Crashlytics, Analytics.
 - MobAI: 10 `.mob` trong `mobai_tests/`, kết quả thật, healing và bug-catching; unit/widget tests không thay gate này. Đề yêu cầu dedicated Google test account; user hiện cho phép tài khoản cá nhân để QA, không biến thành đã đạt gate dedicated account.
@@ -18,7 +30,7 @@ Người dùng chỉ định PDF **PRM393 - Lab 3 From Design to Working App wit
 - Giữ hai control Crashlytics trong vùng chẩn đoán vì mục6.7 PDF yêu cầu; không nhầm chúng với demo login/data.
 - Firebase hiện hành `tokenledger-nhan-20261021`, Spark; Auth/SHA/Firestore/RC đã setup theo lịch sử. Không tự bật billing, migrate project hoặc coi console evidence đã đạt. Storage/Analytics console còn phải kiểm.
 - Provider companion local là extension user yêu cầu; không phải điều kiện để 3 core flows chạy. Không đọc provider credentials/cookies/private consumer endpoints, gọi model hoặc suy phí đã charge từ token.
-- Không tự push/merge/deploy hoặc đổi visibility/remote name. Branch mới dùng `codex/`.
+- User đã cho phép push web admin vào repo `NhanHuynhThien/lab3_prm_web_admin`; không push mobile, merge/deploy hoặc đổi visibility/remote name. Branch mới dùng `codex/`.
 - Không chủ động tạo agent phụ trừ khi user hoặc skill áp dụng yêu cầu rõ.
 
 ## Kiến trúc
@@ -43,4 +55,4 @@ Người dùng chỉ định PDF **PRM393 - Lab 3 From Design to Working App wit
 - Dart files ≤300 lines. Khi thay runtime: format/analyze/tests liên quan; full tests khi sửa theme/model/navigation/bootstrap; thay dependency cần build web và Android phù hợp.
 - User đã yêu cầu testing chi tiết: kiểm UI/Firestore thật, loading/empty/error/recovery, Back/draft, CRUD/reload, quota/time/unknown, PDF, source setup/errors, RC, notifications, logout. Ghi pass/fail/blocked từng case và môi trường; không gọi fake widget data là E2E.
 - Không tạo `.mob`, prompt/review results, console screenshot hoặc thời gian chạy giả. Không dùng screenshot fixture làm fidelity native.
-- Chỉ nêu test/build đã thực chạy; evidence online/console không tự suy từ SDK status. Giữ secrets và `.env.local` ngoài Git/log.
+- Chỉ nêu test/build đã thực chạy; evidence online/console không tự suy từ SDK status. Giữ secrets và `.env` ngoài Git/log.

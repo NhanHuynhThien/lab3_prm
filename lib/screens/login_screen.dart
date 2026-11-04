@@ -176,7 +176,7 @@ class LoginScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: AppSpace.xl),
                             Text(
-                              'Dữ liệu của bạn được lưu riêng theo tài khoản.\nKết nối nguồn AI sau khi đăng nhập.',
+                              'App cá nhân: xem token, quota và chi phí AI của bạn.\nQuản trị model, bảng giá, thông báo ở web admin.',
                               textAlign: TextAlign.center,
                               style: text.bodySmall,
                             ),

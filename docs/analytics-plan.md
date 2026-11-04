@@ -36,4 +36,4 @@ Tắt automatic Android screen reporting để MainActivity không thay route. D
 3. Chụp DebugView từng event/params, auth lifecycle đúng project hiện hành; che identity nếu đưa vào bài nộp.
 4. Đối chiếu MobAI/manual flow với Logcat/DebugView; unit/fake transports không thay evidence online.
 
-Project `tokenledger-nhan-20261021` chưa có DebugView evidence đầy đủ/liên kết GA được xác nhận. RC setup/evidence xem [firebase-setup](firebase-setup.md), kết quả thực xem [test-report](test-report.md).
+Project `tokenledger-nhan-20261021` chưa có DebugView evidence đầy đủ/liên kết GA được xác nhận. RC setup/evidence xem [firebase-setup](../TASKS.md), kết quả thực xem [test-report](test-report.md).

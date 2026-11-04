@@ -5,15 +5,15 @@ import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/reporting_viewmodel.dart';
 import '../widgets/common.dart';
 import '../widgets/dashboard_cards.dart';
-import '../widgets/data_scope_picker.dart';
 import '../widgets/ledger_feedback.dart';
 import '../widgets/range_picker.dart';
 import '../widgets/agent_dashboard_panel.dart';
-import '../viewmodels/provider_sync_viewmodel.dart';
+import '../viewmodels/provider_sources_viewmodel.dart';
 import '../models/cloud_sync_status.dart';
 import '../theme/app_theme.dart';
 import '../widgets/provider_ledger_feedback.dart';
 import 'usage_form_screen.dart';
+import '../widgets/optional_source_prompt.dart';
 
 export '../widgets/quota_row.dart';
 export '../widgets/range_picker.dart';
@@ -33,8 +33,9 @@ class DashboardScreen extends ConsumerWidget {
     final state = ref.watch(ledgerProvider);
     final feedback = ledgerFeedback(state, 'Tổng quan');
     final cloud = ref.watch(cloudOwnerProvider) != null;
+    final showProviderFirst = ref.watch(hasObservedSourcesProvider);
     if (feedback != null) {
-      return cloud
+      return cloud && showProviderFirst
           ? ProviderLedgerFeedback(
               feedback: feedback,
               header: AgentDashboardPanel(onAnalytics: onAnalytics),
@@ -43,8 +44,6 @@ class DashboardScreen extends ConsumerWidget {
     }
     final data = state.requireValue;
     final projection = ref.watch(dashboardProjectionProvider);
-    final showProviderFirst =
-        cloud || ref.watch(providerSyncProvider).snapshot != null;
 
     final balance = DashboardBalanceCard(
       budgetAccounts: projection.budgetAccounts,
@@ -79,6 +78,16 @@ class DashboardScreen extends ConsumerWidget {
       onAnalytics: onAnalytics,
     );
 
+    final manual = [
+      const FilterBar(),
+      const SizedBox(height: 24),
+      _CardRow(left: balance, right: metrics, breakpoint: 680, leftFlex: 2),
+      const SizedBox(height: 16),
+      _CardRow(left: trend, right: quota),
+      const SizedBox(height: 16),
+      _CardRow(left: latest, right: purpose),
+    ];
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: AppSpace.dashboardWidth),
@@ -89,8 +98,7 @@ class DashboardScreen extends ConsumerWidget {
           children: [
             PageHeading(
               'Tổng quan',
-              centered: true,
-              cloud
+              showProviderFirst
                   ? 'Tình hình các agent bạn đang sử dụng, trong một dashboard.'
                   : 'AI đang hỗ trợ công việc của bạn như thế nào?',
               action: FilledButton.icon(
@@ -112,139 +120,44 @@ class DashboardScreen extends ConsumerWidget {
                 child: ExpansionTile(
                   title: const Text('Sổ sử dụng thủ công'),
                   subtitle: const Text('Ngân sách và các phiên bạn tự ghi'),
-                  initiallyExpanded: false,
                   tilePadding: EdgeInsets.zero,
-                  children: [
-                    const Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [RangePicker(), DataScopePicker()],
-                    ),
-                    const SizedBox(height: 24),
-                    LayoutBuilder(
-                      builder: (context, c) => c.maxWidth >= 680
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(child: balance),
-                                const SizedBox(width: 16),
-                                Expanded(child: metrics),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                balance,
-                                const SizedBox(height: 16),
-                                metrics,
-                              ],
-                            ),
-                    ),
-                    const SizedBox(height: 16),
-                    LayoutBuilder(
-                      builder: (context, c) => c.maxWidth >= 800
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(flex: 3, child: trend),
-                                const SizedBox(width: 16),
-                                Expanded(flex: 2, child: quota),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                trend,
-                                const SizedBox(height: 16),
-                                quota,
-                              ],
-                            ),
-                    ),
-                    const SizedBox(height: 16),
-                    LayoutBuilder(
-                      builder: (context, c) => c.maxWidth >= 800
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(flex: 3, child: latest),
-                                const SizedBox(width: 16),
-                                Expanded(flex: 2, child: purpose),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                latest,
-                                const SizedBox(height: 16),
-                                purpose,
-                              ],
-                            ),
-                    ),
-                  ],
+                  children: manual,
                 ),
               ),
             ] else ...[
-              const Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [RangePicker(), DataScopePicker()],
-              ),
-              const SizedBox(height: 24),
-              LayoutBuilder(
-                builder: (context, c) => c.maxWidth >= 680
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: balance),
-                          const SizedBox(width: 16),
-                          Expanded(child: metrics),
-                        ],
-                      )
-                    : Column(
-                        children: [
-                          balance,
-                          const SizedBox(height: 16),
-                          metrics,
-                        ],
-                      ),
-              ),
+              ...manual,
               const SizedBox(height: 16),
-              LayoutBuilder(
-                builder: (context, c) => c.maxWidth >= 800
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 3, child: trend),
-                          const SizedBox(width: 16),
-                          Expanded(flex: 2, child: quota),
-                        ],
-                      )
-                    : Column(
-                        children: [trend, const SizedBox(height: 16), quota],
-                      ),
-              ),
-              const SizedBox(height: 16),
-              LayoutBuilder(
-                builder: (context, c) => c.maxWidth >= 800
-                    ? Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 3, child: latest),
-                          const SizedBox(width: 16),
-                          Expanded(flex: 2, child: purpose),
-                        ],
-                      )
-                    : Column(
-                        children: [latest, const SizedBox(height: 16), purpose],
-                      ),
-              ),
-            ],
-            if (!showProviderFirst) ...[
-              const SizedBox(height: 16),
-              AgentDashboardPanel(onAnalytics: onAnalytics),
+              const OptionalSourcePrompt(),
             ],
           ],
         ),
       ),
     );
   }
+}
+
+/// Two cards side by side on wide screens, stacked on phones.
+class _CardRow extends StatelessWidget {
+  const _CardRow({
+    required this.left,
+    required this.right,
+    this.breakpoint = 800,
+    this.leftFlex = 3,
+  });
+  final Widget left, right;
+  final double breakpoint;
+  final int leftFlex;
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, c) => c.maxWidth >= breakpoint
+        ? Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(flex: leftFlex, child: left),
+              const SizedBox(width: 16),
+              Expanded(flex: 2, child: right),
+            ],
+          )
+        : Column(children: [left, const SizedBox(height: 16), right]),
+  );
 }

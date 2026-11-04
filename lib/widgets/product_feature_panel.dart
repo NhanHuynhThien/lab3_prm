@@ -15,6 +15,8 @@ class ProductFeaturePanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(notificationListProvider);
+    final notifications = ref.watch(notificationServiceProvider);
     final config = ref.watch(productConfigProvider);
     final analytics =
         ref.watch(analyticsStatusProvider).asData?.value ??
@@ -144,6 +146,15 @@ class ProductFeaturePanel extends ConsumerWidget {
                 'Nhận thông báo đẩy từ Firebase Cloud Messaging và quản lý cảnh báo trong ứng dụng.',
                 style: TextStyle(color: AppColors.muted),
               ),
+              if (notifications.backendAvailable) ...[
+                const SizedBox(height: AppSpace.sm),
+                Text(
+                  notifications.registered
+                      ? 'Thiết bị đã đăng ký với backend.'
+                      : notifications.registrationError ?? 'Chưa đăng ký backend. Bật thông báo ở phía trên để kết nối.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
               const SizedBox(height: AppSpace.md),
               Wrap(
                 spacing: 12,
@@ -165,7 +176,7 @@ class ProductFeaturePanel extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpace.lg),
 
-        // Panel 4: PDF Export & Cloud Storage
+        // Panel 4: Local PDF Export
         ProductPdfStorageCard(reports: reports),
         const SizedBox(height: AppSpace.lg),
         const CrashDiagnosticsPanel(),

@@ -1,6 +1,6 @@
 # AI implementation log — dữ liệu thật của phiên làm việc
 
-Có 24 mục ghi nhận đến ngày22/10/2026; một số mục là Git/docs, không phải implementation evidence. Prompt lịch sử giữ nguyên văn. Các nhận định/trạng thái cũ chỉ có hiệu lực ở checkpoint tương ứng; đối chiếu hiện tại tại [audit](requirements-audit.md) và [test report](test-report.md).
+Có 25 mục ghi nhận đến ngày22/10/2026; một số mục là Git/docs, không phải implementation evidence. Prompt lịch sử giữ nguyên văn. Các nhận định/trạng thái cũ chỉ có hiệu lực ở checkpoint tương ứng; đối chiếu hiện tại tại [audit](../TASKS.md) và [test report](test-report.md).
 
 Lịch sử lượt đầu19/10/2026. Tool: Codex; shell/Flutter/Dart; cua_repl IAB; local taste-skill draw/lint/inspect. Không gọi AI provider để phân tích usage trong app. Không có subagent, Firebase console, MobAI hoặc AI PR review trong lượt này.
 
@@ -352,3 +352,41 @@ Output: bỏ3metadata `.agents` dùng rubric cũ/link docs đã xóa; giữ root
 Verification:280file Git candidates được scan các mẫu private key/provider token/Bearer/OAuth secret, không có phát hiện (không in giá trị). Không file candidate>5MiB; chỉ `.env.example` được track. Format dry-run không đổi, analyzer sạch2.4s; Node26/26pass; docs local links không hỏng; Dart lib/test≤300lines; git diff --check sạch. Không chạy lại Flutter suite/Android/web build trong cleanup chỉ đổi config/comments/docs;391Flutter và profile/web pass là checkpoint trước cleanup.
 
 Decision: accepted; giữ public Firebase client config, fonts/licenses/provider assets, test fixtures và Crash controls yêu cầu bởi đề. Cleanup chuẩn bị source để commit/push, không phải xác nhận mọi gate Firebase/MobAI đã hoàn tất.
+
+## Entry25 — plan và browser setup platform (04/11/2026)
+
+Prompt người dùng nguyên văn:
+
+> 1. lên Plan chi tiết
+> 2. Tạo 1 folder mới
+> 3. Dùng browser đăng kí các key sau đó set up toàn bộ cho mình
+
+Steering tiếp theo nguyên văn:
+
+> Bỏ qua tính năng up PDF đi
+
+> Xử lí tiếp cho mình đi
+
+Tools: Codex, source inventory, official docs, Chrome qua cua_repl, Node/Python local file/config và APIverification. Không subagent.
+
+Output: `platform/` có detailedplan, setupstatus, backend/adminenvexamples và presence/APIverification scripts. Dùng đúng Firebaseproject TokenLedgerNhan, import vào AIStudio; tạo Gemini key riêng sau user xác nhận ngay bướccredential. Tạo tokenledger-fcm-dev + riêng FirebaseCloudMessagingAPIAdmin và JSONlocal sau user xác nhận riêng. Backendconfig/JSON600, folder700, Gitignored; web chỉ publicFirebaseconfig. Không billing/Cloudinary/S3/productiondeploy/adminclaim. PDFupload bỏ khỏi scope; localPDF giữ, UIuploadcode hiện có chưa gỡ (phase1).
+
+Verification: browser xác nhận Spark và FCMv1Enabled/LegacyDisabled; GeminiFreeTier. Model-list200 và configuredmodelgemini-2.5-flashavailable; FCMOAuth200 + validate_only200, không generateContent/pushdelivery. Configpreflightpass, JSsyntaxchecks,288Gitcandidatefiles không chứa credential thật, localdoclinks không hỏng, gitdiffcheck sạch. Không chạyFluttertests/build trong lượtplan/setup;391Flutter22/10 là lịch sử.
+
+Decision: accepted plan/setup theo scopeuser; không claim webadmin/APIbusiness/mobileAI/pushE2E đã triển khai. IdentityFCM không dùng làm Firestore/Authadmin; những quyền mới phải được xét riêng khi đến implementation. UploadPDF vẫn là exception với đề gốc, không tự coi lecturer đã miễn. Keymodel-list/dryrun không chứng minh quota generation hay realdevice delivery.
+
+
+## 27. Next.js admin riêng và dọn docs mobile — 04/11/2026
+
+Prompt nguyên văn (không gồm credential user gửi):
+
+> 1. [https://github.com/NhanHuynhThien/lab3_prm_web_admin.git](https://github.com/NhanHuynhThien/lab3_prm_web_admin.git) làm xong web app thì push vào repo này
+> 2. bên mobile clear bớt các md rác, cho 1 md đánh dấu và hiển thị chi tiết các task đã làm + cần làm. 1 readme nghiệp vụ
+
+> cả 2 file chỉ dùng đúng .env thôi k toạ thêm env rác. Web admin dùng nextJS cho mình
+
+> web app dùng next js và shadCn nha
+
+Output: web/API tách repo/folder `../lab3_prm_web_admin/`, Next.js App Router + shadcn/ui + Fastify + Supabase. Chỉ admin/.env và api/.env bị Git ignore, server-only credentials. Mobile có TASKS.md làm nguồn tiến độ duy nhất, README nghiệp vụ, giữ7 tài liệu bắt buộc/requirements/assets provenance/AGENTS; bỏ5 docs mục lục/setup/architecture/audit trùng sau khi gom thông tin hiện hành. PDF chỉ local, gỡ upload/link cloud UI và FirebaseStorage bootstrap.
+
+Verification: mobile analyzer sạch,391Flutter tests và26Node bridge tests pass04/11. Platform production build Next/API pass,5API security/contract tests pass, liveSupabase QA atomic/owner/idempotency/encryption/cap pass và dọnQA. Firebase/Gemini/FCM configured không thay E2E mobile; task thiếu giữ unchecked. Không bật billing/deploy public hay push mobile. Credential values không đưa vào log này.

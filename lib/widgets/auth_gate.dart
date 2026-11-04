@@ -107,6 +107,9 @@ class _WorkspaceScopeState extends State<_WorkspaceScope> {
 
   late final _container = ProviderContainer(
     overrides: [
+      platformApiProvider.overrideWithValue(
+        widget.parent.read(platformApiProvider),
+      ),
       authServiceProvider.overrideWithValue(widget.auth),
       ...[
         analyticsServiceProvider.overrideWithValue(

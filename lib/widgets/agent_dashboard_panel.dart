@@ -239,7 +239,7 @@ class _AgentRow extends StatelessWidget {
           const SizedBox(height: AppSpace.lg),
           if (source.totalTokens != null)
             Text(
-              '${compactTokens(source.totalTokens)} token · ${source.id == 'codex' ? 'lifetime từ server' : 'CLI trong 30 ngày'}',
+              '${compactTokens(source.totalTokens)} · ${source.tokenLabel}',
               style: text.bodySmall,
             ),
           if (source.models.isNotEmpty)

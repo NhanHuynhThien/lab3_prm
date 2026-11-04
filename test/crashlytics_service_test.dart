@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/services/crashlytics_service.dart';
 
@@ -36,6 +38,38 @@ class FakeCrashlyticsTransport implements CrashlyticsTransport {
 }
 
 void main() {
+  test(
+    'unavailable Crashlytics never reports enabled or recorded success',
+    () async {
+      final service = CrashlyticsService(null);
+      await service.bindOwner('a');
+      await service.recordHandled(Exception('QA'));
+      expect(service.current.enabled, false);
+      expect(service.current.errorCount, 0);
+      await service.close();
+    },
+  );
+  test(
+    'late owner binding cannot restore a previous owner after switch/logout',
+    () async {
+      final transport = DelayedCrashTransport(),
+          service = CrashlyticsService(DelayedCrashTransport());
+      await service.close();
+      final actual = CrashlyticsService(transport);
+      final a = actual.bindOwner('a');
+      await Future<void>.delayed(Duration.zero);
+      final b = actual.bindOwner('b');
+      transport.gate.complete();
+      await a;
+      await b;
+      expect(transport.userId, 'b');
+      expect(actual.current.userId, 'b');
+      await actual.bindOwner(null);
+      expect(transport.enabled, false);
+      expect(actual.current.enabled, false);
+      await actual.close();
+    },
+  );
   group('CrashlyticsService', () {
     late FakeCrashlyticsTransport transport;
     late CrashlyticsService service;
@@ -99,4 +133,17 @@ void main() {
       expect(transport.crashed, isTrue);
     });
   });
+}
+
+class DelayedCrashTransport extends FakeCrashlyticsTransport {
+  final gate = Completer<void>();
+  bool first = true;
+  @override
+  Future<void> enable(bool value) async {
+    if (first) {
+      first = false;
+      await gate.future;
+    }
+    await super.enable(value);
+  }
 }

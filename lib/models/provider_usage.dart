@@ -78,6 +78,14 @@ class ProviderUsage {
   final DateTime? observedAt;
   final int? totalTokens, contextTokens, estimatedCostMicros;
   final List<ProviderQuota> windows;
+
+  /// Codex totals are server lifetime unless the bridge fell back to local
+  /// session logs (source set by withLocalUsage in tool/provider_bridge).
+  String get tokenLabel => id == 'antigravity'
+      ? 'Token IDE'
+      : id == 'codex' && source != 'Phiên lưu trên máy'
+      ? 'Token lifetime · server'
+      : 'Token CLI · 30 ngày';
   final List<ProviderModelUsage> models;
   final String modelsCoverage;
   String get name => providerNames[id]!;

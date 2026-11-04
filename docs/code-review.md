@@ -1,6 +1,6 @@
 # Code review — Codex,22/10/2026
 
-**Local source review, chưa phải PR review evidence hoàn chỉnh theo PDF §11,tr11.** Tool: Codex trong chat này; base main `0dee633` + working tree22/10. Không tạo PR/commit hoặc screenshot tool review giả. Severity do người review đánh giá. [Compliance audit](requirements-audit.md).
+**Local source review, chưa phải PR review evidence hoàn chỉnh theo PDF §11,tr11.** Tool: Codex trong chat này; base main `0dee633` + working tree22/10. Không tạo PR/commit hoặc screenshot tool review giả. Severity do người review đánh giá. [Compliance audit](../TASKS.md).
 
 | ID | File:line tại lúc review | Severity/type | Finding | Quyết định/lý do | Fix/evidence |
 |---|---|---|---|---|---|

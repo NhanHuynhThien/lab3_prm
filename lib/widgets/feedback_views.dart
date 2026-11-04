@@ -95,30 +95,33 @@ class EmptyFeedback extends StatelessWidget {
   final String? action;
   final VoidCallback? onAction;
   @override
+  // Left-aligned so it lines up with the card title above it.
   Widget build(BuildContext context) => SingleChildScrollView(
     child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.inbox_outlined, size: 36, color: AppColors.muted),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          if (action != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: OutlinedButton(onPressed: onAction, child: Text(action!)),
+          const Icon(Icons.inbox_outlined, size: 24, color: AppColors.muted),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 4),
+                Text(message, style: Theme.of(context).textTheme.bodySmall),
+                if (action != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: OutlinedButton(
+                      onPressed: onAction,
+                      child: Text(action!),
+                    ),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     ),

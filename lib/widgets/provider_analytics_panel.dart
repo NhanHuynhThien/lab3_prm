@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/usage_tips.dart';
 import '../models/provider_analysis.dart';
 import '../theme/app_theme.dart';
 import '../viewmodels/gemini_activity_viewmodel.dart';
@@ -88,7 +89,10 @@ class ProviderAnalyticsPanel extends ConsumerWidget {
         const SizedBox(height: 16),
         if (source.activity != null) ...[
           const SizedBox(height: 16),
-          ProviderActivityPanel(activity: source.activity!),
+          ProviderActivityPanel(
+            activity: source.activity!,
+            tips: usageTips(source.activity!, source, now),
+          ),
         ],
         if (source.id == 'gemini-web') ...[
           if (activity != null) ...[

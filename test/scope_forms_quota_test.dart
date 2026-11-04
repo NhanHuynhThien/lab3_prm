@@ -100,8 +100,8 @@ void main() {
       await h.reveal(tester, find.text('20/10/2026'));
       expect(find.text('20/10/2026'), findsOneWidget);
       expect(find.text('Không thuộc provider'), findsNothing);
-      await h.reveal(tester, find.text('Múi giờ báo cáo'), step: -240);
-      await tester.tap(find.text('Múi giờ báo cáo'));
+      await h.reveal(tester, find.byTooltip('Múi giờ báo cáo'), step: -240);
+      await tester.tap(find.byTooltip('Múi giờ báo cáo'));
       await tester.pumpAndSettle();
       final zone = find.byKey(const ValueKey('reporting-timezone'));
       await tester.enterText(zone, 'Made/Up');

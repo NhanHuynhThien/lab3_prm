@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -8,6 +9,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/notification_item.dart';
+import '../firebase_options.dart';
 import 'analytics_service.dart';
 import 'crashlytics_service.dart';
 import 'notification_service.dart';
@@ -106,11 +108,32 @@ class FirebaseCrashlyticsTransport implements CrashlyticsTransport {
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Executed in background isolate upon receiving FCM push
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // The OS displays notification payloads. Never read a user's ledger here.
 }
 
-class FirebaseNotificationTransport implements NotificationTransport {
+class FirebaseNotificationTransport
+    implements NotificationTransport, NotificationRefreshTransport {
+  FirebaseNotificationTransport() {
+    if (!kIsWeb) {
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    }
+  }
   FirebaseMessaging get _sdk => FirebaseMessaging.instance;
+  @override
+  // HTTP v1 backend currently accepts registration tokens, not Installation IDs.
+  // ignore: deprecated_member_use
+  Stream<String> get onTokenRefresh => _sdk.onTokenRefresh;
+  @override
+  Future<bool> hasPermission() async {
+    final settings = await _sdk.getNotificationSettings();
+    return settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional;
+  }
+
+  @override
+  // ignore: deprecated_member_use
+  Future<void> deleteToken() => _sdk.deleteToken();
 
   @override
   Future<bool> requestPermission() async {
@@ -140,7 +163,10 @@ class FirebaseNotificationTransport implements NotificationTransport {
 
   NotificationItem _mapMessage(RemoteMessage msg) {
     return NotificationItem(
-      id: msg.messageId ?? 'fcm_${DateTime.now().millisecondsSinceEpoch}',
+      id:
+          msg.data['notificationId']?.toString() ??
+          msg.messageId ??
+          'fcm_${DateTime.now().millisecondsSinceEpoch}',
       title:
           msg.notification?.title ??
           msg.data['title']?.toString() ??

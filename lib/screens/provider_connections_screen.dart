@@ -39,8 +39,7 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
         padding: const EdgeInsets.all(AppSpace.lg),
         children: [
           const Text(
-            'Đọc số liệu từ Codex, Claude Code, Gemini CLI và Antigravity trên máy đã ghép nối. '
-            'Google login không tự cấp quyền đọc các gói đăng ký này.',
+            'Companion là kết nối CLI tùy chọn trên Mac. Đăng nhập Google, ghi usage và Gemini API không cần companion.',
           ),
           const SizedBox(height: 12),
           const Wrap(
@@ -60,6 +59,31 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SectionTitle('Nguồn trên máy của bạn'),
+                if (state.enabled) ...[
+                  const SizedBox(height: 16),
+                  const Text('Tự cập nhật mỗi 60 giây khi ứng dụng hoạt động.'),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: state.working ? null : actions.refresh,
+                        icon: const Icon(Icons.sync),
+                        label: Text(
+                          state.working ? 'Đang đồng bộ...' : 'Cập nhật ngay',
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          actions.disconnect();
+                          _token.clear();
+                        },
+                        child: const Text('Ngắt kết nối'),
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 12),
                 const Text(
                   'Chạy companion trên Mac, dùng mã ghép nối của máy đó. '
                   'Dữ liệu chỉ giữ trong phiên hiện tại, không tự tải lên Firestore. '
@@ -111,30 +135,6 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
                     label: const Text('Kết nối nguồn trên máy'),
                   ),
                 ],
-                if (state.enabled) ...[
-                  const SizedBox(height: 16),
-                  const Text('Tự cập nhật mỗi 60 giây khi ứng dụng hoạt động.'),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
-                    children: [
-                      OutlinedButton.icon(
-                        onPressed: state.working ? null : actions.refresh,
-                        icon: const Icon(Icons.sync),
-                        label: Text(
-                          state.working ? 'Đang đồng bộ...' : 'Cập nhật ngay',
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          actions.disconnect();
-                          _token.clear();
-                        },
-                        child: const Text('Ngắt kết nối'),
-                      ),
-                    ],
-                  ),
-                ],
                 if (state.error != null) ...[
                   const SizedBox(height: 12),
                   Semantics(
@@ -161,15 +161,18 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SectionTitle('Thiết lập companion'),
+                SelectableText('node tool/provider_bridge/setup.mjs'),
+                SizedBox(height: 8),
                 SelectableText('node tool/provider_bridge/server.mjs'),
                 SizedBox(height: 12),
                 Text(
-                  'Mã ghép nối: ~/.local/share/tokenledger/bridge-token. '
+                  'Lệnh setup tạo mã ghép nối tại ~/.local/share/tokenledger/bridge-token trên Mac. '
+                  'Đây không phải mật khẩu Google hoặc Gemini API key. '
                   'Android Emulator cần adb reverse tcp:8787 tcp:8787.',
                 ),
                 SizedBox(height: 12),
                 Text(
-                  'Claude cần status line theo docs/provider-sync.md. '
+                  'Claude cần status line theo hướng dẫn TASKS.md. '
                   'Gemini CLI cần lịch sử phiên; Antigravity dùng agy /usage. '
                   'Chưa có nguồn sẽ hiện “Cần kết nối nguồn”, không dùng dữ liệu mẫu.',
                 ),

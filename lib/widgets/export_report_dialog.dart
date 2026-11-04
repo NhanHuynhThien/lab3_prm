@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/export_report.dart';
@@ -9,7 +8,6 @@ import '../theme/app_theme.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
-import 'common.dart';
 import 'export_report_views.dart';
 
 class ExportReportDialog extends ConsumerStatefulWidget {
@@ -29,7 +27,6 @@ class ExportReportDialog extends ConsumerStatefulWidget {
 class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
   String _selectedPeriod = 'Tháng này';
   bool _isWorking = false;
-  double _uploadProgress = 0.0;
   String _statusText = '';
   ExportReport? _completedReport;
   String? _errorMessage;
@@ -106,7 +103,6 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
               if (_isWorking) ...[
                 const SizedBox(height: AppSpace.md),
                 LinearProgressIndicator(
-                  value: _uploadProgress > 0 ? _uploadProgress : null,
                   backgroundColor: AppColors.frame,
                   valueColor: const AlwaysStoppedAnimation(AppColors.primary),
                 ),
@@ -148,18 +144,10 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
         ),
         const SizedBox(width: AppSpace.sm),
         if (_completedReport == null) ...[
-          OutlinedButton.icon(
-            onPressed: _isWorking
-                ? null
-                : () => _generate(uploadToCloud: false),
-            icon: const Icon(Icons.file_open_outlined, size: 18),
-            label: const Text('Mở trên máy'),
-          ),
-          const SizedBox(width: AppSpace.sm),
           FilledButton.icon(
-            onPressed: _isWorking ? null : () => _generate(uploadToCloud: true),
-            icon: const Icon(Icons.cloud_upload_outlined, size: 18),
-            label: const Text('Tải lên Cloud'),
+            onPressed: _isWorking ? null : _generate,
+            icon: const Icon(Icons.file_open_outlined, size: 18),
+            label: const Text('Tạo PDF trên máy'),
           ),
         ] else ...[
           if (_completedReport!.localPath != null)
@@ -172,29 +160,15 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
               icon: const Icon(Icons.open_in_new, size: 18),
               label: const Text('Mở PDF'),
             ),
-          if (_completedReport!.storageUrl != null) ...[
-            const SizedBox(width: AppSpace.sm),
-            FilledButton.icon(
-              onPressed: () {
-                Clipboard.setData(
-                  ClipboardData(text: _completedReport!.storageUrl!),
-                );
-                showMessage(context, 'Đã sao chép link Cloud Storage!');
-              },
-              icon: const Icon(Icons.copy, size: 18),
-              label: const Text('Sao chép link'),
-            ),
-          ],
         ],
       ],
     );
   }
 
-  Future<void> _generate({required bool uploadToCloud}) async {
+  Future<void> _generate() async {
     setState(() {
       _isWorking = true;
       _errorMessage = null;
-      _uploadProgress = 0.0;
       _statusText = 'Đang khởi tạo tài liệu PDF...';
     });
 
@@ -217,37 +191,13 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
       );
 
       if (!mounted) return;
-      if (uploadToCloud) {
-        setState(() {
-          _statusText = 'Đang tải lên Firebase Cloud Storage...';
-          _uploadProgress = 0.3;
-        });
-
-        final uploaded = await reportManager.uploadToCloudStorage(
-          reportId: report.id,
-          onProgress: (prog) {
-            if (mounted) setState(() => _uploadProgress = prog);
-          },
-        );
-
-        if (mounted) {
-          setState(() {
-            _isWorking = false;
-            _completedReport = uploaded;
-            _statusText = 'Đã hoàn tất.';
-          });
-        }
-      } else {
-        if (mounted) {
-          setState(() {
-            _isWorking = false;
-            _completedReport = report;
-            _statusText = 'Đã tạo báo cáo.';
-          });
-        }
-        if (report.localPath != null) {
-          await reportManager.openLocalReport(report.id);
-        }
+      setState(() {
+        _isWorking = false;
+        _completedReport = report;
+        _statusText = 'Đã tạo báo cáo.';
+      });
+      if (report.localPath != null) {
+        await reportManager.openLocalReport(report.id);
       }
     } catch (e) {
       if (mounted) {

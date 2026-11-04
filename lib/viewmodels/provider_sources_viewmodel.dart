@@ -46,3 +46,9 @@ final providerSourcesProvider = Provider<List<ProviderUsage>>((ref) {
             ),
   ];
 });
+
+final hasObservedSourcesProvider = Provider<bool>(
+  (ref) => ref
+      .watch(providerSourcesProvider)
+      .any((source) => source.status == 'ready'),
+);

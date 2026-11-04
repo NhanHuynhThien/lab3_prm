@@ -18,12 +18,13 @@ class ProviderSourcePicker extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: ChoiceChip(
-                avatar: ProviderBrandIcon(entry.key, size: 16),
+                avatar: ProviderBrandIcon(entry.key, size: 18, framed: false),
                 label: Text(entry.key == 'codex' ? 'Codex' : entry.value),
                 selected: selected == entry.key,
                 onSelected: (_) =>
                     ref.read(selectedSourceProvider.notifier).select(entry.key),
-                showCheckmark: true,
+                // Keep the logo visible when selected; the fill marks selection.
+                showCheckmark: false,
               ),
             ),
         ],

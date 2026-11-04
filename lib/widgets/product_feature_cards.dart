@@ -37,7 +37,7 @@ class ProductPdfStorageCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpace.sm),
           const Text(
-            'Xuất sổ ghi nhận theo kỳ ra PDF. Chọn lưu trên thiết bị hoặc tải lên cloud khi dịch vụ khả dụng.',
+            'Xuất sổ ghi nhận theo kỳ ra PDF. Lưu và mở file trên thiết bị, không tải dữ liệu lên cloud.',
             style: TextStyle(fontSize: 12, color: AppColors.muted),
           ),
           const SizedBox(height: AppSpace.md),
@@ -80,7 +80,7 @@ class ProductPdfStorageCard extends ConsumerWidget {
                             ),
                           ),
                           Text(
-                            '${rep.periodLabel} · ${(rep.fileSizeBytes / 1024).toStringAsFixed(1)} KB · ${rep.status == 'uploaded_cloud' ? 'Cloud' : 'Local'}',
+                            '${rep.periodLabel} · ${(rep.fileSizeBytes / 1024).toStringAsFixed(1)} KB · Trên thiết bị',
                             style: const TextStyle(
                               fontSize: 10,
                               color: AppColors.muted,

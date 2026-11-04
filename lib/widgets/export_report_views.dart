@@ -135,9 +135,7 @@ class ExportCompletedCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  report.status == 'uploaded_cloud'
-                      ? 'Đã tạo và tải lên Cloud Storage thành công!'
-                      : 'Đã tạo file PDF thành công!',
+                  'Đã tạo file PDF thành công!',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
@@ -151,15 +149,6 @@ class ExportCompletedCard extends StatelessWidget {
             'File: ${report.fileName} (${(report.fileSizeBytes / 1024).toStringAsFixed(1)} KB)',
             style: const TextStyle(fontSize: 12),
           ),
-          if (report.storageUrl != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              'Cloud URL: ${report.storageUrl!}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, color: AppColors.muted),
-            ),
-          ],
         ],
       ),
     );

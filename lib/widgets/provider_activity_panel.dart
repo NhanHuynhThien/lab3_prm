@@ -8,8 +8,13 @@ import 'common.dart';
 import 'provider_task_list.dart';
 
 class ProviderActivityPanel extends StatelessWidget {
-  const ProviderActivityPanel({super.key, required this.activity});
+  const ProviderActivityPanel({
+    super.key,
+    required this.activity,
+    this.tips = const [],
+  });
   final ProviderActivity activity;
+  final List<String> tips;
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
@@ -65,6 +70,36 @@ class ProviderActivityPanel extends StatelessWidget {
               const Text(
                 'Chưa xác định phí cho từng công việc. Token trong gói thuê bao không được quy đổi thành tiền đã trừ. Chi phí tự ghi được báo cáo riêng bên dưới.',
               ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpace.lg),
+        Panel(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SectionTitle('Gợi ý tối ưu'),
+              if (tips.isEmpty)
+                Text(
+                  'Chưa thấy điểm cần tối ưu trong 30 ngày qua.',
+                  style: text.bodySmall,
+                ),
+              for (final tip in tips)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpace.md),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.lightbulb_outline_rounded,
+                        size: 20,
+                        color: AppColors.amber,
+                      ),
+                      const SizedBox(width: AppSpace.md),
+                      Expanded(child: Text(tip)),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),

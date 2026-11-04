@@ -22,6 +22,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _permissionWorking = false;
   @override
   Widget build(BuildContext context) {
+    ref.watch(notificationListProvider);
     final user = widget.user;
     final sync = ref.watch(cloudSyncProvider);
     final action = ref.watch(authActionProvider);
@@ -32,7 +33,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       children: [
         const PageHeading(
           'Cá nhân',
-          'Tài khoản, kết nối dữ liệu và tùy chọn báo cáo.',
+          'App cá nhân · tài khoản, nguồn dữ liệu và báo cáo của riêng bạn.',
         ),
         Panel(
           child: Row(
@@ -119,7 +120,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed:
-                    _permissionWorking || notificationService.permissionGranted
+                    _permissionWorking ||
+                        (notificationService.permissionGranted &&
+                            (!notificationService.backendAvailable ||
+                                notificationService.registered))
                     ? null
                     : () async {
                         setState(() => _permissionWorking = true);
@@ -137,8 +141,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 label: Text(
                   _permissionWorking
                       ? 'Đang xử lý...'
-                      : notificationService.permissionGranted
+                      : notificationService.permissionGranted &&
+                            notificationService.registered
                       ? 'Thông báo đã bật'
+                      : notificationService.permissionGranted &&
+                            notificationService.backendAvailable
+                      ? 'Kết nối lại thông báo'
                       : 'Bật thông báo',
                 ),
               ),

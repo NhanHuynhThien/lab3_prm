@@ -14,5 +14,10 @@ for attempt in {1..60}; do
 done
 "$SDK_DIR/platform-tools/adb" -s "$DEVICE_ID" shell settings put system peak_refresh_rate 120.0
 "$SDK_DIR/platform-tools/adb" -s "$DEVICE_ID" shell settings put system min_refresh_rate 120.0
+# Local companion (Codex/Claude/Gemini CLI usage) so login auto-connects.
+if ! lsof -nP -iTCP:8787 -sTCP:LISTEN >/dev/null 2>&1; then
+  node tool/provider_bridge/server.mjs > /tmp/tokenledger-bridge.log 2>&1 &
+fi
 "$SDK_DIR/platform-tools/adb" -s "$DEVICE_ID" reverse tcp:8787 tcp:8787
-flutter run --profile -d "$DEVICE_ID" --dart-define-from-file=.env.local
+"$SDK_DIR/platform-tools/adb" -s "$DEVICE_ID" reverse tcp:8788 tcp:8788
+flutter run --profile -d "$DEVICE_ID" --dart-define-from-file=.env --dart-define=UI_PERFORMANCE_AUDIT=true

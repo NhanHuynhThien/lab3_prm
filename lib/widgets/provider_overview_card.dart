@@ -6,6 +6,7 @@ import '../models/gemini_activity_summary.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import 'common.dart';
+import 'provider_brand_icon.dart';
 import 'provider_model_preview.dart';
 import 'provider_quota_metric.dart';
 
@@ -46,7 +47,9 @@ class ProviderOverviewCard extends StatelessWidget {
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text(name, style: text.headlineSmall),
+              if (row != null)
+                ProviderBrandIcon(row.id, size: 22, framed: false),
+              Text(name, style: text.titleLarge),
               StatusTag(
                 ready
                     ? quotas.isNotEmpty && row!.stale(now)
@@ -130,14 +133,7 @@ class ProviderOverviewCard extends StatelessWidget {
               spacing: 32,
               runSpacing: 16,
               children: [
-                _Number(
-                  row.id == 'codex'
-                      ? 'Token lifetime · server'
-                      : row.id == 'antigravity'
-                      ? 'Token IDE'
-                      : 'Token CLI · 30 ngày',
-                  compactTokens(row.totalTokens),
-                ),
+                _Number(row.tokenLabel, compactTokens(row.totalTokens)),
                 if (row.models.isNotEmpty)
                   _Number('Model có ghi nhận', '${row.models.length}'),
               ],

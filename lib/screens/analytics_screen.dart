@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/usage_calculator.dart';
-import '../models/cloud_sync_status.dart';
+import '../viewmodels/provider_sources_viewmodel.dart';
 import '../widgets/provider_analytics_panel.dart';
 import '../widgets/provider_ledger_feedback.dart';
-import '../widgets/data_scope_picker.dart';
 import 'usage_form_screen.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/reporting_viewmodel.dart';
@@ -16,6 +15,7 @@ import '../viewmodels/ledger_viewmodel.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
 import '../widgets/export_report_dialog.dart';
+import '../widgets/gemini_analysis_card.dart';
 
 class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
@@ -31,9 +31,9 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     final feedback = ledgerFeedback(ref.watch(ledgerProvider), 'Phân tích');
-    final cloud = ref.watch(cloudOwnerProvider) != null;
+    final hasSources = ref.watch(hasObservedSourcesProvider);
     if (feedback != null) {
-      return cloud ? ProviderLedgerFeedback(feedback: feedback) : feedback;
+      return hasSources ? ProviderLedgerFeedback(feedback: feedback) : feedback;
     }
     final projection = ref.watch(analyticsProjectionProvider(_metric));
     final summary = projection.summary;
@@ -51,7 +51,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           'Phân tích sử dụng',
           'Hạn mức cần chú ý, model đang dùng và độ đầy đủ của dữ liệu.',
         ),
-        if (cloud) ...[
+        if (hasSources) ...[
           const ProviderAnalyticsPanel(),
           const SizedBox(height: 24),
           const SectionTitle('Phân tích các phiên tự ghi'),
@@ -60,9 +60,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           ),
           const SizedBox(height: 16),
         ],
-        const DataScopePicker(),
-        const SizedBox(height: 16),
-        const RangePicker(),
+        const FilterBar(),
         const SizedBox(height: 16),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -75,6 +73,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 setState(() => _selectedMetric = s.first),
           ),
         ),
+        const SizedBox(height: 24),
+        const GeminiAnalysisCard(),
         const SizedBox(height: 24),
         Panel(
           child: Column(
@@ -285,7 +285,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         OutlinedButton.icon(
           onPressed: () => ExportReportDialog.show(context),
           icon: const Icon(Icons.picture_as_pdf_outlined),
-          label: const Text('Xuất báo cáo PDF & Cloud Storage'),
+          label: const Text('Xuất báo cáo PDF'),
         ),
       ],
     );

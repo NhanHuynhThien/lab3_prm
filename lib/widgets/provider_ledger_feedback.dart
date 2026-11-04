@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'provider_sync_summary.dart';
-
 /// Companion data does not depend on Firestore's loading/error state.
 class ProviderLedgerFeedback extends StatelessWidget {
   const ProviderLedgerFeedback({
@@ -16,8 +14,7 @@ class ProviderLedgerFeedback extends StatelessWidget {
   Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.all(16),
     children: [
-      header ?? const ProviderSyncSummary(),
-      const SizedBox(height: 16),
+      if (header != null) ...[header!, const SizedBox(height: 16)],
       SizedBox(height: 420, child: feedback),
     ],
   );

@@ -129,7 +129,8 @@ void main() {
     (tester) async {
       await h.open(tester, corrupt: true);
       try {
-        expect(find.text('Dashboard agent'), findsOneWidget);
+        expect(find.text('Dashboard agent'), findsNothing);
+        expect(find.text('Mã ghép nối companion'), findsNothing);
         await h.reveal(tester, find.textContaining('Chưa đọc được dữ liệu'));
         expect(find.textContaining('Chưa đọc được dữ liệu'), findsOneWidget);
         expect(h.root.exists(ledgerProvider), isFalse);

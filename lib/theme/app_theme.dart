@@ -94,25 +94,25 @@ ThemeData buildAppTheme() {
     scaffoldBackgroundColor: AppColors.background,
     textTheme: TextTheme(
       displaySmall: base.copyWith(
-        fontSize: 32,
+        fontSize: 28,
         height: 1.15,
         fontWeight: FontWeight.w700,
         letterSpacing: -.7,
       ),
       headlineSmall: base.copyWith(
-        fontSize: 26,
+        fontSize: 22,
         height: 1.25,
         fontWeight: FontWeight.w700,
         letterSpacing: -.5,
       ),
       titleLarge: base.copyWith(
-        fontSize: 20,
+        fontSize: 18,
         height: 1.3,
         fontWeight: FontWeight.w700,
       ),
       titleMedium: base.copyWith(
-        fontSize: 16,
-        height: 1.5,
+        fontSize: 14,
+        height: 1.4,
         fontWeight: FontWeight.w600,
       ),
       titleSmall: base.copyWith(
@@ -120,11 +120,11 @@ ThemeData buildAppTheme() {
         height: 1.4,
         fontWeight: FontWeight.w600,
       ),
-      bodyLarge: base.copyWith(fontSize: 16, height: 1.55),
-      bodyMedium: base.copyWith(fontSize: 15, height: 1.5),
+      bodyLarge: base.copyWith(fontSize: 15, height: 1.5),
+      bodyMedium: base.copyWith(fontSize: 14, height: 1.45),
       bodySmall: base.copyWith(
-        fontSize: 14,
-        height: 1.5,
+        fontSize: 13,
+        height: 1.4,
         color: AppColors.muted,
       ),
       labelLarge: base.copyWith(
@@ -222,10 +222,10 @@ ThemeData buildAppTheme() {
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surface,
       indicatorColor: AppColors.soft,
-      height: 80,
+      height: 68,
       labelTextStyle: WidgetStateProperty.resolveWith(
         (states) => base.copyWith(
-          fontSize: 14,
+          fontSize: 12,
           fontWeight: states.contains(WidgetState.selected)
               ? FontWeight.w600
               : FontWeight.w400,

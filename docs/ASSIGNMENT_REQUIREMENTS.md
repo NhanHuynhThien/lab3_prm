@@ -2,7 +2,7 @@
 
 Đối chiếu ngày22/10/2026 theo file **PRM393 - Lab 3 From Design to Working App with Flutter and Firebase.pdf** do người dùng chỉ định. SHA-256: `563eb49ef0eca4d860b4edd67c4c818d08728fa657c3c07231ee7229a197589c`. Đã đọc toàn bộ17 trang và xem ảnh các trang5,6,9,11,12 để kiểm bảng/yêu cầu.
 
-Các bản tổng hợp trước từng lẫn đề18trang/ARTEMIS và Final; đã dọn khỏi docs. **Không dùng các scope đó làm rubric cho PDF này.** Checklist dưới đây là yêu cầu, không phải tuyên bố đã hoàn thành; xem [audit source](requirements-audit.md) cho trạng thái.
+Các bản tổng hợp trước từng lẫn đề18trang/ARTEMIS và Final; đã dọn khỏi docs. **Không dùng các scope đó làm rubric cho PDF này.** Checklist dưới đây là yêu cầu, không phải tuyên bố đã hoàn thành; xem [audit source](../TASKS.md) cho trạng thái.
 
 ## 1. Kiến trúc và chức năng — trang2–8
 

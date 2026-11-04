@@ -6,7 +6,10 @@
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
-      "args": ["--dart-define-from-file=.env.local"]
+      "args": [
+        "--dart-define-from-file=.env",
+        "--dart-define=UI_PERFORMANCE_AUDIT=true"
+      ]
     },
     {
       "name": "TokenLedger · Web localhost",
@@ -17,7 +20,7 @@
       "args": [
         "--web-hostname=localhost",
         "--web-port=4183",
-        "--dart-define-from-file=.env.local"
+        "--dart-define=UI_PERFORMANCE_AUDIT=true"
       ]
     }
   ]

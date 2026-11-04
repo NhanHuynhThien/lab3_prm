@@ -1,6 +1,6 @@
 # Test report — 22/10/2026
 
-Chuẩn [Lab3 PDF17trang](ASSIGNMENT_REQUIREMENTS.md). Phân biệt unit/widget, build, native SDK và console/MobAI evidence. Repo chưa đạt mọi gate; xem [requirements audit](requirements-audit.md).
+Chuẩn [Lab3 PDF17trang](ASSIGNMENT_REQUIREMENTS.md). Phân biệt unit/widget, build, native SDK và console/MobAI evidence. Repo chưa đạt mọi gate; xem [requirements audit](../TASKS.md).
 
 ## 1. Verification vừa chạy
 
@@ -85,3 +85,10 @@ Các manual web checks ngày21/10 do **user báo** gồm CRUD/budget/totals/purp
 `flutter clean` đã dọn artifacts và `flutter pub get` resolve lại. Format dry-run0changed; analyzer sạch2.4s; Node26/26pass; Dart lib/test≤300lines; git diff --check và doc links sạch. Quét280Git candidates không phát hiện các mẫu private/provider/Bearer/OAuth secrets và không có file>5MiB; `.env.local` không track. Đây là pattern scan, không khẳng định kiểm toán toàn bộ lịch sửGit.
 
 Không chạy lại Flutter suite/native build trong cleanup config/comment/docs;391Flutter và các build ở mục1 thuộc checkpoint runtime trước cleanup. Cache build đã dọn nên APK/web phải build lại khi cần xuất binary mới.
+
+
+## Verification 04/11/2026 — PDF local và cấu hình/docs
+
+Gỡ upload/link Cloud trong dialog/card báo cáo, bỏ FirebaseStorage transport khỏi bootstrap; giữ tạo/mở PDF local. Chuyển Dart defines/launch/emulator/bridge setup sang `.env`. `flutter analyze`: No issues found (5.7s); `flutter test`:391/391 pass (26s). `node --test tool/provider_bridge/*.test.mjs`:26/26 pass sau khi cho test bind loopback. Không claim native PDF/device thật hoặc MobAI đã pass từ các kết quả này.
+
+Tiến độ và audit được gom tại [TASKS](../TASKS.md), README giữ nghiệp vụ. Giữ 7 docs bắt buộc và requirements; bỏ mục lục/setup/audit trùng. Web source đã chuyển sang sibling `../lab3_prm_web_admin/`, không copy vào mobile repo.

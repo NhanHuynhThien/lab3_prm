@@ -36,6 +36,8 @@ class CrashlyticsService {
   final _changes = StreamController<CrashlyticsStatus>.broadcast(sync: true);
   CrashlyticsStatus _status = const CrashlyticsStatus();
   bool _closed = false;
+  int _ownerEpoch = 0;
+  Future<void> _ownerBinding = Future.value();
 
   CrashlyticsStatus get current => _status;
   Stream<CrashlyticsStatus> get changes => _changes.stream;
@@ -60,37 +62,29 @@ class CrashlyticsService {
     };
   }
 
-  Future<void> bindOwner(String? uid) async {
-    if (_closed) return;
-    try {
-      if (uid != null) {
-        await _transport?.enable(true);
-        await _transport?.setUserIdentifier(uid);
-        await _transport?.setCustomKey('app_flavor', 'tokenledger');
-        await _transport?.setCustomKey('user_type', 'cloud_authenticated');
-        _publish(
-          CrashlyticsStatus(
-            enabled: true,
-            userId: uid,
-            lastRecordedError: _status.lastRecordedError,
-            errorCount: _status.errorCount,
-          ),
+  Future<void> bindOwner(String? uid) {
+    if (_closed) return Future.value();
+    final epoch = ++_ownerEpoch;
+    _publish(const CrashlyticsStatus());
+    _ownerBinding = _ownerBinding.catchError((_) {}).then((_) async {
+      final transport = _transport;
+      if (_closed || epoch != _ownerEpoch || transport == null) return;
+      try {
+        await transport.enable(uid != null);
+        if (_closed || epoch != _ownerEpoch) return;
+        await transport.setUserIdentifier(uid ?? '');
+        await transport.setCustomKey('app_flavor', 'tokenledger');
+        await transport.setCustomKey(
+          'user_type',
+          uid == null ? 'signed_out' : 'cloud_authenticated',
         );
-      } else {
-        await _transport?.setUserIdentifier('');
-        await _transport?.setCustomKey('user_type', 'signed_out');
-        _publish(
-          CrashlyticsStatus(
-            enabled: false,
-            userId: null,
-            lastRecordedError: _status.lastRecordedError,
-            errorCount: _status.errorCount,
-          ),
-        );
+        if (_closed || epoch != _ownerEpoch) return;
+        _publish(CrashlyticsStatus(enabled: uid != null, userId: uid));
+      } catch (_) {
+        /* A configured SDK is not proof of an enabled/healthy transport. */
       }
-    } catch (_) {
-      // Best-effort; do not crash app on diagnostics failures
-    }
+    });
+    return _ownerBinding;
   }
 
   Future<void> recordHandled(
@@ -98,25 +92,27 @@ class CrashlyticsService {
     StackTrace? stack,
     String? reason,
   ]) async {
-    if (_closed) return;
+    if (_closed || _transport == null) return;
+    final epoch = _ownerEpoch;
     final errStr = exception.toString();
     try {
-      await _transport?.setCustomKey(
+      await _transport.setCustomKey(
         'last_error_time',
         DateTime.now().toUtc().toIso8601String(),
       );
       if (reason != null) {
-        await _transport?.setCustomKey('error_reason', reason);
+        await _transport.setCustomKey('error_reason', reason);
       }
-      await _transport?.recordError(
+      await _transport.recordError(
         exception,
         stack ?? StackTrace.current,
         reason: reason ?? 'handled_business_error',
         fatal: false,
       );
     } catch (_) {
-      // Best-effort
+      return;
     }
+    if (_closed || epoch != _ownerEpoch) return;
     _publish(
       CrashlyticsStatus(
         enabled: _status.enabled,
@@ -128,13 +124,17 @@ class CrashlyticsService {
   }
 
   void recordFlutterError(FlutterErrorDetails details) {
-    if (_closed) return;
+    if (_closed || _transport == null) return;
     try {
-      _transport?.recordError(
-        details.exception,
-        details.stack,
-        reason: details.context?.toString(),
-        fatal: false,
+      unawaited(
+        _transport
+            .recordError(
+              details.exception,
+              details.stack,
+              reason: details.context?.toString(),
+              fatal: false,
+            )
+            .catchError((_) {}),
       );
     } catch (_) {}
   }

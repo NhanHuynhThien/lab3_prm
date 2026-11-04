@@ -7,64 +7,41 @@ import '../viewmodels/ledger_viewmodel.dart';
 import 'common.dart';
 import 'draft_guard.dart';
 import 'ledger_feedback.dart';
+import 'range_picker.dart';
 
 class DataScopePicker extends ConsumerWidget {
   const DataScopePicker({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final zone = ref.watch(ledgerProvider).asData?.value.reportingTimezone;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    // Wraps when standalone; stays on one line inside FilterBar's scroll.
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Wrap(
-          spacing: 12,
-          runSpacing: 8,
-          children: [
-            PopupMenuButton<DataScope>(
-              tooltip: 'Chọn nguồn dữ liệu báo cáo',
-              initialValue: ref.watch(effectiveDataScopeProvider),
-              onSelected: (scope) =>
-                  ref.read(dataScopeProvider.notifier).select(scope),
-              itemBuilder: (_) => DataScope.values
-                  .where((scope) => scope != DataScope.demo)
-                  .map(
-                    (scope) =>
-                        PopupMenuItem(value: scope, child: Text(scope.label)),
-                  )
-                  .toList(),
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 48),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      ref.watch(effectiveDataScopeProvider).label,
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.expand_more, size: 18),
-                  ],
-                ),
-              ),
-            ),
-            OutlinedButton.icon(
-              icon: const Icon(Icons.schedule),
-              label: const Text('Múi giờ báo cáo'),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (_) => const _ReportingSettingsScreen(),
-                ),
-              ),
-            ),
-          ],
+        PopupMenuButton<DataScope>(
+          tooltip: 'Chọn nguồn dữ liệu báo cáo',
+          initialValue: ref.watch(effectiveDataScopeProvider),
+          onSelected: (scope) =>
+              ref.read(dataScopeProvider.notifier).select(scope),
+          itemBuilder: (_) => DataScope.values
+              .where((scope) => scope != DataScope.demo)
+              .map(
+                (scope) =>
+                    PopupMenuItem(value: scope, child: Text(scope.label)),
+              )
+              .toList(),
+          child: FilterButton(ref.watch(effectiveDataScopeProvider).label),
         ),
-        if (zone != null)
-          Text(
-            ReportingCalendar.zoneLabel(zone),
-            style: Theme.of(context).textTheme.bodySmall,
+        // Timezone is a rarely changed setting, so it is icon-only here.
+        IconButton(
+          tooltip: 'Múi giờ báo cáo',
+          icon: const Icon(Icons.schedule, size: 20),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (_) => const _ReportingSettingsScreen(),
+            ),
           ),
+        ),
       ],
     );
   }

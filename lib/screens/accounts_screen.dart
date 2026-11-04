@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../viewmodels/ledger_viewmodel.dart';
 import '../models/cloud_sync_status.dart';
+import '../viewmodels/provider_sources_viewmodel.dart';
 import '../widgets/account_card.dart';
 import '../widgets/common.dart';
 import '../widgets/data_scope_picker.dart';
@@ -34,6 +35,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
     final state = ref.watch(ledgerProvider);
     final feedback = ledgerFeedback(state, 'Tài khoản AI');
     final cloud = ref.watch(cloudOwnerProvider) != null;
+    final hasSources = ref.watch(hasObservedSourcesProvider);
     if (feedback != null) {
       return cloud ? ProviderLedgerFeedback(feedback: feedback) : feedback;
     }
@@ -65,7 +67,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             label: const Text('Thêm tài khoản'),
           ),
         ),
-        if (cloud) ...[
+        if (cloud && hasSources) ...[
           const ProviderSyncSummary(),
           const SizedBox(height: 24),
           const SectionTitle('Sổ tài khoản nhập tay'),
@@ -77,7 +79,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
           runSpacing: 12,
           children: [
             SizedBox(
-              width: 320,
+              width: double.infinity,
               child: TextField(
                 controller: _searchController,
                 decoration: const InputDecoration(
@@ -115,7 +117,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
             ),
           ),
         ...accounts.map((a) => AccountCard(key: ValueKey(a.id), account: a)),
-        if (!cloud) ...[
+        if (!cloud && hasSources) ...[
           const SizedBox(height: 16),
           const ProviderSyncSummary(),
         ],

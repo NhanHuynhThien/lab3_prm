@@ -48,7 +48,6 @@ app.*.map.json
 # Local-only secrets and credentials
 .env
 .env.*
-!.env.example
 **/service-account*.json
 **/*serviceAccount*.json
 **/*.pem
