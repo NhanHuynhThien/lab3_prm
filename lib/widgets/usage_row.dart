@@ -43,7 +43,7 @@ class UsageRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${account?.product ?? 'Tài khoản đã xóa'} · ${session.purpose.label} · ${shortDate(session.occurredAt, timezone: timezone)}',
+                    '${account?.alias ?? 'Tài khoản đã xóa'} ·${session.purpose.label} · ${shortDate(session.occurredAt, timezone: timezone)}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

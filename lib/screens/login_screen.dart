@@ -58,10 +58,7 @@ class LoginScreen extends ConsumerWidget {
                             const SizedBox(height: AppSpace.lg),
                             Text('TokenLedger', style: text.displaySmall),
                             const SizedBox(height: AppSpace.sm),
-                            Text(
-                              'Chào mừng bạn quay lại',
-                              style: text.bodyLarge,
-                            ),
+                            Text('Chào mừng bạn', style: text.bodyLarge),
                             const SizedBox(height: AppSpace.xxl),
                             Container(
                               width: double.infinity,
@@ -176,7 +173,7 @@ class LoginScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: AppSpace.xl),
                             Text(
-                              'App cá nhân: xem token, quota và chi phí AI của bạn.\nQuản trị model, bảng giá, thông báo ở web admin.',
+                              'Xem token, quota và chi phí AI của bạn ở một nơi.',
                               textAlign: TextAlign.center,
                               style: text.bodySmall,
                             ),

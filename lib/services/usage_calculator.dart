@@ -3,6 +3,7 @@ import 'reporting_calendar.dart';
 
 enum UsageRange {
   month('Tháng này'),
+  lastMonth('Tháng trước'),
   week('7 ngày gần đây'),
   all('Tất cả thời gian');
 
@@ -40,7 +41,21 @@ class PurposeShare {
   final int value, count;
 }
 
+/// One account past its warning threshold; budgets are never netted across accounts.
+class BudgetAlert {
+  const BudgetAlert(this.account, this.spent);
+  final AIAccount account;
+  final int spent;
+  int get budget => account.budgetMicros!;
+  bool get exceeded => spent > budget;
+}
+
 abstract final class UsageCalculator {
+  /// Integer micros only, so the threshold never drifts through doubles.
+  static bool reachesWarning(int spent, int budget, int percent) => budget == 0
+      ? spent > 0
+      : spent >= budget ~/ 100 * percent + (budget % 100 * percent + 99) ~/ 100;
+
   static List<UsageSession> filter(
     List<UsageSession> sessions,
     DateTime now, {
@@ -65,6 +80,12 @@ abstract final class UsageCalculator {
             now.month,
             1,
           ),
+          UsageRange.lastMonth => ReportingCalendar.wall(
+            timezone,
+            now.year,
+            now.month - 1,
+            1,
+          ),
           UsageRange.week => ReportingCalendar.wall(
             timezone,
             now.year,
@@ -75,7 +96,21 @@ abstract final class UsageCalculator {
         };
     final end =
         periodEnd ??
-        ReportingCalendar.wall(timezone, now.year, now.month, now.day + 1);
+        (range == UsageRange.lastMonth
+            ? ReportingCalendar.wall(timezone, now.year, now.month, 1)
+            : ReportingCalendar.wall(
+                timezone,
+                now.year,
+                now.month,
+                now.day + 1,
+              ));
+    final needle = search.toLowerCase();
+    final providerAccounts = provider == null
+        ? null
+        : {
+            for (final a in accounts)
+              if (a.provider == provider) a.id,
+          };
     return sessions
         .where(
           (s) =>
@@ -84,12 +119,9 @@ abstract final class UsageCalculator {
               (accountId == null || s.accountId == accountId) &&
               (purpose == null || s.purpose == purpose) &&
               (scope == null || scope.includes(s)) &&
-              (provider == null ||
-                  accounts.any(
-                    (a) => a.id == s.accountId && a.provider == provider,
-                  )) &&
-              (search.isEmpty ||
-                  s.title.toLowerCase().contains(search.toLowerCase())),
+              (providerAccounts == null ||
+                  providerAccounts.contains(s.accountId)) &&
+              (needle.isEmpty || s.title.toLowerCase().contains(needle)),
         )
         .toList()
       ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
@@ -178,7 +210,8 @@ abstract final class UsageCalculator {
       ? UsageMetric.cost
       : UsageMetric.sessions;
 
-  static List<int> dailyCosts(
+  /// Null marks a day whose sessions all lack a cost: unknown is not $0.
+  static List<int?> dailyCosts(
     List<UsageSession> sessions,
     DateTime now, {
     String timezone = 'device',
@@ -192,11 +225,14 @@ abstract final class UsageCalculator {
         now.day - 6 + i,
       );
       final end = ReportingCalendar.wall(timezone, d.year, d.month, d.day + 1);
-      return summarize(
+      final day = summarize(
         sessions.where(
           (s) => !s.occurredAt.isBefore(d) && s.occurredAt.isBefore(end),
         ),
-      ).costMicros;
+      );
+      return day.count > 0 && day.count == day.unknownCost
+          ? null
+          : day.costMicros;
     });
   }
 }

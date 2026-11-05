@@ -28,6 +28,7 @@ class PdfReportService {
     required String periodLabel,
     required List<AIAccount> accounts,
     required List<UsageSession> sessions,
+    String timezone = 'device',
   }) async {
     final pdf = pw.Document();
     final font = await _resolveFont();
@@ -43,7 +44,7 @@ class PdfReportService {
     final purposeCounts = <String, int>{};
     final purposeCost = <String, int>{};
     for (final s in sessions) {
-      final pName = s.purpose.name;
+      final pName = s.purpose.label;
       purposeCounts[pName] = (purposeCounts[pName] ?? 0) + 1;
       if (s.costMicros != null) {
         purposeCost[pName] = (purposeCost[pName] ?? 0) + s.costMicros!;
@@ -76,7 +77,7 @@ class PdfReportService {
           pw.SizedBox(height: 24),
           PdfReportBuilders.buildPurposeTable(purposeCounts, purposeCost),
           pw.SizedBox(height: 24),
-          PdfReportBuilders.buildRecentSessionsTable(sessions),
+          PdfReportBuilders.buildRecentSessionsTable(sessions, timezone),
         ],
       ),
     );

@@ -34,8 +34,12 @@ class DashboardBalanceCard extends StatelessWidget {
     required this.spent,
     required this.budgetWarning,
     required this.warningPercent,
+    this.alerts = const [],
+    this.unknownCostCount = 0,
   });
 
+  final List<BudgetAlert> alerts;
+  final int unknownCostCount;
   final List<AIAccount> budgetAccounts;
   final int remaining;
   final int budget;
@@ -65,7 +69,9 @@ class DashboardBalanceCard extends StatelessWidget {
         AnimatedProgress(
           value: budget == 0 ? 0 : spent / budget,
           semanticValue: budgetAccounts.isEmpty ? 'Chưa đặt ngân sách' : null,
-          color: remaining < 0 ? AppColors.danger : AppColors.primary,
+          color: remaining < 0 || alerts.any((a) => a.exceeded)
+              ? AppColors.danger
+              : AppColors.primary,
         ),
         const SizedBox(height: 12),
         Text(
@@ -79,6 +85,25 @@ class DashboardBalanceCard extends StatelessWidget {
             key: const ValueKey('budget-config-warning'),
             style: Theme.of(context).textTheme.bodyMedium
                 ?.copyWith(color: AppColors.danger),
+          ),
+          for (final alert in alerts.take(3))
+            Text(
+              '${alert.account.alias} ${alert.exceeded ? 'đã vượt' : 'đã dùng'}: ${money(alert.spent)} / ${money(alert.budget)}',
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: AppColors.danger),
+            ),
+          if (alerts.length > 3)
+            Text(
+              '+${alerts.length - 3} tài khoản khác',
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: AppColors.danger),
+            ),
+          const SizedBox(height: AppSpace.sm),
+        ],
+        if (unknownCostCount > 0) ...[
+          Text(
+            '$unknownCostCount phiên trong kỳ chưa biết chi phí; số còn lại thực tế có thể thấp hơn.',
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: AppSpace.sm),
         ],

@@ -21,6 +21,7 @@ Inter; primary#006C49,background#FAF8FF,mint#E8F7EF; radius20/12; spacing4/8/12/
 |22/10|Logo provider chính thức bundle offline; logo và tên cùng hàng; chuông chuyển topbar cạnh lịch sử|Theo phản hồi user, hành động thông báo tách khỏi CTA ghi sử dụng; không suy endorsement|
 |22/10|Analytics token theo task/purpose/model/day/input/output/cache/reasoning; time window và unknown cost rõ nhãn|Số liệu trước, phương pháp thu gọn; không suy token/cost Antigravity từ quota|
 |22/10|Validation error ngay footer; detail/tinyUSD giữ6digits|Lỗi token-pair không bị dưới fold;0.001234 không thành0.00 ở detail/phân tích|
+|05/11|Lịch sử thêm bộ lọc dạng nút, nút đang lọc nền mint viền primary; Cá nhân gom Remote Config/Analytics vào mục thu gọn "Thông tin kỹ thuật"; biểu đồ vòng dùng 5 màu token (primary/amber/accent/chartSecondary/chartTertiary), bỏ `disabled` quá nhạt; picker tiếng Việt|Theo đánh giá UX: lọc đúng luồng README, giảm chữ kỹ thuật, phân biệt mục đích rõ hơn. Chưa annotate Figma|
 |22/10|Panel đổi Material, lazyvisitedtabs/Offstage/TickerMode, fade180ms/chart280ms, bỏ IntrinsicHeight/loop/blur|Sửa Ink/ListTile assertion và giảm layout/animation work; reduced motion giữ đúng|
 
 Provider asset provenance tại [assets/providers](../assets/providers/README.md), Google button tại [assets/auth](../assets/auth/README.md). Custom Flutter Google button, không claim SDK-rendered hoặc đã được Google duyệt.

@@ -19,12 +19,11 @@ class LedgerData {
   final List<UsageSession> sessions;
   final String reportingTimezone;
 
-  AIAccount? account(String id) {
-    for (final a in accounts) {
-      if (a.id == id) return a;
-    }
-    return null;
-  }
+  // Looked up once per row and session; built only on first use.
+  late final Map<String, AIAccount> _accountsById = {
+    for (final a in accounts.reversed) a.id: a,
+  };
+  AIAccount? account(String id) => _accountsById[id];
 
   LedgerData copyWith({
     List<AIAccount>? accounts,

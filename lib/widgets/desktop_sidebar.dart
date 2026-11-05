@@ -141,11 +141,15 @@ class DesktopSidebar extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Tài khoản Google',
+                              user?.displayName ?? 'Tài khoản Google',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             Text(
-                              'Không gian cá nhân',
+                              user?.email ?? 'Không gian cá nhân',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ],

@@ -33,6 +33,14 @@ class AIAccount {
   final List<QuotaSnapshot> quotaWindows;
   // Compatibility for callers that display just the first window. Never sum %.
   QuotaSnapshot? get quota => quotaWindows.isEmpty ? null : quotaWindows.first;
+
+  /// The window closest to running out; expired snapshots only as a fallback.
+  QuotaSnapshot? limitingQuota(DateTime now) {
+    final live = quotaWindows.where((q) => !q.isStale(now)).toList()
+      ..sort((a, b) => b.usedPercent.compareTo(a.usedPercent));
+    return live.firstOrNull ?? quota;
+  }
+
   final String? defaultModelId;
   final List<Purpose> defaultPurposes;
   final String timezone;

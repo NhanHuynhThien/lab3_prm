@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:open_filex/open_filex.dart';
 
 import '../models/ai_account.dart';
 import '../models/export_report.dart';
@@ -46,6 +47,7 @@ class ReportManagementService {
     required List<AIAccount> accounts,
     required List<UsageSession> sessions,
     required String? userEmail,
+    String timezone = 'device',
   }) async {
     final owner = _requireOwner();
     final epoch = _epoch;
@@ -59,19 +61,16 @@ class ReportManagementService {
       periodLabel: periodLabel,
       accounts: accounts,
       sessions: sessions,
+      timezone: timezone,
     );
     _checkOwner(owner, epoch);
     _cachedBytes[reportId] = bytes;
 
-    String? localPath;
-    try {
-      localPath = await pdfService.savePdfLocally(
-        fileName: fileName,
-        bytes: bytes,
-      );
-    } catch (_) {
-      // Best-effort for local storage
-    }
+    // A failed save must surface: a report that cannot be opened is no report.
+    final localPath = await pdfService.savePdfLocally(
+      fileName: fileName,
+      bytes: bytes,
+    );
     _checkOwner(owner, epoch);
 
     final report = ExportReport(
@@ -158,7 +157,12 @@ class ReportManagementService {
       throw StateError('Báo cáo không thuộc phiên hiện tại.');
     }
     if (report.localPath != null) {
-      await pdfService.openFile(report.localPath!);
+      final result = await pdfService.openFile(report.localPath!);
+      if (result != null && result.type != ResultType.done) {
+        throw StateError(
+          'Không mở được file PDF. Máy có thể chưa có ứng dụng đọc PDF.',
+        );
+      }
     }
   }
 

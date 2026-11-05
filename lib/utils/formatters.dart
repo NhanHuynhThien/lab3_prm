@@ -1,5 +1,14 @@
 import '../services/reporting_calendar.dart';
 
+/// Text safe to show users: no "Bad state:" or other Dart error prefixes.
+String errorText(Object error) => switch (error) {
+  StateError(:final message) => message,
+  ArgumentError(:final String message) => message,
+  FormatException(:final message) => message,
+  Error() => 'Chưa hoàn tất thao tác. Hãy thử lại.',
+  _ => error.toString(),
+};
+
 String preciseMoney(int? micros) =>
     money(micros, decimals: micros != null && micros % 10000 != 0 ? 6 : 2);
 

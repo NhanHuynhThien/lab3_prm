@@ -113,27 +113,42 @@ void main() {
       expect(container.read(ledgerProvider).requireValue.sessions.length, 1);
     },
   );
-  test('lost acknowledgement retry preserves original create despite stream update', () async {
-    await vm.saveAccount(account(), expectedRevision: 0);
-    await flush();
-    store.failAfterCommit = FirebaseException(
-      plugin: 'cloud_firestore',
-      code: 'unavailable',
-    );
-    await expectLater(
-      vm.saveUsage(usage(cost: 9), expectedRevision: 0),
-      throwsA(isA<CloudLedgerFailure>()),
-    );
-    await flush();
-    await expectLater(
-      vm.saveUsage(usage(cost: 10), expectedRevision: 0),
-      throwsStateError,
-    );
-    await vm.saveUsage(usage(cost: 9), expectedRevision: 0);
-    await flush();
-    expect(store.documents['users/A/accounts/a']!['usageCount'], 1);
-    expect(vm.usageRevision('u'), 1);
-  });
+  test(
+    'lost acknowledgement: edited retry updates, never duplicates',
+    () async {
+      await vm.saveAccount(account(), expectedRevision: 0);
+      await flush();
+      store.failAfterCommit = FirebaseException(
+        plugin: 'cloud_firestore',
+        code: 'unavailable',
+      );
+      await expectLater(
+        vm.saveUsage(usage(cost: 9), expectedRevision: 0),
+        throwsA(isA<CloudLedgerFailure>()),
+      );
+      await flush();
+      await vm.saveUsage(usage(cost: 9), expectedRevision: 0);
+      await flush();
+      expect(vm.usageRevision('u'), 1);
+      store.failAfterCommit = FirebaseException(
+        plugin: 'cloud_firestore',
+        code: 'unavailable',
+      );
+      await expectLater(
+        vm.saveUsage(usage(cost: 10), expectedRevision: 1),
+        throwsA(isA<CloudLedgerFailure>()),
+      );
+      await flush();
+      await vm.saveUsage(usage(cost: 11), expectedRevision: 1);
+      await flush();
+      expect(store.documents['users/A/accounts/a']!['usageCount'], 1);
+      expect(vm.usageRevision('u'), 3);
+      expect(
+        container.read(ledgerProvider).requireValue.sessions.single.costMicros,
+        11,
+      );
+    },
+  );
   test('stale form revision cannot overwrite remote metadata', () async {
     await vm.saveAccount(account(), expectedRevision: 0);
     await flush();
@@ -176,11 +191,10 @@ void main() {
             .usedPercent,
         75,
       );
-      await expectLater(
-        vm.updateQuota('a', quota, expectedRevision: 0),
-        throwsA(isA<CloudLedgerFailure>()),
-      );
-      expect(vm.quotaRevision('a', 'weekly'), 1);
+      // Adding a window under an existing name updates that window.
+      await vm.updateQuota('a', quota, expectedRevision: 0);
+      await flush();
+      expect(vm.quotaRevision('a', 'weekly'), 2);
       await vm.deleteQuota('a', 'weekly');
       await flush();
       expect(

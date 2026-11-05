@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/export_report.dart';
 import '../theme/app_theme.dart';
+import '../utils/formatters.dart';
 import '../viewmodels/product_features_viewmodel.dart';
 import 'common.dart';
 import 'export_report_dialog.dart';
@@ -93,9 +94,17 @@ class ProductPdfStorageCard extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.open_in_new, size: 16),
                         tooltip: 'Mở PDF',
-                        onPressed: () => ref
-                            .read(reportManagementServiceProvider)
-                            .openLocalReport(rep.id),
+                        onPressed: () async {
+                          try {
+                            await ref
+                                .read(reportManagementServiceProvider)
+                                .openLocalReport(rep.id);
+                          } catch (e) {
+                            if (context.mounted) {
+                              showMessage(context, errorText(e));
+                            }
+                          }
+                        },
                       ),
                   ],
                 ),

@@ -13,7 +13,7 @@ class OptionalSourcePrompt extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.laptop_mac_outlined, color: AppColors.primary),
+            const Icon(Icons.laptop_outlined, color: AppColors.primary),
             const SizedBox(width: 12),
             Expanded(
               child: Text(

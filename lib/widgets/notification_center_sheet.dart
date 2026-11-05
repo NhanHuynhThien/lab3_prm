@@ -130,7 +130,7 @@ class NotificationCenterSheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpace.xs),
                     const Text(
-                      'Các cảnh báo ngân sách và tin nhắn hệ thống qua FCM sẽ xuất hiện tại đây.',
+                      'Thông báo từ hệ thống sẽ xuất hiện tại đây.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: AppColors.muted, fontSize: 13),
                     ),

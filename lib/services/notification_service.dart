@@ -25,6 +25,7 @@ class NotificationService {
   final _openedRouteController = StreamController<String>.broadcast(sync: true);
 
   final List<NotificationItem> _items = [];
+  final Set<String> _hidden = {};
   String? _ownerId;
   String? _deviceToken;
   bool _permissionGranted = false;
@@ -158,6 +159,7 @@ class NotificationService {
     if (_closed || uid == _ownerId) return;
     _ownerId = uid;
     _items.clear();
+    _hidden.clear();
     _deviceToken = null;
     _permissionGranted = false;
     registered = false;
@@ -194,6 +196,7 @@ class NotificationService {
     if (_closed || _ownerId == null) return;
     final owner = item.data['ownerUid'];
     if (owner != null && owner != _ownerId) return;
+    if (_hidden.contains(item.id)) return;
     final existingIndex = _items.indexWhere((i) => i.id == item.id);
     if (existingIndex >= 0) {
       _items[existingIndex] = item;
@@ -254,6 +257,8 @@ class NotificationService {
 
   void clearAll() {
     if (_closed) return;
+    // Refreshing the inbox must not bring back what the user just hid.
+    _hidden.addAll(_items.map((i) => i.id));
     _items.clear();
     _publish();
   }

@@ -5,6 +5,7 @@ import '../models/export_report.dart';
 import '../models/ledger.dart';
 import '../services/manual_report_projection.dart';
 import '../theme/app_theme.dart';
+import '../utils/formatters.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
@@ -85,7 +86,12 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
               ExportReportPeriodSelector(
                 selectedPeriod: _selectedPeriod,
                 isWorking: _isWorking,
-                onSelected: (val) => setState(() => _selectedPeriod = val),
+                // A finished report belongs to the old period: start over.
+                onSelected: (val) => setState(() {
+                  _selectedPeriod = val;
+                  _completedReport = null;
+                  _errorMessage = null;
+                }),
               ),
               const SizedBox(height: AppSpace.md),
               ExportReportPreviewCard(
@@ -152,10 +158,14 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
         ] else ...[
           if (_completedReport!.localPath != null)
             OutlinedButton.icon(
-              onPressed: () {
-                ref
-                    .read(reportManagementServiceProvider)
-                    .openLocalReport(_completedReport!.id);
+              onPressed: () async {
+                try {
+                  await ref
+                      .read(reportManagementServiceProvider)
+                      .openLocalReport(_completedReport!.id);
+                } catch (e) {
+                  if (mounted) setState(() => _errorMessage = errorText(e));
+                }
               },
               icon: const Icon(Icons.open_in_new, size: 18),
               label: const Text('Mở PDF'),
@@ -188,6 +198,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
         accounts: projection.accounts,
         sessions: projection.sessions,
         userEmail: user?.email,
+        timezone: projection.timezone,
       );
 
       if (!mounted) return;
@@ -203,7 +214,9 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
       if (mounted) {
         setState(() {
           _isWorking = false;
-          _errorMessage = 'Lỗi xử lý báo cáo: ${e.toString()}';
+          _errorMessage = e is StateError
+              ? errorText(e)
+              : 'Chưa tạo được báo cáo. Kiểm tra dung lượng máy rồi thử lại.';
         });
       }
     }

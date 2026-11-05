@@ -35,7 +35,7 @@ class _CloudSyncBannerState extends ConsumerState<CloudSyncBanner> {
       liveRegion: true,
       child: Container(
         width: double.infinity,
-        color: AppColors.soft,
+        color: status.error != null ? AppColors.error : AppColors.soft,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: [

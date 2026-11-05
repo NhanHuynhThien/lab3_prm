@@ -4,6 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../models/ai_account.dart';
 import '../models/usage_session.dart';
 import '../utils/formatters.dart';
+import 'reporting_calendar.dart';
 
 class PdfReportBuilders {
   const PdfReportBuilders._();
@@ -179,26 +180,30 @@ class PdfReportBuilders {
             'Chi phí (USD)',
             'Token',
           ],
-          data: accounts.map((acc) {
-            final accSessions = sessions.where((s) => s.accountId == acc.id);
-            int cost = 0;
-            int tokens = 0;
-            for (final s in accSessions) {
-              if (s.costMicros != null) cost += s.costMicros!;
-              if (s.knownTokens != null) tokens += s.knownTokens!;
-            }
-            return [
-              acc.alias,
-              acc.provider,
-              acc.plan.isEmpty ? 'Mặc định' : acc.plan,
-              '${accSessions.length}',
-              money(cost),
-              compactTokens(tokens),
-            ];
-          }).toList(),
+          data: accounts.map((acc) => accountRow(acc, sessions)).toList(),
         ),
       ],
     );
+  }
+
+  /// Sessions without any known figure stay "Chưa biết", never 0.
+  static List<String> accountRow(AIAccount acc, List<UsageSession> sessions) {
+    final rows = sessions.where((s) => s.accountId == acc.id).toList();
+    int? total(Iterable<int?> values) {
+      final known = values.whereType<int>();
+      return rows.isNotEmpty && known.isEmpty
+          ? null
+          : known.fold<int>(0, (a, b) => a + b);
+    }
+
+    return [
+      acc.alias,
+      acc.provider,
+      acc.plan.isEmpty ? 'Mặc định' : acc.plan,
+      '${rows.length}',
+      money(total(rows.map((s) => s.costMicros))),
+      compactTokens(total(rows.map((s) => s.knownTokens))),
+    ];
   }
 
   static pw.Widget buildPurposeTable(
@@ -227,16 +232,18 @@ class PdfReportBuilders {
           cellStyle: const pw.TextStyle(fontSize: 9),
           headerDecoration: const pw.BoxDecoration(color: mintBackground),
           headers: ['Mục đích', 'Số phiên', 'Chi phí (USD)'],
-          data: counts.entries.map((e) {
-            final c = costs[e.key] ?? 0;
-            return [e.key.toUpperCase(), '${e.value} phiên', money(c)];
-          }).toList(),
+          data: counts.entries
+              .map((e) => [e.key, '${e.value} phiên', money(costs[e.key])])
+              .toList(),
         ),
       ],
     );
   }
 
-  static pw.Widget buildRecentSessionsTable(List<UsageSession> sessions) {
+  static pw.Widget buildRecentSessionsTable(
+    List<UsageSession> sessions, [
+    String timezone = 'device',
+  ]) {
     final recent = sessions.take(10).toList();
     if (recent.isEmpty) return pw.Container();
     return pw.Column(
@@ -262,9 +269,9 @@ class PdfReportBuilders {
           headers: ['Thời gian', 'Công việc', 'Mục đích', 'Chi phí', 'Token'],
           data: recent.map((s) {
             return [
-              '${shortDate(s.occurredAt)} ${shortTime(s.occurredAt)}',
+              '${ReportingCalendar.dayKey(s.occurredAt, timezone)} ${shortTime(s.occurredAt, timezone: timezone)}',
               s.title,
-              s.purpose.name,
+              s.purpose.label,
               s.costMicros != null ? money(s.costMicros!) : 'Chưa rõ',
               s.knownTokens != null ? compactTokens(s.knownTokens!) : 'Chưa rõ',
             ];

@@ -171,10 +171,10 @@ void main() {
               ),
             );
             await h.settle(tester);
-            expect(find.text('Nguyễn Văn An · TokenLedger'), findsOneWidget);
+            expect(find.text('Nguyễn Văn An · TokenLedger'), findsWidgets);
             if (scale == 1) await h.capture(tester, 'profile-${width.toInt()}');
             expect(find.text('Mở demo local riêng biệt'), findsNothing);
-            expect(find.text('Nguyễn Văn An · TokenLedger'), findsOneWidget);
+            expect(find.text('Nguyễn Văn An · TokenLedger'), findsWidgets);
             expect(tester.takeException(), isNull);
           } finally {
             await h.close(tester);

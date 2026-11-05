@@ -23,6 +23,10 @@ Cập nhật 04/11/2026. Đây là **file duy nhất điều khiển tiến đ�
 - [x] Đổi cấu hình local Flutter sang `.env`; cập nhật launch, script emulator và bridge setup.
 - [x] Dọn docs trùng: gom audit/setup/architecture/provider notes vào file này và README; giữ 7 tài liệu bài yêu cầu, đề chuẩn hóa, license tài nguyên và AGENTS.
 - [x] 04/11: Flutter analyze không có issues; toàn bộ 391 tests pass sau thay đổi PDF/bootstrap.
+- [x] 05/11: Sửa nhóm P1 nghiệp vụ: biểu đồ 7 ngày không phụ thuộc kỳ lọc, chi phí chưa biết không hiện $0 ở biểu đồ/bảng PDF, cảnh báo ngân sách theo từng tài khoản và số phiên thiếu chi phí trong kỳ, thêm quota trùng tên thì cập nhật, tài khoản lưu trữ không cho sửa quota, tài khoản còn quota không hiện nút xóa, lưu lại được sau lỗi chưa rõ kết quả, khởi động chưa có xác nhận máy chủ không hiện workspace trống. Analyze sạch, 420 tests pass. Chưa kiểm trên thiết bị thật, nhất là offline; không đổi Firestore rules.
+- [x] 05/11: Lịch sử có bộ lọc tài khoản/mục đích/nhà cung cấp và xóa bộ lọc; thêm kỳ "Tháng trước" cho Tổng quan, Phân tích, Lịch sử (báo cáo PDF chưa có). Analyze sạch, 429 tests pass; chưa kiểm trên thiết bị thật.
+- [x] 05/11: PDF có kỳ Tháng trước, ngày thật của kỳ, mục đích tiếng Việt, giờ theo múi giờ báo cáo, báo lỗi khi lưu/mở thất bại. Quota ưu tiên cửa sổ sắp hết; sửa nhãn account/usage; giới hạn form khớp validation; gom Remote Config/Analytics vào "Thông tin kỹ thuật"; bỏ chữ kỹ thuật và "Mac" khỏi giao diện; Việt hóa picker (thêm `flutter_localizations`). Analyze sạch, 437 tests pass; chưa build Android/web và chưa kiểm trên thiết bị thật sau khi đổi dependency.
+- [ ] Lưu ý: main.dart đã nối PlatformApi và hộp thư, nên P0 "Chưa nối runtime" bên dưới cần rà lại khi có backend thật.
 
 ## Công việc cần làm và tiêu chí đóng task
 

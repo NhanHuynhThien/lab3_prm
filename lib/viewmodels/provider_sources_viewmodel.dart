@@ -4,11 +4,31 @@ import '../models/provider_usage.dart';
 import 'gemini_activity_viewmodel.dart';
 import 'provider_sync_viewmodel.dart';
 
+class _ChosenSource extends Notifier<String?> {
+  @override
+  String? build() => null;
+  void choose(String id) => state = id;
+}
+
+final _chosenSourceProvider = NotifierProvider<_ChosenSource, String?>(
+  _ChosenSource.new,
+);
+
+/// The user's pick, otherwise the first source that actually has data.
 class SelectedSource extends Notifier<String> {
   @override
-  String build() => 'codex';
+  String build() =>
+      ref.watch(_chosenSourceProvider) ??
+      ref
+          .watch(providerSourcesProvider)
+          .where((s) => s.status == 'ready')
+          .firstOrNull
+          ?.id ??
+      'codex';
   void select(String id) {
-    if (providerNames.containsKey(id)) state = id;
+    if (providerNames.containsKey(id)) {
+      ref.read(_chosenSourceProvider.notifier).choose(id);
+    }
   }
 }
 
@@ -40,7 +60,7 @@ final providerSourcesProvider = Provider<List<ProviderUsage>>((ref) {
               source: providerNames[id]!,
               coverage: id == 'gemini-web'
                   ? 'Nhập file JSON Gemini Apps từ Google Takeout để xem tần suất hoạt động.'
-                  : 'Kết nối nguồn trên Mac để đọc số liệu.',
+                  : 'Kết nối nguồn trên máy tính để đọc số liệu.',
               observedAt: null,
               windows: const [],
             ),

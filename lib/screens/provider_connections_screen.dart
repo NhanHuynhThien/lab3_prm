@@ -19,7 +19,7 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
   final _token = TextEditingController(
     text: const String.fromEnvironment('PROVIDER_BRIDGE_TOKEN'),
   );
-  bool _confirmed = false;
+  bool _confirmed = false, _showToken = false;
 
   @override
   void dispose() {
@@ -39,7 +39,7 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
         padding: const EdgeInsets.all(AppSpace.lg),
         children: [
           const Text(
-            'Companion là kết nối CLI tùy chọn trên Mac. Đăng nhập Google, ghi usage và Gemini API không cần companion.',
+            'Companion là kết nối CLI tùy chọn trên máy tính. Đăng nhập Google, ghi usage và Gemini API không cần companion.',
           ),
           const SizedBox(height: 12),
           const Wrap(
@@ -85,7 +85,7 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
                 ],
                 const SizedBox(height: 12),
                 const Text(
-                  'Chạy companion trên Mac, dùng mã ghép nối của máy đó. '
+                  'Chạy companion trên máy tính, dùng mã ghép nối của máy đó. '
                   'Dữ liệu chỉ giữ trong phiên hiện tại, không tự tải lên Firestore. '
                   'Số liệu website và phí đã charge có thể chưa có nguồn.',
                 ),
@@ -98,11 +98,21 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _token,
-                    obscureText: true,
+                    obscureText: !_showToken,
                     autocorrect: false,
                     enableSuggestions: false,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Mã ghép nối companion',
+                      suffixIcon: IconButton(
+                        tooltip: _showToken ? 'Ẩn mã' : 'Hiện mã',
+                        onPressed: () =>
+                            setState(() => _showToken = !_showToken),
+                        icon: Icon(
+                          _showToken
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -166,13 +176,13 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
                 SelectableText('node tool/provider_bridge/server.mjs'),
                 SizedBox(height: 12),
                 Text(
-                  'Lệnh setup tạo mã ghép nối tại ~/.local/share/tokenledger/bridge-token trên Mac. '
+                  'Lệnh setup tạo mã ghép nối tại ~/.local/share/tokenledger/bridge-token trên máy tính. '
                   'Đây không phải mật khẩu Google hoặc Gemini API key. '
                   'Android Emulator cần adb reverse tcp:8787 tcp:8787.',
                 ),
                 SizedBox(height: 12),
                 Text(
-                  'Claude cần status line theo hướng dẫn TASKS.md. '
+                  'Claude cần bật status line theo file cấu hình do lệnh setup tạo. '
                   'Gemini CLI cần lịch sử phiên; Antigravity dùng agy /usage. '
                   'Chưa có nguồn sẽ hiện “Cần kết nối nguồn”, không dùng dữ liệu mẫu.',
                 ),

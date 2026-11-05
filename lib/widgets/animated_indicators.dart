@@ -40,14 +40,9 @@ class AnimatedMoney extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     label: money(micros),
     excludeSemantics: true,
-    child: TweenAnimationBuilder<double>(
-      tween: Tween(begin: micros.toDouble(), end: micros.toDouble()),
-      duration: AppMotion.duration(context, AppMotion.medium),
-      curve: AppMotion.curve,
-      builder: (_, value, _) => Text(
-        money(value.round()),
-        style: style ?? Theme.of(context).textTheme.displaySmall,
-      ),
+    child: Text(
+      money(micros),
+      style: style ?? Theme.of(context).textTheme.displaySmall,
     ),
   );
 }

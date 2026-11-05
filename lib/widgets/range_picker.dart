@@ -20,16 +20,17 @@ class FilterBar extends StatelessWidget {
 
 /// Shared look for the dropdown filters so they line up.
 class FilterButton extends StatelessWidget {
-  const FilterButton(this.label, {super.key, this.icon});
+  const FilterButton(this.label, {super.key, this.icon, this.active = false});
   final String label;
   final IconData? icon;
+  final bool active;
   @override
   Widget build(BuildContext context) => Container(
     constraints: const BoxConstraints(minHeight: AppSpace.touch),
     padding: const EdgeInsets.symmetric(horizontal: 12),
     decoration: BoxDecoration(
-      color: AppColors.surface,
-      border: Border.all(color: AppColors.line),
+      color: active ? AppColors.soft : AppColors.surface,
+      border: Border.all(color: active ? AppColors.primary : AppColors.line),
       borderRadius: BorderRadius.circular(AppSpace.controlRadius),
     ),
     child: Row(

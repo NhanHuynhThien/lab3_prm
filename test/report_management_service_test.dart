@@ -52,6 +52,16 @@ class FakeAnalyticsTransport implements AnalyticsTransport {
   }
 }
 
+/// Real PDF bytes; the device filesystem plugin is not available in unit tests.
+class _NoDiskPdf extends PdfReportService {
+  const _NoDiskPdf();
+  @override
+  Future<String?> savePdfLocally({
+    required String fileName,
+    required Uint8List bytes,
+  }) async => null;
+}
+
 void main() {
   group('ReportManagementService', () {
     late FakeStorageTransport storageTransport;
@@ -66,7 +76,7 @@ void main() {
       analyticsTransport = FakeAnalyticsTransport();
       analyticsService = AnalyticsService(analyticsTransport);
       reportManager = ReportManagementService(
-        pdfService: const PdfReportService(),
+        pdfService: const _NoDiskPdf(),
         storageService: storageService,
         analyticsService: analyticsService,
       );

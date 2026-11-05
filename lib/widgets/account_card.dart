@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/ledger.dart';
 import '../screens/account_detail_screen.dart';
+import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/reporting_viewmodel.dart';
@@ -77,20 +78,27 @@ class AccountCard extends ConsumerWidget {
               spacing: 32,
               runSpacing: 16,
               children: [
-                AccountFact('Chi phí tháng này', money(summary.costMicros)),
+                AccountFact('Chi phí kỳ này', money(summary.costMicros)),
                 AccountFact('Token đã ghi', compactTokens(summary.tokens)),
-                AccountFact('Ngân sách kỳ', money(account.budgetMicros)),
+                AccountFact(
+                  'Ngân sách kỳ',
+                  account.budgetMicros == null
+                      ? 'Chưa đặt'
+                      : money(account.budgetMicros),
+                ),
                 AccountFact('Số phiên', '${summary.count}'),
               ],
             ),
             const SizedBox(height: 20),
-            AnimatedProgress(
-              value: projection.budgetProgress,
-              semanticValue: account.budgetMicros == null
-                  ? 'Chưa đặt ngân sách'
-                  : null,
-            ),
-            const SizedBox(height: 12),
+            if (account.budgetMicros != null) ...[
+              AnimatedProgress(
+                value: projection.budgetProgress,
+                color: (projection.remainingBudgetMicros ?? 0) < 0
+                    ? AppColors.danger
+                    : AppColors.primary,
+              ),
+              const SizedBox(height: 12),
+            ],
             Text(
               account.quotaWindows.isEmpty
                   ? 'Quota: chưa có dữ liệu'

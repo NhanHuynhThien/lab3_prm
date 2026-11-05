@@ -129,6 +129,7 @@ class UsageTokenInputs extends StatelessWidget {
             child: TextFormField(
               controller: inputController,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
               decoration: const InputDecoration(labelText: 'Input token'),
               validator: validator,
             ),
@@ -138,6 +139,7 @@ class UsageTokenInputs extends StatelessWidget {
             child: TextFormField(
               controller: outputController,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
               decoration: const InputDecoration(labelText: 'Output token'),
               validator: validator,
             ),

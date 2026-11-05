@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../utils/formatters.dart';
 
 void showMessage(BuildContext context, String text) =>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
@@ -72,7 +73,7 @@ class _ConfirmedActionButtonState extends State<ConfirmedActionButton> {
       await widget.onConfirm();
       if (mounted) widget.onSuccess?.call();
     } catch (error) {
-      if (mounted) showMessage(context, error.toString());
+      if (mounted) showMessage(context, errorText(error));
     } finally {
       if (mounted) setState(() => _working = false);
     }

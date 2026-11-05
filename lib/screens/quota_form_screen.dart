@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/ledger.dart';
 import '../services/ledger_validation.dart';
 import '../theme/app_theme.dart';
+import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../widgets/common.dart';
 import '../widgets/draft_guard.dart';
@@ -113,7 +114,7 @@ class _QuotaFormScreenState extends ConsumerState<QuotaFormScreen> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        setState(() => _error = e.toString());
+        setState(() => _error = errorText(e));
         showMessage(context, 'Chưa lưu được thay đổi. Vui lòng thử lại.');
       }
     } finally {

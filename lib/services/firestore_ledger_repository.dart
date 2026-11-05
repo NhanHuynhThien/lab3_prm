@@ -103,7 +103,7 @@ class FirestoreLedgerRepository implements CloudLedgerRepository {
       return switch (error.code) {
         'permission-denied' => const CloudLedgerFailure(
           CloudLedgerProblem.permission,
-          'Chưa có quyền truy cập dữ liệu. Kiểm tra Security Rules.',
+          'Chưa có quyền truy cập dữ liệu. Hãy đăng nhập lại rồi thử lại.',
         ),
         'unauthenticated' => const CloudLedgerFailure(
           CloudLedgerProblem.unauthenticated,

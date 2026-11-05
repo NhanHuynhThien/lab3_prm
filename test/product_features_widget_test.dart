@@ -74,6 +74,15 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        final technical = find.text('Thông tin kỹ thuật');
+        await tester.scrollUntilVisible(technical, 240, maxScrolls: 30);
+        await Scrollable.ensureVisible(
+          tester.element(technical),
+          alignment: .5,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(technical);
+        await tester.pumpAndSettle();
         final refresh = find.byKey(const ValueKey('refresh-product-config'));
         await tester.scrollUntilVisible(refresh, 240, maxScrolls: 30);
         await Scrollable.ensureVisible(tester.element(refresh), alignment: .5);

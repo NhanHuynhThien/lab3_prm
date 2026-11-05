@@ -12,13 +12,11 @@ import 'usage_row.dart';
 class DashboardTrendCard extends StatelessWidget {
   const DashboardTrendCard({
     super.key,
-    required this.sessions,
     required this.dailyCosts,
     required this.now,
   });
 
-  final List<UsageSession> sessions;
-  final List<int> dailyCosts;
+  final List<int?> dailyCosts;
   final DateTime now;
 
   @override
@@ -27,16 +25,16 @@ class DashboardTrendCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionTitle('Chi phí 7 ngày gần đây'),
-        if (sessions.isEmpty)
+        if (dailyCosts.every((v) => v == 0))
           const EmptyFeedback(
-            title: 'Chưa có sử dụng trong kỳ',
+            title: 'Chưa có chi phí trong 7 ngày qua',
             message: 'Ghi một phiên để bắt đầu theo dõi.',
           )
         else
           UsageBarChart(values: dailyCosts, now: now),
         const SizedBox(height: 16),
         Text(
-          'Số liệu chi phí nhập tay theo khoảng thời gian đã chọn.',
+          'Luôn tính 7 ngày gần nhất theo chi phí nhập tay. “—” là ngày có phiên nhưng chưa biết chi phí.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -58,7 +56,14 @@ class DashboardQuotaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final active = accounts.where((a) => !a.archived).toList();
+    int used(AIAccount a) {
+      final q = a.limitingQuota(now);
+      return q == null || q.isStale(now) ? -1 : q.usedPercent;
+    }
+
+    // Closest to running out first, so the card shows what needs attention.
+    final active = accounts.where((a) => !a.archived).toList()
+      ..sort((a, b) => used(b).compareTo(used(a)));
     return Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

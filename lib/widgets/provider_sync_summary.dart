@@ -44,7 +44,7 @@ class ProviderSyncSummary extends ConsumerWidget {
         ),
         Text(
           state.working
-              ? 'Đang cập nhật nguồn trên Mac...'
+              ? 'Đang cập nhật nguồn trên máy tính...'
               : '${rows.where((r) => r.status == 'ready').length}/${rows.length} nguồn có dữ liệu · Chọn nguồn để xem',
           style: Theme.of(context).textTheme.bodySmall,
         ),

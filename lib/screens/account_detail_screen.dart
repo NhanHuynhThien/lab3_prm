@@ -153,7 +153,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               children: [
                 SectionTitle(
                   'Hạn mức đã ghi nhận',
-                  action: 'Thêm cửa sổ',
+                  action: a.archived ? null : 'Thêm cửa sổ',
                   onAction: () => Navigator.push(
                     context,
                     MaterialPageRoute<void>(
@@ -162,18 +162,29 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     ),
                   ),
                 ),
-                if (a.quotaWindows.isEmpty) QuotaRow(account: a, now: now),
+                if (a.archived)
+                  const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      'Tài khoản đã lưu trữ. Khôi phục để cập nhật hạn mức.',
+                    ),
+                  ),
+                if (a.quotaWindows.isEmpty)
+                  const Text('Chưa có cửa sổ hạn mức nào.'),
                 for (final q in a.quotaWindows) ...[
                   QuotaRow(
                     account: a,
                     quota: q,
                     now: now,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (_) => QuotaFormScreen(account: a, quota: q),
-                      ),
-                    ),
+                    onTap: a.archived
+                        ? null
+                        : () => Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  QuotaFormScreen(account: a, quota: q),
+                            ),
+                          ),
                   ),
                   Text(
                     'Quan sát ${shortDate(q.observedAt)} ${shortTime(q.observedAt)} · Reset ${shortDate(q.resetAt)} ${shortTime(q.resetAt)} · giờ thiết bị',
@@ -193,11 +204,6 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   ),
                   const Divider(),
                 ],
-                const SizedBox(height: 8),
-                Text(
-                  'Không tự quy đổi hạn mức thuê bao thành số token.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
               ],
             ),
           ),
@@ -267,13 +273,18 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 .read(ledgerProvider.notifier)
                 .archiveAccount(a.id, !a.archived),
           ),
-          if (allCount == 0)
+          if (allCount == 0 && a.quotaWindows.isNotEmpty)
+            const Text(
+              'Xóa các cửa sổ hạn mức ở trên để có thể xóa tài khoản này.',
+            ),
+          if (allCount == 0 && a.quotaWindows.isEmpty)
             ConfirmedActionButton(
               label: 'Xóa tài khoản rỗng',
               icon: Icons.delete_outline,
               destructive: true,
               title: 'Xóa ${a.alias}?',
-              message: 'Tài khoản rỗng sẽ bị xóa khỏi dữ liệu trên thiết bị. Không thể hoàn tác.',
+              message:
+                  'Tài khoản rỗng sẽ bị xóa vĩnh viễn. Không thể hoàn tác.',
               onConfirm: () =>
                   ref.read(ledgerProvider.notifier).deleteAccount(a.id),
               onSuccess: () => Navigator.pop(context),

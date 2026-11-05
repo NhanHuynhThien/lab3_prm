@@ -22,7 +22,7 @@ class QuotaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final q = quota ?? account.quota;
+    final q = quota ?? account.limitingQuota(now);
     final stale = q?.isStale(now) ?? false;
     return ActionSurface(
       onTap: onTap,
@@ -63,7 +63,7 @@ class QuotaRow extends StatelessWidget {
             Text(
               q == null
                   ? 'Thêm quota từ trang tài khoản'
-                  : '${q.window}${quota == null && account.quotaWindows.length > 1 ? ' · +${account.quotaWindows.length - 1} cửa sổ khác' : ''} · ${q.source.label} lúc ${shortTime(q.observedAt)}',
+                  : '${q.window}${quota == null && account.quotaWindows.length > 1 ? ' · +${account.quotaWindows.length - 1} cửa sổ khác' : ''} · ${q.source.label} ${shortDate(q.observedAt)} ${shortTime(q.observedAt)}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],

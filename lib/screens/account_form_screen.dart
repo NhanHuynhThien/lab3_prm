@@ -94,6 +94,19 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     super.dispose();
   }
 
+  /// Moves an untouched product suggestion along; typed names are kept.
+  void _pickProvider(String next) {
+    const suggested = {
+      'Anthropic': 'Claude',
+      'OpenAI': 'Codex',
+      'Google': 'Gemini',
+    };
+    if (_product.text.trim() == (suggested[_provider] ?? '')) {
+      _product.text = suggested[next] ?? '';
+    }
+    _provider = next;
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     if (!_key.currentState!.validate()) return;
@@ -127,16 +140,11 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
       await vm.saveAccount(account, expectedRevision: _revision);
       if (mounted) {
         Navigator.pop(context, account.id);
-        showMessage(
-          context,
-          vm.isCloud
-              ? 'Đã lưu tài khoản trên Firestore.'
-              : 'Đã lưu tài khoản trên thiết bị.',
-        );
+        showMessage(context, 'Đã lưu tài khoản.');
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _error = e.toString());
+        setState(() => _error = errorText(e));
         showMessage(context, 'Chưa lưu được thay đổi. Vui lòng thử lại.');
       }
     } finally {
@@ -204,7 +212,7 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       .toList(),
                   onChanged: _saving
                       ? null
-                      : (s) => setState(() => _provider = s!),
+                      : (s) => setState(() => _pickProvider(s!)),
                 ),
                 const SizedBox(height: 24),
                 TextFormField(

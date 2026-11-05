@@ -17,6 +17,7 @@ class _Pdf extends PdfReportService {
     required String periodLabel,
     required List<AIAccount> accounts,
     required List<UsageSession> sessions,
+    String timezone = 'device',
   }) async => gate == null ? Uint8List.fromList([1, 2, 3]) : gate!.future;
   @override
   Future<String?> savePdfLocally({

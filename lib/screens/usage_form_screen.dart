@@ -171,16 +171,11 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
           );
       if (mounted) {
         Navigator.pop(context);
-        showMessage(
-          context,
-          ref.read(ledgerProvider.notifier).isCloud
-              ? 'Đã lưu phiên sử dụng trên Firestore.'
-              : 'Đã lưu phiên sử dụng trên thiết bị.',
-        );
+        showMessage(context, 'Đã lưu phiên sử dụng.');
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _error = e.toString());
+        setState(() => _error = errorText(e));
         showMessage(context, 'Chưa lưu được thay đổi. Vui lòng thử lại.');
       }
     } finally {

@@ -32,7 +32,7 @@ Repo độc lập: [lab3_prm_web_admin](https://github.com/NhanHuynhThien/lab3_p
 
 ## Chạy mobile
 
-Giữ `pubspec.lock`. Cấu hình local duy nhất là `.env` JSON, Git ignore. Pairing token chỉ phục vụ ghép nối local; build mặc định không nhúng file env vào APK. Nếu dùng companion, chạy `node tool/provider_bridge/setup.mjs` để tạo/cập nhật pairing token. Không đưa Gemini/service-account keys vào file này.
+Giữ `pubspec.lock`. Cấu hình local duy nhất là `.env` JSON, Git ignore. Pairing token chỉ phục vụ ghép nối local; build mặc định không nhúng file env vào APK. Nếu dùng companion, chạy `node tool/provider_bridge/setup.mjs` để tạo/cập nhật pairing token. Không đưa Gemini/service-account keys vào file này. Phân tích Gemini và hộp thư cần địa chỉ backend qua `TOKENLEDGER_API_URL` (mặc định `http://127.0.0.1:8788`, chỉ dùng cho môi trường dev).
 
 ```sh
 flutter pub get

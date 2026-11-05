@@ -75,19 +75,3 @@ enum CostBasis {
   const CostBasis(this.label);
   final String label;
 }
-
-enum QuotaWindowUnit {
-  percent('phần trăm');
-
-  const QuotaWindowUnit(this.label);
-  final String label;
-}
-
-enum QuotaSource {
-  manual('Nhập tay'),
-  provider('Nhà cung cấp'),
-  legacy('Dữ liệu cũ');
-
-  const QuotaSource(this.label);
-  final String label;
-}

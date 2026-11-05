@@ -8,6 +8,10 @@ import 'ledger_viewmodel.dart';
 mixin CloudLedgerMutations on LedgerViewModel {
   CloudLedgerRepository get repo;
   LedgerData? get lastData;
+
+  /// True after a save whose outcome is unknown: it may have committed, so the
+  /// next edit must build on the latest revision instead of the form's copy.
+  bool hasUnconfirmed(String key);
   Future<void> run(
     String key,
     Object payload,
@@ -19,10 +23,15 @@ mixin CloudLedgerMutations on LedgerViewModel {
   Future<void> saveAccount(AIAccount account, {int? expectedRevision}) {
     LedgerValidation.account(account);
     final value = account.copyWith(quotaWindows: []);
+    final key = 'account/${account.id}';
+    final uncertain = hasUnconfirmed(key);
     final exists =
-        expectedRevision != 0 && lastData?.account(account.id) != null;
-    final revision = expectedRevision ?? accountRevision(account.id);
-    return run('account/${account.id}', value.toJson(), (op) async {
+        (expectedRevision != 0 || uncertain) &&
+        lastData?.account(account.id) != null;
+    final revision = uncertain
+        ? accountRevision(account.id)
+        : expectedRevision ?? accountRevision(account.id);
+    return run(key, value.toJson(), (op) async {
       if (exists) {
         await repo.updateAccount(
           value,
@@ -63,11 +72,14 @@ mixin CloudLedgerMutations on LedgerViewModel {
   @override
   Future<void> saveUsage(UsageSession session, {int? expectedRevision}) {
     LedgerValidation.usage(session, now: ref.read(clockProvider)());
-    final revision = expectedRevision == 0
+    final key = 'usage/${session.id}';
+    final revision = hasUnconfirmed(key)
+        ? usageRevision(session.id)
+        : expectedRevision == 0
         ? null
         : expectedRevision ?? usageRevision(session.id);
     return run(
-      'usage/${session.id}',
+      key,
       session.toJson(),
       (op) async {
         if (revision != null) {
@@ -106,13 +118,36 @@ mixin CloudLedgerMutations on LedgerViewModel {
     bool requireExisting = false,
     int? expectedRevision,
   }) {
-    final revision = expectedRevision == 0
+    final account = lastData?.account(accountId);
+    if (account?.archived == true) {
+      throw StateError(
+        'Tài khoản đã lưu trữ. Hãy khôi phục trước khi cập nhật hạn mức.',
+      );
+    }
+    final windows = account?.quotaWindows ?? const <QuotaSnapshot>[];
+    final adding = expectedRevision == 0 && !requireExisting;
+    final label = quota.window.trim().toLowerCase();
+    final sameName = adding
+        ? windows
+              .where((q) => q.window.trim().toLowerCase() == label)
+              .firstOrNull
+        : null;
+    // A renamed window keeps its key, so a new window can reuse only its name.
+    final target = sameName != null
+        ? quota.copyWith(windowKey: sameName.windowKey)
+        : adding && windows.any((q) => q.windowKey == quota.windowKey)
+        ? quota.copyWith(windowKey: '${quota.windowKey}#${newId()}')
+        : quota;
+    final key = 'quota/$accountId/${target.windowKey}';
+    final revision = sameName != null || hasUnconfirmed(key)
+        ? quotaRevision(accountId, target.windowKey)
+        : expectedRevision == 0
         ? null
-        : expectedRevision ?? quotaRevision(accountId, quota.windowKey);
-    final value = AccountQuota(accountId: accountId, snapshot: quota);
+        : expectedRevision ?? quotaRevision(accountId, target.windowKey);
+    final value = AccountQuota(accountId: accountId, snapshot: target);
     return run(
-      'quota/$accountId/${quota.windowKey}',
-      quota.toJson(),
+      key,
+      target.toJson(),
       (op) async {
         if (revision != null) {
           await repo.updateQuota(
@@ -151,7 +186,9 @@ mixin CloudLedgerMutations on LedgerViewModel {
 
   @override
   Future<void> setReportingTimezone(String zone, {int? expectedRevision}) {
-    final revision = expectedRevision == 0
+    final revision = hasUnconfirmed('settings')
+        ? settingsRevision
+        : expectedRevision == 0
         ? null
         : expectedRevision ?? settingsRevision;
     return run('settings', zone, (op) async {

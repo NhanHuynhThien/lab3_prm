@@ -59,12 +59,7 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
       _epoch++;
       final waiting = _waiting;
       if (waiting != null && !waiting.isCompleted) {
-        waiting.completeError(
-          const CloudLedgerFailure(
-            CloudLedgerProblem.closed,
-            'Không gian dữ liệu đã đóng.',
-          ),
-        );
+        waiting.completeError(CloudLedgerFailure.workspaceClosed);
       }
       for (final sub in _subscriptions) {
         unawaited(sub.cancel());
@@ -89,10 +84,7 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
     final epoch = ++_epoch;
     await Future.wait(_subscriptions.map((sub) => sub.cancel()));
     if (!ref.mounted || epoch != _epoch) {
-      throw const CloudLedgerFailure(
-        CloudLedgerProblem.closed,
-        'Không gian dữ liệu đã đóng.',
-      );
+      throw CloudLedgerFailure.workspaceClosed;
     }
     _subscriptions.clear();
     _accounts = null;
@@ -104,6 +96,7 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
     if (_last != null && ref.mounted) state = AsyncData(_last!.copyWith());
     final ready = Completer<LedgerData>();
     _waiting = ready;
+    var serverSeen = false;
     void fail(Object error) {
       if (!ref.mounted || epoch != _epoch) return;
       sync = CloudSyncStatus(error: error);
@@ -153,10 +146,12 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
                 r.usageCount == (usageCounts[r.id] ?? 0) &&
                 r.quotaCount == (quotaCounts[r.id] ?? 0),
           );
+      final cached = a.fromCache || u.fromCache || q.fromCache || s.fromCache;
+      serverSeen = serverSeen || !cached;
       sync = CloudSyncStatus(
-        loading: false,
+        loading: !serverSeen,
         coherent: coherent,
-        fromCache: a.fromCache || u.fromCache || q.fromCache || s.fromCache,
+        fromCache: cached,
         pending:
             a.hasPendingWrites ||
             u.hasPendingWrites ||
@@ -167,6 +162,8 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
         if (_last != null) state = AsyncData(_last!.copyWith());
         return;
       }
+      // Persistence is off, so an unconfirmed offline snapshot is just empty.
+      if (!serverSeen) return;
       try {
         final data = LedgerData(
           accounts: a.records
@@ -209,7 +206,10 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
       listen(_repo.watchAllUsage(), (v) => _usage = v);
       listen(_repo.watchAllQuotas(), (v) => _quotas = v);
       listen(_repo.watchSettings(), (v) => _settings = v);
-      return await ready.future.timeout(const Duration(seconds: 20));
+      return await ready.future.timeout(
+        const Duration(seconds: 20),
+        onTimeout: () => throw CloudLedgerFailure.serverUnreachable,
+      );
     } catch (error) {
       fail(error);
       rethrow;
@@ -252,6 +252,9 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
   int? get settingsRevision => _settings?.records.firstOrNull?.revision;
 
   @override
+  bool hasUnconfirmed(String key) => _commands.containsKey(key);
+
+  @override
   Future<void> run(
     String key,
     Object payload,
@@ -261,14 +264,12 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
     if (_busy) throw StateError('Đang lưu thay đổi trước.');
     _ready();
     final signature = jsonEncode(payload);
+    // Same content retries the same operation ID; edited content is a new one.
     var command = _commands[key];
-    if (command != null && command.signature != signature) {
-      throw StateError(
-        'Thao tác trước chưa rõ kết quả. Thử lại với nội dung cũ trước khi sửa tiếp.',
-      );
+    if (command?.signature != signature) {
+      command = _PendingCommand(signature, newId(), execute, event);
     }
-    command ??= _PendingCommand(signature, newId(), execute, event);
-    _commands[key] = command;
+    _commands[key] = command!;
     _busy = true;
     try {
       await command.execute(command.id);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/ledger.dart';
 import '../screens/account_form_screen.dart';
+import '../services/ledger_validation.dart';
 import 'common.dart';
 
 Widget? checkUsageEmptyGuards({
@@ -52,15 +53,16 @@ class UsageTitleField extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TextFormField(
     controller: controller,
-    maxLength: 80,
+    maxLength: LedgerValidation.titleLimit,
+    textInputAction: TextInputAction.next,
     decoration: const InputDecoration(
       labelText: 'Đã dùng AI cho việc gì?',
       hintText: 'Ví dụ: Sửa lỗi Google Sign-In',
     ),
     validator: (v) => (v == null || v.trim().isEmpty)
         ? 'Nhập tên công việc.'
-        : v.trim().length > 80
-        ? 'Tên công việc không quá 80 ký tự.'
+        : v.trim().length > LedgerValidation.titleLimit
+        ? 'Tên công việc không quá ${LedgerValidation.titleLimit} ký tự.'
         : null,
   );
 }
@@ -73,11 +75,12 @@ class UsageNoteField extends StatelessWidget {
   Widget build(BuildContext context) => TextFormField(
     key: const ValueKey('usage-note'),
     controller: controller,
-    validator: (v) => (v != null && v.trim().length > 200)
-        ? 'Ghi chú không quá 200 ký tự.'
+    validator: (v) =>
+        (v != null && v.trim().length > LedgerValidation.noteLimit)
+        ? 'Ghi chú không quá ${LedgerValidation.noteLimit} ký tự.'
         : null,
     maxLines: 3,
-    maxLength: 200,
+    maxLength: LedgerValidation.noteLimit,
     decoration: const InputDecoration(labelText: 'Ghi chú (tùy chọn)'),
   );
 }

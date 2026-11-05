@@ -29,18 +29,25 @@ class ExportReportPeriodSelector extends StatelessWidget {
         const SizedBox(height: AppSpace.xs),
         Wrap(
           spacing: 8,
-          children: ['Tháng này', '30 ngày qua', 'Toàn bộ dữ liệu'].map((p) {
-            final isSelected = selectedPeriod == p;
-            return ChoiceChip(
-              label: Text(p),
-              selected: isSelected,
-              onSelected: isWorking
-                  ? null
-                  : (val) {
-                      if (val) onSelected(p);
-                    },
-            );
-          }).toList(),
+          runSpacing: 8,
+          children:
+              [
+                'Tháng này',
+                'Tháng trước',
+                '30 ngày qua',
+                'Toàn bộ dữ liệu',
+              ].map((p) {
+                final isSelected = selectedPeriod == p;
+                return ChoiceChip(
+                  label: Text(p),
+                  selected: isSelected,
+                  onSelected: isWorking
+                      ? null
+                      : (val) {
+                          if (val) onSelected(p);
+                        },
+                );
+              }).toList(),
         ),
       ],
     );
@@ -149,6 +156,13 @@ class ExportCompletedCard extends StatelessWidget {
             'File: ${report.fileName} (${(report.fileSizeBytes / 1024).toStringAsFixed(1)} KB)',
             style: const TextStyle(fontSize: 12),
           ),
+          if (report.localPath == null) ...[
+            const SizedBox(height: 8),
+            const Text(
+              'Thiết bị này chưa hỗ trợ lưu file PDF, nên chưa thể mở báo cáo.',
+              style: TextStyle(fontSize: 12, color: AppColors.danger),
+            ),
+          ],
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/ledger.dart';
 import '../services/reporting_calendar.dart';
+import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import 'common.dart';
 import 'draft_guard.dart';
@@ -13,24 +14,32 @@ class DataScopePicker extends ConsumerWidget {
   const DataScopePicker({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scope = ref.watch(effectiveDataScopeProvider);
+    final data = ref.watch(ledgerProvider).asData?.value;
+    // Only old local snapshots carry legacy data; otherwise there is no choice.
+    final hasChoice =
+        scope != DataScope.manual ||
+        (data?.sessions.any(DataScope.legacy.includes) ?? false) ||
+        (data?.accounts.any((a) => a.dataSource == DataSource.legacy) ?? false);
     // Wraps when standalone; stays on one line inside FilterBar's scroll.
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        PopupMenuButton<DataScope>(
-          tooltip: 'Chọn nguồn dữ liệu báo cáo',
-          initialValue: ref.watch(effectiveDataScopeProvider),
-          onSelected: (scope) =>
-              ref.read(dataScopeProvider.notifier).select(scope),
-          itemBuilder: (_) => DataScope.values
-              .where((scope) => scope != DataScope.demo)
-              .map(
-                (scope) =>
-                    PopupMenuItem(value: scope, child: Text(scope.label)),
-              )
-              .toList(),
-          child: FilterButton(ref.watch(effectiveDataScopeProvider).label),
-        ),
+        if (hasChoice)
+          PopupMenuButton<DataScope>(
+            tooltip: 'Chọn nguồn dữ liệu báo cáo',
+            initialValue: ref.watch(effectiveDataScopeProvider),
+            onSelected: (scope) =>
+                ref.read(dataScopeProvider.notifier).select(scope),
+            itemBuilder: (_) => DataScope.values
+                .where((scope) => scope != DataScope.demo)
+                .map(
+                  (scope) =>
+                      PopupMenuItem(value: scope, child: Text(scope.label)),
+                )
+                .toList(),
+            child: FilterButton(ref.watch(effectiveDataScopeProvider).label),
+          ),
         // Timezone is a rarely changed setting, so it is icon-only here.
         IconButton(
           tooltip: 'Múi giờ báo cáo',
@@ -91,7 +100,7 @@ class _ReportingSettingsState extends ConsumerState<_ReportingSettingsScreen> {
           .setReportingTimezone(_zone.text.trim(), expectedRevision: _revision);
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString());
+      if (mounted) setState(() => _error = errorText(e));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

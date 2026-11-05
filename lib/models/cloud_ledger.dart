@@ -12,6 +12,14 @@ enum CloudLedgerProblem {
 
 class CloudLedgerFailure implements Exception {
   const CloudLedgerFailure(this.problem, this.message);
+  static const workspaceClosed = CloudLedgerFailure(
+    CloudLedgerProblem.closed,
+    'Không gian dữ liệu đã đóng.',
+  );
+  static const serverUnreachable = CloudLedgerFailure(
+    CloudLedgerProblem.unavailable,
+    'Chưa kết nối được máy chủ. Kiểm tra mạng rồi thử lại.',
+  );
   final CloudLedgerProblem problem;
   final String message;
   @override

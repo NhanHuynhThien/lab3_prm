@@ -120,9 +120,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                                         height: 8,
                                         decoration: BoxDecoration(
                                           color:
-                                              PurposeRing.colors[shares
-                                                  .indexOf(p)
-                                                  .clamp(0, 3)],
+                                              PurposeRing.colors[shares.indexOf(
+                                                    p,
+                                                  ) %
+                                                  PurposeRing.colors.length],
                                           shape: BoxShape.circle,
                                         ),
                                       ),
@@ -247,7 +248,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 );
               }),
               if (projection.comparisons.isEmpty)
-                const Text('Chưa có tài khoản để so sánh.'),
+                const Text('Chưa có phiên trong kỳ để so sánh tài khoản.'),
             ],
           ),
         ),

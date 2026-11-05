@@ -19,7 +19,11 @@ class DashboardProjection {
     required this.dailyCosts,
     this.recentLimit = 3,
     this.warningPercent = 80,
+    this.budgetAlerts = const [],
+    this.budgetUnknownCost = 0,
   });
+  final List<BudgetAlert> budgetAlerts;
+  final int budgetUnknownCost;
   final List<UsageSession> sessions;
   final UsageSummary summary;
   final DateTime now;
@@ -27,14 +31,13 @@ class DashboardProjection {
   final int budget, spent;
   int get remaining => budget - spent;
   final List<PurposeShare> shares;
-  final List<int> dailyCosts;
+  final List<int?> dailyCosts;
   final int recentLimit, warningPercent;
   List<UsageSession> get recentSessions => sessions.take(recentLimit).toList();
   bool get budgetWarning =>
+      budgetAlerts.isNotEmpty ||
       budget > 0 &&
-      spent >=
-          (budget ~/ 100 * warningPercent +
-              ((budget % 100 * warningPercent) + 99) ~/ 100);
+          UsageCalculator.reachesWarning(spent, budget, warningPercent);
 }
 
 final dashboardProjectionProvider = Provider.autoDispose<DashboardProjection>((
@@ -53,20 +56,32 @@ final dashboardProjectionProvider = Provider.autoDispose<DashboardProjection>((
             scope.includesAccount(a, data.sessions),
       )
       .toList();
-  final budgetSessions = [
-    for (final a in budgetAccounts)
-      ...UsageCalculator.inCycle(data.sessions, a, now, scope: scope),
-  ];
+  final alerts = <BudgetAlert>[];
+  final budgetSessions = <UsageSession>[];
+  for (final a in budgetAccounts) {
+    final cycle = UsageCalculator.inCycle(data.sessions, a, now, scope: scope);
+    budgetSessions.addAll(cycle);
+    final used = UsageCalculator.summarize(cycle).costMicros;
+    final limit = a.budgetMicros!;
+    if (UsageCalculator.reachesWarning(used, limit, config.warningPercent)) {
+      alerts.add(BudgetAlert(a, used));
+    }
+  }
+  alerts.sort((x, y) => (y.exceeded ? 1 : 0) - (x.exceeded ? 1 : 0));
+  final budgetSummary = UsageCalculator.summarize(budgetSessions);
   return DashboardProjection(
     sessions: sessions,
     summary: UsageCalculator.summarize(sessions),
     now: ReportingCalendar.at(now, data.reportingTimezone),
     budgetAccounts: budgetAccounts,
     budget: budgetAccounts.fold<int>(0, (s, a) => s + a.budgetMicros!),
-    spent: UsageCalculator.summarize(budgetSessions).costMicros,
+    spent: budgetSummary.costMicros,
+    budgetAlerts: alerts,
+    budgetUnknownCost: budgetSummary.unknownCost,
     shares: UsageCalculator.shares(sessions, UsageMetric.sessions),
+    // A fixed 7-day window: the selected range must not blank out recent days.
     dailyCosts: UsageCalculator.dailyCosts(
-      sessions,
+      data.sessions.where(scope.includes).toList(),
       now,
       timezone: data.reportingTimezone,
     ),
@@ -100,33 +115,29 @@ final accountProjectionProvider = Provider.autoDispose
     .family<AccountProjection, String>((ref, id) {
       final data = ref.watch(ledgerProvider).requireValue;
       final account = data.account(id);
+      final now = ref.watch(nowProvider);
       final sessions = account == null
           ? <UsageSession>[]
           : UsageCalculator.inCycle(
               data.sessions,
               account,
-              ref.watch(nowProvider),
+              now,
               scope: ref.watch(effectiveDataScopeProvider),
+            );
+      final cycle = account == null
+          ? null
+          : ReportingCalendar.cycle(
+              now,
+              account.timezone,
+              account.cycleStartDay,
             );
       return AccountProjection(
         UsageCalculator.summarize(sessions),
         data.sessions.where((s) => s.accountId == id).length,
         UsageCalculator.shares(sessions, UsageMetric.sessions),
-        data.account(id)?.budgetMicros,
-        account == null
-            ? null
-            : ReportingCalendar.cycle(
-                ref.watch(nowProvider),
-                account.timezone,
-                account.cycleStartDay,
-              ).start,
-        account == null
-            ? null
-            : ReportingCalendar.cycle(
-                ref.watch(nowProvider),
-                account.timezone,
-                account.cycleStartDay,
-              ).end,
+        account?.budgetMicros,
+        cycle?.start,
+        cycle?.end,
       );
     });
 
@@ -162,37 +173,38 @@ final analyticsProjectionProvider = Provider.autoDispose
     .family<AnalyticsProjection, UsageMetric>((ref, metric) {
       final data = ref.watch(ledgerProvider).requireValue;
       final sessions = ref.watch(filteredSessionsProvider);
+      int value(UsageSummary summary) => switch (metric) {
+        UsageMetric.cost => summary.costMicros,
+        UsageMetric.tokens => summary.tokens,
+        UsageMetric.sessions => summary.count,
+      };
+      // One pass over the sessions instead of one per account and provider.
+      final byAccount = <String, List<UsageSession>>{};
+      final byProvider = <String, List<UsageSession>>{};
+      for (final s in sessions) {
+        (byAccount[s.accountId] ??= []).add(s);
+        final provider = data.account(s.accountId)?.provider;
+        if (provider != null) (byProvider[provider] ??= []).add(s);
+      }
       return AnalyticsProjection(
         UsageCalculator.summarize(sessions),
         UsageCalculator.shares(sessions, metric),
-        data.accounts.map((a) {
-          final summary = UsageCalculator.summarize(
-            sessions.where((s) => s.accountId == a.id),
-          );
-          final value = switch (metric) {
-            UsageMetric.cost => summary.costMicros,
-            UsageMetric.tokens => summary.tokens,
-            UsageMetric.sessions => summary.count,
-          };
-          return AccountComparison(a, summary, value);
-        }).toList(),
-        data.accounts
-            .map((a) => a.provider)
-            .toSet()
-            .map((provider) {
-              final summary = UsageCalculator.summarize(
-                sessions.where(
-                  (s) => data.account(s.accountId)?.provider == provider,
-                ),
-              );
-              return ProviderComparison(provider, summary, switch (metric) {
-                UsageMetric.cost => summary.costMicros,
-                UsageMetric.tokens => summary.tokens,
-                UsageMetric.sessions => summary.count,
-              });
-            })
-            .where((p) => p.summary.count > 0)
-            .toList(),
+        [
+          for (final a in data.accounts)
+            if (byAccount[a.id] case final rows?)
+              () {
+                final summary = UsageCalculator.summarize(rows);
+                return AccountComparison(a, summary, value(summary));
+              }(),
+        ],
+        [
+          for (final provider in data.accounts.map((a) => a.provider).toSet())
+            if (byProvider[provider] case final rows?)
+              () {
+                final summary = UsageCalculator.summarize(rows);
+                return ProviderComparison(provider, summary, value(summary));
+              }(),
+        ],
       );
     });
 

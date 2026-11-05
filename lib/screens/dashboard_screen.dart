@@ -52,13 +52,14 @@ class DashboardScreen extends ConsumerWidget {
       spent: projection.spent,
       budgetWarning: projection.budgetWarning,
       warningPercent: projection.warningPercent,
+      alerts: projection.budgetAlerts,
+      unknownCostCount: projection.budgetUnknownCost,
     );
     final metrics = DashboardMetricsCard(
       summary: projection.summary,
       activeAccountsCount: data.accounts.where((a) => !a.archived).length,
     );
     final trend = DashboardTrendCard(
-      sessions: projection.sessions,
       dailyCosts: projection.dailyCosts,
       now: projection.now,
     );
@@ -118,6 +119,9 @@ class DashboardScreen extends ConsumerWidget {
               Material(
                 color: Colors.transparent,
                 child: ExpansionTile(
+                  // Reopens when a budget warning appears, so it is never hidden.
+                  key: ValueKey('manual-${projection.budgetWarning}'),
+                  initiallyExpanded: projection.budgetWarning,
                   title: const Text('Sổ sử dụng thủ công'),
                   subtitle: const Text('Ngân sách và các phiên bạn tự ghi'),
                   tilePadding: EdgeInsets.zero,

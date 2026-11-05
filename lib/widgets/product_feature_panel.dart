@@ -28,12 +28,16 @@ class ProductFeaturePanel extends ConsumerWidget {
 
     return Column(
       children: [
-        // Panel 1: Remote Config & Analytics
+        // Panel 1: Remote Config & Analytics. Kept for evidence, not daily use.
         Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            title: Text(
+              'Thông tin kỹ thuật',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             children: [
-              const SectionTitle('Tùy chọn báo cáo'),
               Text(
                 'Phiên gần đây: ${config.recentLimit} · nguồn ${config.recentSource}',
                 key: const ValueKey('config-recent-value'),
@@ -124,7 +128,7 @@ class ProductFeaturePanel extends ConsumerWidget {
                   const SizedBox(width: AppSpace.sm),
                   Expanded(
                     child: Text(
-                      'Thông báo & FCM',
+                      'Hộp thư thông báo',
                       style: Theme.of(context).textTheme.titleMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -143,7 +147,7 @@ class ProductFeaturePanel extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpace.sm),
               const Text(
-                'Nhận thông báo đẩy từ Firebase Cloud Messaging và quản lý cảnh báo trong ứng dụng.',
+                'Xem lại các thông báo đã nhận.',
                 style: TextStyle(color: AppColors.muted),
               ),
               if (notifications.backendAvailable) ...[

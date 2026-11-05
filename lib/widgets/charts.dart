@@ -8,11 +8,12 @@ import '../utils/formatters.dart';
 
 class UsageBarChart extends StatelessWidget {
   const UsageBarChart({super.key, required this.values, required this.now});
-  final List<int> values;
+  final List<int?> values;
   final DateTime now;
+  static String _label(int? value) => value == null ? '—' : money(value);
   @override
   Widget build(BuildContext context) {
-    final highest = values.fold<int>(0, math.max);
+    final highest = values.fold<int>(0, (a, b) => math.max(a, b ?? 0));
     return Semantics(
       excludeSemantics: true,
       label:
@@ -42,7 +43,7 @@ class UsageBarChart extends StatelessWidget {
             return math.max(
               width,
               math.max(
-                    labelWidth(money(entry.$2)),
+                    labelWidth(_label(entry.$2)),
                     labelWidth('${date.day}/${date.month}'),
                   ) +
                   16,
@@ -75,7 +76,7 @@ class UsageBarChart extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               Text(
-                                money(values[i]),
+                                _label(values[i]),
                                 style: Theme.of(context).textTheme.bodySmall,
                               ),
                               const SizedBox(height: 8),
@@ -87,7 +88,7 @@ class UsageBarChart extends StatelessWidget {
                                       begin: 0,
                                       end: highest == 0
                                           ? 0
-                                          : values[i] / highest,
+                                          : (values[i] ?? 0) / highest,
                                     ),
                                     duration: AppMotion.duration(
                                       context,
@@ -96,7 +97,7 @@ class UsageBarChart extends StatelessWidget {
                                     curve: AppMotion.curve,
                                     builder: (_, v, _) => FractionallySizedBox(
                                       widthFactor: .65,
-                                      heightFactor: values[i] == 0
+                                      heightFactor: (values[i] ?? 0) == 0
                                           ? 0
                                           : math.max(v, .015),
                                       child: DecoratedBox(
@@ -152,9 +153,10 @@ class PurposeRing extends StatelessWidget {
   final String center;
   static const colors = [
     AppColors.primary,
+    AppColors.amber,
+    AppColors.accent,
     AppColors.chartSecondary,
     AppColors.chartTertiary,
-    AppColors.disabled,
   ];
   @override
   Widget build(BuildContext context) {
@@ -256,7 +258,7 @@ class _RingPainter extends CustomPainter {
         start,
         math.max(0, sweep * progress - .035),
         false,
-        paint..color = PurposeRing.colors[math.min(i, 3)],
+        paint..color = PurposeRing.colors[i % PurposeRing.colors.length],
       );
       start += sweep;
     }
