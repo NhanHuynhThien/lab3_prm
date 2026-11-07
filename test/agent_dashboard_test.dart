@@ -84,10 +84,10 @@ void main() {
               ),
             );
             await tester.pumpAndSettle();
-            expect(find.text('Dashboard agent'), findsOneWidget);
+            expect(find.text('ChatGPT / Codex'), findsOneWidget);
             expect(find.byType(ChoiceChip), findsNothing);
             expect(find.text('Claude'), findsNothing);
-            final action = find.text('Phân tích Antigravity');
+            final action = find.byTooltip('Phân tích Antigravity');
             await tester.ensureVisible(action);
             await tester.pumpAndSettle();
             await tester.tap(action);

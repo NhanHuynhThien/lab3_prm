@@ -57,7 +57,7 @@ void main() {
         expect(find.text('Thêm tài khoản AI'), findsOneWidget);
         await h.open(tester, container, const ShellScreen(), width: width);
         await tester.pumpAndSettle();
-        for (final tab in ['Tài khoản', 'Phân tích', 'Cá nhân', 'Tổng quan']) {
+        for (final tab in ['Đánh giá', 'Phân tích', 'Cá nhân', 'Tổng quan']) {
           await tester.tap(find.text(tab).last);
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);

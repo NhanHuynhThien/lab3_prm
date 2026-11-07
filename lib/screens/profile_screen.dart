@@ -9,6 +9,7 @@ import '../viewmodels/product_features_viewmodel.dart';
 import '../widgets/brand_mark.dart';
 import '../widgets/common.dart';
 import '../widgets/product_feature_panel.dart';
+import 'accounts_screen.dart';
 import 'provider_connections_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -92,6 +93,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(
+                  Icons.layers_outlined,
+                  color: AppColors.primary,
+                ),
+                title: const Text('Tài khoản tự ghi'),
+                subtitle: const Text(
+                  'Thêm, sửa, lưu trữ và đặt giới hạn token',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(),
+                      body: const AccountsScreen(),
+                    ),
+                  ),
+                ),
+              ),
+              const Divider(height: 24),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(
                   Icons.hub_outlined,
                   color: AppColors.primary,
                 ),
@@ -115,7 +138,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               const SectionTitle('Thông báo'),
               const Text(
-                'Cho phép ứng dụng nhận thông báo đẩy. Cảnh báo nhận được sẽ xuất hiện trong hộp thư.',
+                'Bật để nhận cảnh báo trên điện thoại khi chạm giới hạn token.',
               ),
               const SizedBox(height: 16),
               SizedBox(

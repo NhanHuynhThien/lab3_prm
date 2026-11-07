@@ -49,16 +49,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       children: [
         const PageHeading(
           'Phân tích sử dụng',
-          'Hạn mức cần chú ý, model đang dùng và độ đầy đủ của dữ liệu.',
+          'Chi tiết từng agent và gợi ý tối ưu từ Gemini.',
         ),
         if (hasSources) ...[
           const ProviderAnalyticsPanel(),
           const SizedBox(height: 24),
-          const SectionTitle('Phân tích các phiên tự ghi'),
-          const Text(
-            'Bộ lọc bên dưới áp dụng cho sổ thủ công, không thay đổi số liệu từ agent.',
-          ),
-          const SizedBox(height: 16),
+          const SectionTitle('Phiên tự ghi'),
         ],
         const FilterBar(),
         const SizedBox(height: 16),
@@ -249,36 +245,6 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               }),
               if (projection.comparisons.isEmpty)
                 const Text('Chưa có phiên trong kỳ để so sánh tài khoản.'),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SectionTitle('Theo nhà cung cấp'),
-              if (projection.providers.isEmpty)
-                const Text('Chưa có phiên trong kỳ và nguồn đã chọn.'),
-              ...projection.providers.map(
-                (p) => ActionSurface(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => HistoryScreen(provider: p.provider),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: AdaptivePair(
-                      leading: Text(p.provider),
-                      trailing: Text(
-                        '${format(p.value)} · ${p.summary.count} phiên',
-                      ),
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

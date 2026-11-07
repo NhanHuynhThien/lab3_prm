@@ -6,7 +6,6 @@ import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/product_features_viewmodel.dart';
 import 'common.dart';
-import 'notification_center_sheet.dart';
 import 'product_feature_cards.dart';
 import 'crash_diagnostics_panel.dart';
 
@@ -16,12 +15,10 @@ class ProductFeaturePanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.watch(notificationListProvider);
-    final notifications = ref.watch(notificationServiceProvider);
     final config = ref.watch(productConfigProvider);
     final analytics =
         ref.watch(analyticsStatusProvider).asData?.value ??
         const AnalyticsStatus();
-    final unreadNotifications = ref.watch(unreadNotificationCountProvider);
     final reports =
         ref.watch(reportsListProvider).asData?.value ??
         ref.watch(reportManagementServiceProvider).reports;
@@ -112,70 +109,6 @@ class ProductFeaturePanel extends ConsumerWidget {
                     ),
                   ),
                 ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpace.lg),
-
-        // Panel 3: Notifications & FCM
-        Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.notifications_active_outlined,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(width: AppSpace.sm),
-                  Expanded(
-                    child: Text(
-                      'Hộp thư thông báo',
-                      style: Theme.of(context).textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  if (unreadNotifications > 0) ...[
-                    const SizedBox(width: AppSpace.sm),
-                    Badge(
-                      label: Text('$unreadNotifications'),
-                      child: const Icon(
-                        Icons.notifications,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: AppSpace.sm),
-              const Text(
-                'Xem lại các thông báo đã nhận.',
-                style: TextStyle(color: AppColors.muted),
-              ),
-              if (notifications.backendAvailable) ...[
-                const SizedBox(height: AppSpace.sm),
-                Text(
-                  notifications.registered
-                      ? 'Thiết bị đã đăng ký với backend.'
-                      : notifications.registrationError ?? 'Chưa đăng ký backend. Bật thông báo ở phía trên để kết nối.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-              const SizedBox(height: AppSpace.md),
-              ActionButtons(
-                children: [
-                  FilledButton.icon(
-                    onPressed: () => NotificationCenterSheet.show(context),
-                    icon: const Icon(Icons.inbox_outlined, size: 18),
-                    label: Text(
-                      unreadNotifications > 0
-                          ? 'Xem thông báo ($unreadNotifications)'
-                          : 'Xem thông báo',
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),

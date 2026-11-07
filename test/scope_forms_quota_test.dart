@@ -131,7 +131,7 @@ void main() {
   );
 
   testWidgets(
-    'unknown cost defaults analytics to count; provider tap opens exact history',
+    'unknown cost defaults analytics to count; account tap opens exact history',
     (tester) async {
       h.repo.data = h.repo.data!.copyWith(
         sessions: [
@@ -155,12 +155,12 @@ void main() {
             .selected,
         isTrue,
       );
-      await h.reveal(tester, find.text('OpenAI'));
-      await tester.tap(find.text('OpenAI'));
+      await h.reveal(tester, find.text('Tài khoản a'));
+      await tester.tap(find.text('Tài khoản a'));
       await tester.pumpAndSettle();
       expect(
-        tester.widget<HistoryScreen>(find.byType(HistoryScreen)).provider,
-        'OpenAI',
+        tester.widget<HistoryScreen>(find.byType(HistoryScreen)).accountId,
+        'a',
       );
       await h.reveal(tester, find.text('Chưa biết tiền'));
       expect(find.text('Chưa biết tiền'), findsOneWidget);

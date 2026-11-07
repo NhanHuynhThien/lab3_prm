@@ -20,13 +20,9 @@ export '../widgets/range_picker.dart';
 export '../widgets/usage_row.dart';
 
 class DashboardScreen extends ConsumerWidget {
-  const DashboardScreen({
-    super.key,
-    required this.onAccounts,
-    required this.onAnalytics,
-  });
+  const DashboardScreen({super.key, required this.onAnalytics});
 
-  final VoidCallback onAccounts, onAnalytics;
+  final VoidCallback onAnalytics;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,9 +38,11 @@ class DashboardScreen extends ConsumerWidget {
             )
           : feedback;
     }
+    if (showProviderFirst) {
+      return _Page(children: [AgentDashboardPanel(onAnalytics: onAnalytics)]);
+    }
     final data = state.requireValue;
     final projection = ref.watch(dashboardProjectionProvider);
-
     final balance = DashboardBalanceCard(
       budgetAccounts: projection.budgetAccounts,
       remaining: projection.remaining,
@@ -56,80 +54,68 @@ class DashboardScreen extends ConsumerWidget {
       unknownCostCount: projection.budgetUnknownCost,
     );
     final metrics = DashboardMetricsCard(summary: projection.summary);
-    final trend = DashboardTrendCard(
-      dailyCosts: projection.dailyCosts,
-      now: projection.now,
-    );
     final latest = DashboardRecentCard(
       sessions: projection.sessions,
       recentSessions: projection.recentSessions,
       data: data,
     );
-    final recordUsage = FilledButton.icon(
-      style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-      ),
-      onPressed: () => Navigator.push(
-        context,
-        MaterialPageRoute<void>(builder: (_) => const UsageFormScreen()),
-      ),
-      icon: const Icon(Icons.add_rounded, size: 20),
-      label: const Text('Ghi sử dụng', textAlign: TextAlign.center),
-    );
-    final manual = [
-      FilterBar(leading: showProviderFirst ? null : recordUsage),
-      const SizedBox(height: 24),
-      if (projection.budgetAccounts.isNotEmpty)
-        _CardRow(left: balance, right: metrics, breakpoint: 680, leftFlex: 2)
-      else
-        metrics,
-      const SizedBox(height: 16),
-      if (projection.dailyCosts.any((cost) => cost != 0))
-        _CardRow(left: trend, right: latest)
-      else
-        latest,
-    ];
-
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: AppSpace.dashboardWidth),
-        child: ListView(
-          padding: EdgeInsets.all(
-            MediaQuery.sizeOf(context).width < 600 ? 16 : 28,
-          ),
-          children: [
-            PageHeading(
-              'Tổng quan',
-              showProviderFirst
-                  ? 'Tình hình các agent bạn đang sử dụng, trong một dashboard.'
-                  : 'AI đang hỗ trợ công việc của bạn như thế nào?',
-              action: showProviderFirst ? recordUsage : null,
-            ),
-            if (showProviderFirst) ...[
-              AgentDashboardPanel(onAnalytics: onAnalytics),
-              const SizedBox(height: 24),
-              Material(
-                color: Colors.transparent,
-                child: ExpansionTile(
-                  // Reopens when a budget warning appears, so it is never hidden.
-                  key: ValueKey('manual-${projection.budgetWarning}'),
-                  initiallyExpanded: projection.budgetWarning,
-                  title: const Text('Sổ sử dụng thủ công'),
-                  subtitle: const Text('Ngân sách và các phiên bạn tự ghi'),
-                  tilePadding: EdgeInsets.zero,
-                  children: manual,
-                ),
-              ),
-            ] else ...[
-              ...manual,
-              const SizedBox(height: 16),
-              const OptionalSourcePrompt(),
-            ],
-          ],
+    return _Page(
+      children: [
+        const PageHeading(
+          'Tổng quan',
+          'AI đang hỗ trợ công việc của bạn như thế nào?',
         ),
-      ),
+        FilterBar(
+          leading: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(builder: (_) => const UsageFormScreen()),
+            ),
+            icon: const Icon(Icons.add_rounded, size: 20),
+            label: const Text('Ghi sử dụng', textAlign: TextAlign.center),
+          ),
+        ),
+        const SizedBox(height: 24),
+        if (projection.budgetAccounts.isNotEmpty)
+          _CardRow(left: balance, right: metrics, breakpoint: 680, leftFlex: 2)
+        else
+          metrics,
+        const SizedBox(height: 16),
+        if (projection.dailyCosts.any((cost) => cost != 0))
+          _CardRow(
+            left: DashboardTrendCard(
+              dailyCosts: projection.dailyCosts,
+              now: projection.now,
+            ),
+            right: latest,
+          )
+        else
+          latest,
+        const SizedBox(height: 16),
+        const OptionalSourcePrompt(),
+      ],
     );
   }
+}
+
+class _Page extends StatelessWidget {
+  const _Page({required this.children});
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: AppSpace.dashboardWidth),
+      child: ListView(
+        padding: EdgeInsets.all(
+          MediaQuery.sizeOf(context).width < 600 ? 16 : 28,
+        ),
+        children: children,
+      ),
+    ),
+  );
 }
 
 /// Two cards side by side on wide screens, stacked on phones.

@@ -32,11 +32,9 @@ void main() {
 
       expect(find.text('Ngân sách còn lại · Kỳ hiện tại'), findsOneWidget);
       expect(tester.takeException(), isNull);
-      await tester.tap(
-        find.text(width >= 1000 ? 'Tài khoản AI' : 'Tài khoản').last,
-      );
+      await tester.tap(find.text('Đánh giá').last);
       await tester.pumpAndSettle();
-      expect(find.text('Claude cá nhân'), findsOneWidget);
+      expect(find.text('Sổ tự ghi · kỳ hiện tại'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Phân tích').last);
       await tester.pumpAndSettle();

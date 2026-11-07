@@ -16,7 +16,7 @@ class ProductEvent {
   final Map<String, Object> parameters;
 
   static ProductEvent? screen(String screen) =>
-      const {'overview', 'accounts', 'analytics', 'profile'}.contains(screen)
+      const {'overview', 'review', 'analytics', 'profile'}.contains(screen)
       ? ProductEvent._('screen_view', {'screen_name': screen})
       : null;
 

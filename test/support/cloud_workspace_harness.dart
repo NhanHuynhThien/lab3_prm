@@ -88,13 +88,20 @@ class CloudWorkspaceHarness {
     await auth.changes.close();
   }
 
+  /// Accounts is a page pushed from Profile, not a tab.
   Future<void> nav(WidgetTester tester, String label) async {
+    while (find.byType(BackButton).evaluate().isNotEmpty) {
+      await tester.tap(find.byType(BackButton).first);
+      await tester.pumpAndSettle();
+    }
+    final tab = label == 'Tài khoản' ? 'Cá nhân' : label;
     final bar = find.byType(NavigationBar);
     final target = bar.evaluate().isNotEmpty
-        ? find.descendant(of: bar, matching: find.text(label))
-        : find.text(label == 'Tài khoản' ? 'Tài khoản AI' : label).first;
+        ? find.descendant(of: bar, matching: find.text(tab))
+        : find.text(tab).first;
     await tester.tap(target);
     await tester.pumpAndSettle();
+    if (label == 'Tài khoản') await tap(tester, 'Tài khoản tự ghi');
   }
 
   Future<void> tap(WidgetTester tester, String label) async {

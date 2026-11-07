@@ -88,24 +88,6 @@ class LoginScreen extends ConsumerWidget {
                                       style: text.headlineSmall,
                                     ),
                                   ),
-                                  const SizedBox(height: AppSpace.sm),
-                                  Text(
-                                    'Một nơi để hiểu mức sử dụng AI của bạn.',
-                                    textAlign: TextAlign.center,
-                                    style: text.bodyMedium,
-                                  ),
-                                  const SizedBox(height: AppSpace.xl),
-                                  const _Benefit(
-                                    Icons.insights_outlined,
-                                    'Số liệu rõ ràng',
-                                    'Token, hạn mức và model theo từng nguồn.',
-                                  ),
-                                  const SizedBox(height: AppSpace.lg),
-                                  const _Benefit(
-                                    Icons.cloud_done_outlined,
-                                    'Không gian của riêng bạn',
-                                    'Sổ ghi nhận đồng bộ theo tài khoản Google.',
-                                  ),
                                   const SizedBox(height: AppSpace.xl),
                                   if (failure != null) ...[
                                     Semantics(
@@ -190,35 +172,4 @@ class LoginScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-class _Benefit extends StatelessWidget {
-  const _Benefit(this.icon, this.title, this.description);
-  final IconData icon;
-  final String title, description;
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Container(
-        padding: const EdgeInsets.all(AppSpace.md),
-        decoration: BoxDecoration(
-          color: AppColors.soft,
-          borderRadius: BorderRadius.circular(AppSpace.controlRadius),
-        ),
-        child: Icon(icon, color: AppColors.primary, size: 22),
-      ),
-      const SizedBox(width: AppSpace.md),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: AppSpace.xs),
-            Text(description, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
-      ),
-    ],
-  );
 }

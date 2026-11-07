@@ -56,7 +56,7 @@ void main() {
           .position;
       scroll.jumpTo(300);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Tài khoản').last);
+      await tester.tap(find.text('Đánh giá').last);
       await tester.pump();
       reduce.value = true;
       await tester.pumpAndSettle();
@@ -64,8 +64,6 @@ void main() {
         find.byKey(const ValueKey('tab-transition')),
       );
       expect(fades.every((w) => w.opacity.value == 1), isTrue);
-      await tester.enterText(find.byType(TextField).first, 'Claude');
-      await tester.pumpAndSettle();
       await tester.tap(find.text('Phân tích').last);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Token').first);
@@ -73,15 +71,8 @@ void main() {
       await tester.tap(find.text('Tổng quan').last);
       await tester.pumpAndSettle();
       expect(scroll.pixels, 300);
-      await tester.tap(find.text('Tài khoản').last);
+      await tester.tap(find.text('Đánh giá').last);
       await tester.pumpAndSettle();
-      expect(
-        tester
-            .widget<EditableText>(find.byType(EditableText).first)
-            .controller
-            .text,
-        'Claude',
-      );
       await tester.tap(find.text('Phân tích').last);
       await tester.pumpAndSettle();
       expect(find.text('Theo mục đích · token'), findsOneWidget);

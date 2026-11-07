@@ -7,15 +7,15 @@ import '../models/auth_session.dart';
 import '../theme/app_theme.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
-import '../widgets/brand_mark.dart';
-import '../widgets/common.dart';
+import '../viewmodels/token_limit_viewmodel.dart';
+import '../widgets/app_top_bar.dart';
 import '../widgets/desktop_sidebar.dart';
 import '../widgets/notification_button.dart';
-import 'accounts_screen.dart';
 import 'analytics_screen.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
+import 'review_screen.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
   const ShellScreen({super.key, this.user});
@@ -33,22 +33,17 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
   AuthUser? _profileUser;
   StreamSubscription<String>? _notificationRoute;
   late final _pages = <Widget>[
-    RepaintBoundary(
-      child: DashboardScreen(
-        onAccounts: () => _selectTab(1),
-        onAnalytics: () => _selectTab(2),
-      ),
-    ),
-    const RepaintBoundary(child: AccountsScreen()),
+    RepaintBoundary(child: DashboardScreen(onAnalytics: () => _selectTab(2))),
+    RepaintBoundary(child: ReviewScreen(onAnalytics: () => _selectTab(2))),
     const RepaintBoundary(child: AnalyticsScreen()),
     RepaintBoundary(child: ProfileScreen(user: widget.user)),
   ];
 
-  static const _screenNames = ['overview', 'accounts', 'analytics', 'profile'];
-  static const labels = ['Tổng quan', 'Tài khoản AI', 'Phân tích', 'Cá nhân'];
+  static const _screenNames = ['overview', 'review', 'analytics', 'profile'];
+  static const labels = ['Tổng quan', 'Đánh giá', 'Phân tích', 'Cá nhân'];
   static const icons = [
     Icons.space_dashboard_outlined,
-    Icons.layers_outlined,
+    Icons.fact_check_outlined,
     Icons.donut_large_outlined,
     Icons.person_outline_rounded,
   ];
@@ -65,12 +60,13 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     final notifications = ref.read(notificationServiceProvider);
     void open(String route) {
       if (!mounted) return;
-      final index = [
-        '/overview',
-        '/accounts',
-        '/analytics',
-        '/profile',
-      ].indexOf(route);
+      // Accounts now live under Profile.
+      final index = switch (route) {
+        '/overview' => 0,
+        '/analytics' => 2,
+        '/profile' || '/accounts' => 3,
+        _ => -1,
+      };
       if (index >= 0) _selectTab(index);
       notifications.takePendingRoute();
     }
@@ -122,6 +118,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
         ? null
         : ref.watch(authSessionProvider.select((s) => s.asData?.value));
     final user = restored?.uid == widget.user?.uid ? restored : widget.user;
+    ref.watch(tokenAlertWatcherProvider);
     final wide = MediaQuery.sizeOf(context).width >= AppSpace.wide;
 
     if (_profileUser != user) {
@@ -181,15 +178,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                           ),
                           child: Row(
                             children: [
-                              Text(
-                                'Không gian cá nhân',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
                               const Spacer(),
                               const NotificationButton(),
                               const SizedBox(width: 8),
-                              StatusTag('Đã đăng nhập', neutral: true),
-                              const SizedBox(width: 16),
                               IconButton(
                                 tooltip: 'Cá nhân & trạng thái kết nối',
                                 onPressed: () => _selectTab(3),
@@ -220,28 +211,12 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
               )
             : Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
-                    child: Row(
-                      children: [
-                        const Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: BrandLockup(compact: true),
-                          ),
-                        ),
-                        const NotificationButton(),
-                        IconButton(
-                          tooltip: 'Lịch sử sử dụng',
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute<void>(
-                              builder: (_) => const HistoryScreen(),
-                            ),
-                          ),
-                          icon: const Icon(Icons.history_rounded),
-                        ),
-                      ],
+                  AppTopBar(
+                    onHistory: () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const HistoryScreen(),
+                      ),
                     ),
                   ),
                   Expanded(child: content),
@@ -254,13 +229,10 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
           : NavigationBar(
               selectedIndex: _index,
               onDestinationSelected: _selectTab,
-              destinations: List.generate(
-                4,
-                (i) => NavigationDestination(
-                  icon: Icon(icons[i]),
-                  label: i == 1 ? 'Tài khoản' : labels[i],
-                ),
-              ),
+              destinations: [
+                for (var i = 0; i < labels.length; i++)
+                  NavigationDestination(icon: Icon(icons[i]), label: labels[i]),
+              ],
             ),
     );
   }

@@ -101,10 +101,7 @@ void main() {
             await container.read(ledgerProvider.future);
             final a = repository.data!.account('codex')!;
             final screens = <String, Widget>{
-              'dashboard': DashboardScreen(
-                onAccounts: () {},
-                onAnalytics: () {},
-              ),
+              'dashboard': DashboardScreen(onAnalytics: () {}),
               'usage': UsageFormScreen(
                 accountId: 'codex',
                 session: stress ? repository.data!.sessions.first : null,

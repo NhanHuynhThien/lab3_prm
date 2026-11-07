@@ -111,11 +111,16 @@ class PageHeading extends StatelessWidget {
             header: true,
             child: Text(
               title,
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.headlineMedium
+                  ?.copyWith(letterSpacing: -.5),
             ),
           ),
-          const SizedBox(height: 6),
-          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: AppSpace.sm),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: AppColors.muted),
+          ),
         ],
       );
       return Padding(
