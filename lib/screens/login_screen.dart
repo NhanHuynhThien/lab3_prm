@@ -173,7 +173,7 @@ class LoginScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: AppSpace.xl),
                             Text(
-                              'Xem token, quota và chi phí AI của bạn ở một nơi.',
+                              'Xem token, quota và chi phí AI của bạn ở mọi nơi.',
                               textAlign: TextAlign.center,
                               style: text.bodySmall,
                             ),

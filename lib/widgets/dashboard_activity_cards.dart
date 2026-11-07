@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../models/ledger.dart';
-import '../screens/account_detail_screen.dart';
 import '../screens/history_screen.dart';
-import '../services/usage_calculator.dart';
 import 'charts.dart';
 import 'common.dart';
-import 'quota_row.dart';
 import 'usage_row.dart';
 
 class DashboardTrendCard extends StatelessWidget {
@@ -40,66 +37,6 @@ class DashboardTrendCard extends StatelessWidget {
       ],
     ),
   );
-}
-
-class DashboardQuotaCard extends StatelessWidget {
-  const DashboardQuotaCard({
-    super.key,
-    required this.accounts,
-    required this.now,
-    required this.onAccounts,
-  });
-
-  final List<AIAccount> accounts;
-  final DateTime now;
-  final VoidCallback onAccounts;
-
-  @override
-  Widget build(BuildContext context) {
-    int used(AIAccount a) {
-      final q = a.limitingQuota(now);
-      return q == null || q.isStale(now) ? -1 : q.usedPercent;
-    }
-
-    // Closest to running out first, so the card shows what needs attention.
-    final active = accounts.where((a) => !a.archived).toList()
-      ..sort((a, b) => used(b).compareTo(used(a)));
-    return Panel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SectionTitle(
-            'Hạn mức tài khoản',
-            action: 'Xem tất cả',
-            onAction: onAccounts,
-          ),
-          if (active.isEmpty)
-            const EmptyFeedback(
-              title: 'Chưa có tài khoản',
-              message: 'Thêm tài khoản AI để ghi nhận quota.',
-            ),
-          ...active
-              .take(3)
-              .map(
-                (a) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: QuotaRow(
-                    account: a,
-                    now: now,
-                    compact: true,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (_) => AccountDetailScreen(accountId: a.id),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-        ],
-      ),
-    );
-  }
 }
 
 class DashboardRecentCard extends StatelessWidget {
@@ -140,55 +77,6 @@ class DashboardRecentCard extends StatelessWidget {
             onTap: () => showUsageDetail(context, s),
           ),
         ),
-      ],
-    ),
-  );
-}
-
-class DashboardPurposeCard extends StatelessWidget {
-  const DashboardPurposeCard({
-    super.key,
-    required this.shares,
-    required this.summaryCount,
-    required this.onAnalytics,
-  });
-
-  final List<PurposeShare> shares;
-  final int summaryCount;
-  final VoidCallback onAnalytics;
-
-  @override
-  Widget build(BuildContext context) => Panel(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionTitle(
-          'AI dùng cho việc gì?',
-          action: 'Phân tích',
-          onAction: onAnalytics,
-        ),
-        if (shares.isEmpty) const Text('Chưa có công việc trong kỳ đã chọn.'),
-        ...shares
-            .take(4)
-            .map(
-              (p) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(child: Text(p.purpose.label)),
-                        Text('${p.count} phiên'),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    AnimatedProgress(
-                      value: summaryCount == 0 ? 0 : p.count / summaryCount,
-                    ),
-                  ],
-                ),
-              ),
-            ),
       ],
     ),
   );

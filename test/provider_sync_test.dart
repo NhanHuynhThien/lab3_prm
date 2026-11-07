@@ -89,6 +89,58 @@ void main() {
       expect(e.message, isNot(contains('SECRET')));
     }
     denied.close();
+    final tried = <String>[];
+    final fallback = LoopbackProviderSync(
+      endpoints: [
+        Uri.parse('http://127.0.0.1:8787/v1/snapshot'),
+        Uri.parse('http://10.0.2.2:8787/v1/snapshot'),
+      ],
+      client: MockClient((request) async {
+        tried.add(request.url.host);
+        if (request.url.host == '127.0.0.1') {
+          throw http.ClientException('refused');
+        }
+        return http.Response(
+          jsonEncode(syncFixture()),
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      }),
+    );
+    expect((await fallback.fetch(token)).providers.length, 3);
+    expect(tried, ['127.0.0.1', '10.0.2.2']);
+    fallback.close();
+  });
+
+  test('figures are saved per account and shown on next login', () async {
+    final store = FakeSnapshotStore();
+    ProviderContainer open(String uid, FakeProviderSync service) =>
+        ProviderContainer(
+          overrides: [
+            cloudOwnerProvider.overrideWithValue(uid),
+            providerSyncServiceProvider.overrideWithValue(service),
+            providerSnapshotStoreProvider.overrideWithValue(store),
+          ],
+        );
+    final first = open('A', FakeProviderSync());
+    await first.read(providerSyncProvider.notifier).connect(token);
+    expect(store.saved['A']?.raw, isNotNull);
+    first.dispose();
+
+    final service = FakeProviderSync();
+    final again = open('A', service);
+    again.read(providerSyncProvider);
+    await pumpEventQueue();
+    expect(again.read(providerSyncProvider).snapshot?.providers, isNotEmpty);
+    expect(again.read(providerSyncProvider).enabled, isFalse);
+    expect(service.calls, 0, reason: 'no companion needed to show saved data');
+    again.dispose();
+
+    final other = open('B', FakeProviderSync());
+    other.read(providerSyncProvider);
+    await pumpEventQueue();
+    expect(other.read(providerSyncProvider).snapshot, isNull);
+    other.dispose();
   });
 
   test(

@@ -118,36 +118,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 'Cho phép ứng dụng nhận thông báo đẩy. Cảnh báo nhận được sẽ xuất hiện trong hộp thư.',
               ),
               const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed:
-                    _permissionWorking ||
-                        (notificationService.permissionGranted &&
-                            (!notificationService.backendAvailable ||
-                                notificationService.registered))
-                    ? null
-                    : () async {
-                        setState(() => _permissionWorking = true);
-                        final granted = await ref
-                            .read(productFeaturesProvider.notifier)
-                            .requestNotifications();
-                        if (!context.mounted) return;
-                        setState(() => _permissionWorking = false);
-                        showMessage(
-                          context,
-                          granted ? 'Đã bật thông báo.' : 'Chưa bật thông báo. Bạn có thể đổi trong cài đặt thiết bị.',
-                        );
-                      },
-                icon: const Icon(Icons.notifications_outlined),
-                label: Text(
-                  _permissionWorking
-                      ? 'Đang xử lý...'
-                      : notificationService.permissionGranted &&
-                            notificationService.registered
-                      ? 'Thông báo đã bật'
-                      : notificationService.permissionGranted &&
-                            notificationService.backendAvailable
-                      ? 'Kết nối lại thông báo'
-                      : 'Bật thông báo',
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed:
+                      _permissionWorking ||
+                          (notificationService.permissionGranted &&
+                              (!notificationService.backendAvailable ||
+                                  notificationService.registered))
+                      ? null
+                      : () async {
+                          setState(() => _permissionWorking = true);
+                          final granted = await ref
+                              .read(productFeaturesProvider.notifier)
+                              .requestNotifications();
+                          if (!context.mounted) return;
+                          setState(() => _permissionWorking = false);
+                          showMessage(
+                            context,
+                            granted ? 'Đã bật thông báo.' : 'Chưa bật thông báo. Bạn có thể đổi trong cài đặt thiết bị.',
+                          );
+                        },
+                  icon: const Icon(Icons.notifications_outlined),
+                  label: Text(
+                    _permissionWorking
+                        ? 'Đang xử lý...'
+                        : notificationService.permissionGranted &&
+                              notificationService.registered
+                        ? 'Thông báo đã bật'
+                        : notificationService.permissionGranted &&
+                              notificationService.backendAvailable
+                        ? 'Kết nối lại thông báo'
+                        : 'Bật thông báo',
+                  ),
                 ),
               ),
             ],
@@ -161,13 +164,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             action.failure!.message,
             style: const TextStyle(color: AppColors.danger),
           ),
-        OutlinedButton.icon(
-          onPressed: action.working
-              ? null
-              : () => ref.read(authActionProvider.notifier).signOut(),
-          icon: const Icon(Icons.logout),
-          label: Text(
-            action.working ? 'Đang đăng xuất...' : 'Đăng xuất Google',
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: action.working
+                ? null
+                : () => ref.read(authActionProvider.notifier).signOut(),
+            icon: const Icon(Icons.logout),
+            label: Text(
+              action.working ? 'Đang đăng xuất...' : 'Đăng xuất Google',
+            ),
           ),
         ),
         const SizedBox(height: 24),

@@ -28,15 +28,18 @@ class OptionalSourcePrompt extends StatelessWidget {
           'Tùy chọn bổ sung cho Codex, Claude Code, Gemini CLI và Antigravity. Bạn vẫn quản lý tài khoản, ghi usage và phân tích bằng Gemini mà không cần companion.',
         ),
         const SizedBox(height: 16),
-        OutlinedButton.icon(
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (_) => const ProviderConnectionsScreen(),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => const ProviderConnectionsScreen(),
+              ),
             ),
+            icon: const Icon(Icons.link),
+            label: const Text('Kết nối CLI (tùy chọn)'),
           ),
-          icon: const Icon(Icons.link),
-          label: const Text('Kết nối CLI (tùy chọn)'),
         ),
       ],
     ),

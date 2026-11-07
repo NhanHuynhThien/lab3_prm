@@ -54,10 +54,10 @@ void main() {
           }
           list.jumpTo(0);
           await tester.pumpAndSettle();
-          expect(find.text('Ngắt kết nối'), findsOneWidget);
-          await tester.ensureVisible(find.text('Ngắt kết nối'));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('Ngắt kết nối'));
+          // Direct pairing is hidden for the demo build.
+          expect(find.text('Ghép trực tiếp (nhà phát triển)'), findsNothing);
+          expect(find.text('Ngắt kết nối'), findsNothing);
+          container.read(providerSyncProvider.notifier).disconnect();
           await tester.pumpAndSettle();
           expect(find.byType(ProviderUsageCard), findsNothing);
           expect(container.read(providerSyncProvider).snapshot, isNull);

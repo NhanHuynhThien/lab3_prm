@@ -22,9 +22,7 @@ class CrashDiagnosticsPanel extends ConsumerWidget {
           'Dùng khi nghiệm thu kỹ thuật Lab 3. Cần kiểm tra kết quả trong Firebase Console.',
         ),
         const SizedBox(height: AppSpace.lg),
-        Wrap(
-          spacing: AppSpace.md,
-          runSpacing: AppSpace.sm,
+        ActionButtons(
           children: [
             OutlinedButton.icon(
               onPressed: () async {

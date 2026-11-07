@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'provider_model_usage.dart';
 import 'provider_activity.dart';
 
@@ -170,9 +172,12 @@ class ProviderUsage {
 }
 
 class ProviderSnapshot {
-  const ProviderSnapshot(this.collectedAt, this.providers);
+  const ProviderSnapshot(this.collectedAt, this.providers, [this.raw]);
   final DateTime collectedAt;
   final List<ProviderUsage> providers;
+
+  /// The validated companion JSON, kept so it can be saved to the account.
+  final String? raw;
 
   factory ProviderSnapshot.fromJson(Map<String, dynamic> json) {
     if (json['schemaVersion'] != 1 ||
@@ -195,6 +200,7 @@ class ProviderSnapshot {
     return ProviderSnapshot(
       _date(json['collectedAt']),
       List.unmodifiable(rows),
+      jsonEncode(json),
     );
   }
 }

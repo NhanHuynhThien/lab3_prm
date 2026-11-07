@@ -94,9 +94,7 @@ class UsageDetailSheet extends ConsumerWidget {
                 child: Text(session.note),
               ),
             const SizedBox(height: 24),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
+            ActionButtons(
               children: [
                 if (account != null)
                   OutlinedButton.icon(

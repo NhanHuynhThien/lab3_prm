@@ -114,9 +114,12 @@ class EmptyFeedback extends StatelessWidget {
                 if (action != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
-                    child: OutlinedButton(
-                      onPressed: onAction,
-                      child: Text(action!),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: onAction,
+                        child: Text(action!),
+                      ),
                     ),
                   ),
               ],

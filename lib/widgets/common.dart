@@ -4,6 +4,7 @@ import '../models/ledger.dart';
 import '../theme/app_theme.dart';
 
 export 'action_dialogs.dart';
+export 'action_buttons.dart';
 export 'action_surface.dart';
 export 'adaptive_pair.dart';
 export 'animated_indicators.dart';
@@ -127,7 +128,7 @@ class PageHeading extends StatelessWidget {
                   if (action != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
-                      child: action!,
+                      child: SizedBox(width: double.infinity, child: action!),
                     ),
                 ],
               )

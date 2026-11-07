@@ -196,10 +196,13 @@ class ProviderActivityPanel extends StatelessWidget {
                 ],
               ),
               const Divider(),
-              FilledButton.icon(
-                onPressed: () => _details(context, null),
-                icon: const Icon(Icons.manage_search_rounded),
-                label: const Text('Xem từng công việc và thời lượng'),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => _details(context, null),
+                  icon: const Icon(Icons.manage_search_rounded),
+                  label: const Text('Xem từng công việc và thời lượng'),
+                ),
               ),
               const SizedBox(height: AppSpace.md),
               ExpansionTile(

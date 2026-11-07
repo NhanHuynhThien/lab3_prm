@@ -74,24 +74,29 @@ class GeminiAnalysisCard extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: state.isLoading || !aggregate.eligible
-                    ? null
-                    : () => _confirm(context, ref, aggregate),
-                icon: state.isLoading
-                    ? SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          value: MediaQuery.disableAnimationsOf(context)
-                              ? .5
-                              : null,
-                        ),
-                      )
-                    : const Icon(Icons.auto_awesome_outlined),
-                label: Text(
-                  state.isLoading ? 'Đang phân tích…' : 'Phân tích dữ liệu này',
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: state.isLoading || !aggregate.eligible
+                      ? null
+                      : () => _confirm(context, ref, aggregate),
+                  icon: state.isLoading
+                      ? SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            value: MediaQuery.disableAnimationsOf(context)
+                                ? .5
+                                : null,
+                          ),
+                        )
+                      : const Icon(Icons.auto_awesome_outlined),
+                  label: Text(
+                    state.isLoading
+                        ? 'Đang phân tích…'
+                        : 'Phân tích dữ liệu này',
+                  ),
                 ),
               ),
               if (!aggregate.eligible)

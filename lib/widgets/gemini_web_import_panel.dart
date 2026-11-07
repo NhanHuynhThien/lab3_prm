@@ -25,45 +25,48 @@ class GeminiWebImportPanel extends ConsumerWidget {
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: state.working
-                ? null
-                : () async {
-                    try {
-                      final files = await FilePicker.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['json'],
-                      );
-                      if (!context.mounted || files.isEmpty) return;
-                      final file = files.single;
-                      final length = await file.length();
-                      if (!context.mounted) return;
-                      if ((length ?? 8 * 1024 * 1024 + 1) > 8 * 1024 * 1024) {
-                        showMessage(
-                          context,
-                          'Chọn file JSON nhỏ hơn 8 MB. Hãy xuất riêng hoạt động Gemini.',
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: state.working
+                  ? null
+                  : () async {
+                      try {
+                        final files = await FilePicker.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['json'],
                         );
-                        return;
+                        if (!context.mounted || files.isEmpty) return;
+                        final file = files.single;
+                        final length = await file.length();
+                        if (!context.mounted) return;
+                        if ((length ?? 8 * 1024 * 1024 + 1) > 8 * 1024 * 1024) {
+                          showMessage(
+                            context,
+                            'Chọn file JSON nhỏ hơn 8 MB. Hãy xuất riêng hoạt động Gemini.',
+                          );
+                          return;
+                        }
+                        final bytes = await file.readAsBytes();
+                        if (!context.mounted) return;
+                        await ref
+                            .read(geminiActivityProvider.notifier)
+                            .importBytes(bytes);
+                      } catch (_) {
+                        if (context.mounted) {
+                          showMessage(
+                            context,
+                            'Chưa mở được bộ chọn file. Hãy thử lại.',
+                          );
+                        }
                       }
-                      final bytes = await file.readAsBytes();
-                      if (!context.mounted) return;
-                      await ref
-                          .read(geminiActivityProvider.notifier)
-                          .importBytes(bytes);
-                    } catch (_) {
-                      if (context.mounted) {
-                        showMessage(
-                          context,
-                          'Chưa mở được bộ chọn file. Hãy thử lại.',
-                        );
-                      }
-                    }
-                  },
-            icon: const Icon(Icons.file_upload_outlined),
-            label: Text(
-              state.working
-                  ? 'Đang phân tích file...'
-                  : 'Chọn file JSON Gemini',
+                    },
+              icon: const Icon(Icons.file_upload_outlined),
+              label: Text(
+                state.working
+                    ? 'Đang phân tích file...'
+                    : 'Chọn file JSON Gemini',
+              ),
             ),
           ),
           if (state.error != null)

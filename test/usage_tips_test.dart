@@ -39,9 +39,7 @@ void main() {
         ActivityPurpose(Purpose.other, tokens(500)),
         ActivityPurpose(Purpose.debug, tokens(300)),
       ]),
-      usage([
-        ProviderQuota('Weekly', 95, now.add(const Duration(days: 1))),
-      ]),
+      usage([ProviderQuota('Weekly', 95, now.add(const Duration(days: 1)))]),
       now,
     );
     expect(tips, hasLength(5));

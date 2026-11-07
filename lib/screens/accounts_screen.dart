@@ -89,13 +89,17 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
                 onChanged: (s) => setState(() => _search = s),
               ),
             ),
-            SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(value: false, label: Text('Đang dùng')),
-                ButtonSegment(value: true, label: Text('Đã lưu trữ')),
-              ],
-              selected: {_archived},
-              onSelectionChanged: (s) => setState(() => _archived = s.first),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<bool>(
+                expandedInsets: EdgeInsets.zero,
+                segments: const [
+                  ButtonSegment(value: false, label: Text('Đang dùng')),
+                  ButtonSegment(value: true, label: Text('Đã lưu trữ')),
+                ],
+                selected: {_archived},
+                onSelectionChanged: (s) => setState(() => _archived = s.first),
+              ),
             ),
           ],
         ),

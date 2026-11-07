@@ -55,38 +55,39 @@ class DashboardScreen extends ConsumerWidget {
       alerts: projection.budgetAlerts,
       unknownCostCount: projection.budgetUnknownCost,
     );
-    final metrics = DashboardMetricsCard(
-      summary: projection.summary,
-      activeAccountsCount: data.accounts.where((a) => !a.archived).length,
-    );
+    final metrics = DashboardMetricsCard(summary: projection.summary);
     final trend = DashboardTrendCard(
       dailyCosts: projection.dailyCosts,
       now: projection.now,
-    );
-    final quota = DashboardQuotaCard(
-      accounts: data.accounts,
-      now: projection.now,
-      onAccounts: onAccounts,
     );
     final latest = DashboardRecentCard(
       sessions: projection.sessions,
       recentSessions: projection.recentSessions,
       data: data,
     );
-    final purpose = DashboardPurposeCard(
-      shares: projection.shares,
-      summaryCount: projection.summary.count,
-      onAnalytics: onAnalytics,
+    final recordUsage = FilledButton.icon(
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+      ),
+      onPressed: () => Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const UsageFormScreen()),
+      ),
+      icon: const Icon(Icons.add_rounded, size: 20),
+      label: const Text('Ghi sử dụng', textAlign: TextAlign.center),
     );
-
     final manual = [
-      const FilterBar(),
+      FilterBar(leading: showProviderFirst ? null : recordUsage),
       const SizedBox(height: 24),
-      _CardRow(left: balance, right: metrics, breakpoint: 680, leftFlex: 2),
+      if (projection.budgetAccounts.isNotEmpty)
+        _CardRow(left: balance, right: metrics, breakpoint: 680, leftFlex: 2)
+      else
+        metrics,
       const SizedBox(height: 16),
-      _CardRow(left: trend, right: quota),
-      const SizedBox(height: 16),
-      _CardRow(left: latest, right: purpose),
+      if (projection.dailyCosts.any((cost) => cost != 0))
+        _CardRow(left: trend, right: latest)
+      else
+        latest,
     ];
 
     return Center(
@@ -102,16 +103,7 @@ class DashboardScreen extends ConsumerWidget {
               showProviderFirst
                   ? 'Tình hình các agent bạn đang sử dụng, trong một dashboard.'
                   : 'AI đang hỗ trợ công việc của bạn như thế nào?',
-              action: FilledButton.icon(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => const UsageFormScreen(),
-                  ),
-                ),
-                icon: const Icon(Icons.add_rounded, size: 20),
-                label: const Text('Ghi sử dụng'),
-              ),
+              action: showProviderFirst ? recordUsage : null,
             ),
             if (showProviderFirst) ...[
               AgentDashboardPanel(onAnalytics: onAnalytics),

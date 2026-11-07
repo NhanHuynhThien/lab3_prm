@@ -6,16 +6,27 @@ import '../theme/app_theme.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import 'data_scope_picker.dart';
 
-/// Range + scope + timezone on a single line; scrolls instead of wrapping.
+/// Keeps the dashboard actions within the available width.
 class FilterBar extends StatelessWidget {
-  const FilterBar({super.key});
+  const FilterBar({super.key, this.leading});
+  final Widget? leading;
   @override
-  Widget build(BuildContext context) => const SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      children: [RangePicker(), SizedBox(width: 8), DataScopePicker()],
-    ),
-  );
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (leading != null) ...[
+            Expanded(child: leading!),
+            const SizedBox(width: 8),
+          ],
+          const Expanded(child: RangePicker()),
+          const SizedBox(width: 8),
+          const DataScopePicker(compact: true),
+        ],
+      ),
+    );
+  }
 }
 
 /// Shared look for the dropdown filters so they line up.
@@ -26,8 +37,8 @@ class FilterButton extends StatelessWidget {
   final bool active;
   @override
   Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(minHeight: AppSpace.touch),
-    padding: const EdgeInsets.symmetric(horizontal: 12),
+    constraints: const BoxConstraints(minHeight: AppSpace.button),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     decoration: BoxDecoration(
       color: active ? AppColors.soft : AppColors.surface,
       border: Border.all(color: active ? AppColors.primary : AppColors.line),
@@ -35,9 +46,16 @@ class FilterButton extends StatelessWidget {
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (icon != null) ...[Icon(icon, size: 18), const SizedBox(width: 8)],
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
+        Flexible(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ),
         const SizedBox(width: 4),
         const Icon(Icons.expand_more, size: 18),
       ],

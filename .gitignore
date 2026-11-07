@@ -88,3 +88,8 @@ venv/
 *.profraw
 *.profdata
 *.lcov
+
+# Desktop companion dependencies, copied runtime and distributables
+/companion/node_modules/
+/companion/runtime/
+/companion/dist/

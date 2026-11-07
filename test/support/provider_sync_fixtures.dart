@@ -1,3 +1,5 @@
+import 'package:token_ledger/services/provider_snapshot_store.dart';
+
 import 'dart:async';
 
 import 'package:token_ledger/models/provider_usage.dart';
@@ -59,4 +61,13 @@ class FakeProviderSync implements ProviderSyncService {
 
   @override
   void close() {}
+}
+
+class FakeSnapshotStore implements ProviderSnapshotStore {
+  final saved = <String, ProviderSnapshot>{};
+  @override
+  Stream<ProviderSnapshot?> watch(String uid) => Stream.value(saved[uid]);
+  @override
+  Future<void> save(String uid, ProviderSnapshot snapshot) async =>
+      saved[uid] = snapshot;
 }

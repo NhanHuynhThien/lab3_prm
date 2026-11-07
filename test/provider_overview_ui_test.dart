@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:token_ledger/widgets/action_buttons.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -97,18 +98,20 @@ void main() {
               });
             }
             await tester.ensureVisible(
-              find.widgetWithText(ChoiceChip, 'Antigravity'),
+              find.widgetWithText(SelectionButton, 'Antigravity'),
             );
-            await tester.tap(find.widgetWithText(ChoiceChip, 'Antigravity'));
+            await tester.tap(
+              find.widgetWithText(SelectionButton, 'Antigravity'),
+            );
 
             await tester.pumpAndSettle();
             expect(find.text('Chưa đủ dữ liệu để đánh giá'), findsOneWidget);
             expect(find.text('Token lifetime · server'), findsNothing);
             container.read(providerSyncProvider.notifier).disconnect();
             await tester.ensureVisible(
-              find.widgetWithText(ChoiceChip, 'Codex'),
+              find.widgetWithText(SelectionButton, 'Codex'),
             );
-            await tester.tap(find.widgetWithText(ChoiceChip, 'Codex'));
+            await tester.tap(find.widgetWithText(SelectionButton, 'Codex'));
             await tester.pumpAndSettle();
             expect(find.text('Chưa đủ dữ liệu để đánh giá'), findsOneWidget);
             expect(tester.takeException(), isNull);

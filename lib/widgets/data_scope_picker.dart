@@ -11,7 +11,8 @@ import 'ledger_feedback.dart';
 import 'range_picker.dart';
 
 class DataScopePicker extends ConsumerWidget {
-  const DataScopePicker({super.key});
+  const DataScopePicker({super.key, this.compact = false});
+  final bool compact;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scope = ref.watch(effectiveDataScopeProvider);
@@ -28,6 +29,7 @@ class DataScopePicker extends ConsumerWidget {
         if (hasChoice)
           PopupMenuButton<DataScope>(
             tooltip: 'Chọn nguồn dữ liệu báo cáo',
+            icon: compact ? const Icon(Icons.filter_alt_outlined) : null,
             initialValue: ref.watch(effectiveDataScopeProvider),
             onSelected: (scope) =>
                 ref.read(dataScopeProvider.notifier).select(scope),
@@ -38,7 +40,9 @@ class DataScopePicker extends ConsumerWidget {
                       PopupMenuItem(value: scope, child: Text(scope.label)),
                 )
                 .toList(),
-            child: FilterButton(ref.watch(effectiveDataScopeProvider).label),
+            child: compact
+                ? null
+                : FilterButton(ref.watch(effectiveDataScopeProvider).label),
           ),
         // Timezone is a rarely changed setting, so it is icon-only here.
         IconButton(

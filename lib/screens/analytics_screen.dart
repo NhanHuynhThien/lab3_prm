@@ -62,16 +62,16 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         ],
         const FilterBar(),
         const SizedBox(height: 16),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SegmentedButton<UsageMetric>(
-            segments: UsageMetric.values
-                .map((m) => ButtonSegment(value: m, label: Text(m.label)))
-                .toList(),
-            selected: {_metric},
-            onSelectionChanged: (s) =>
-                setState(() => _selectedMetric = s.first),
-          ),
+        ActionButtons(
+          maxColumns: 3,
+          children: [
+            for (final metric in UsageMetric.values)
+              SelectionButton(
+                label: metric.label,
+                selected: _metric == metric,
+                onPressed: () => setState(() => _selectedMetric = metric),
+              ),
+          ],
         ),
         const SizedBox(height: 24),
         const GeminiAnalysisCard(),

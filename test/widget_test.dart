@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/screens/shell_screen.dart';
+import 'package:token_ledger/models/ledger.dart';
+import 'package:token_ledger/widgets/dashboard_cards.dart';
 import 'package:token_ledger/screens/usage_form_screen.dart';
 import 'package:token_ledger/theme/app_theme.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
@@ -46,6 +48,29 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+  testWidgets('empty overview shows only summary and recent usage', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ledgerRepositoryProvider.overrideWithValue(
+            MemoryRepository()..data = LedgerData(accounts: [], sessions: []),
+          ),
+        ],
+        child: MaterialApp(theme: buildAppTheme(), home: const ShellScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(DashboardMetricsCard), findsOneWidget);
+    expect(find.byType(DashboardBalanceCard), findsNothing);
+    expect(find.byType(DashboardTrendCard), findsNothing);
+    expect(find.byType(DashboardRecentCard), findsOneWidget);
+    expect(find.text('Tài khoản active'), findsNothing);
+    expect(find.textContaining('0 phiên chưa biết'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('usage form rejects empty title and saves a complete session', (
     tester,
   ) async {

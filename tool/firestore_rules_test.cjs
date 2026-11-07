@@ -48,6 +48,14 @@ for (const col of ['accounts','usage_sessions','quota_windows','quota_labels','m
   test('unauth read '+col,'DENY',col+'/a','get',{}, {},null);
 }
 test('unknown collection deny','DENY','devices/a','get');
+const snap={ownerId:'A',savedAt:NOW,json:'{"schemaVersion":1}'};
+test('owner read snapshot','ALLOW','provider_snapshots/latest','get');
+test('foreign read snapshot','DENY','provider_snapshots/latest','get',{}, {},'B');
+test('owner save snapshot','ALLOW','provider_snapshots/latest','create',{}, {'provider_snapshots/latest':snap});
+test('foreign save snapshot','DENY','provider_snapshots/latest','create',{}, {'provider_snapshots/latest':snap},'B');
+test('snapshot other id deny','DENY','provider_snapshots/x','create',{}, {'provider_snapshots/x':snap});
+test('snapshot extra field deny','DENY','provider_snapshots/latest','create',{}, {'provider_snapshots/latest':{...snap,raw:'x'}});
+test('snapshot too large deny','DENY','provider_snapshots/latest','create',{}, {'provider_snapshots/latest':{...snap,json:'x'.repeat(600001)}});
 let a=account(), before={}, after={'accounts/a':a,'mutations/a-create':receipt('accounts','a','create',1)};
 transaction('account create',before,after,Object.keys(after));
 for (const [name, mutate] of [

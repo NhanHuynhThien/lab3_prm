@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:token_ledger/widgets/action_buttons.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/models/ledger.dart';
 import 'package:token_ledger/screens/analytics_screen.dart';
@@ -148,11 +149,11 @@ void main() {
       await h.open(tester, const Scaffold(body: AnalyticsScreen()), 412);
       expect(
         tester
-            .widget<SegmentedButton<UsageMetric>>(
-              find.byType(SegmentedButton<UsageMetric>),
+            .widget<SelectionButton>(
+              find.widgetWithText(SelectionButton, UsageMetric.sessions.label),
             )
             .selected,
-        {UsageMetric.sessions},
+        isTrue,
       );
       await h.reveal(tester, find.text('OpenAI'));
       await tester.tap(find.text('OpenAI'));

@@ -253,11 +253,14 @@ class _AgentRow extends StatelessWidget {
               style: text.bodySmall,
             ),
           const SizedBox(height: AppSpace.md),
-          OutlinedButton.icon(
-            onPressed: onTap,
-            icon: const Icon(Icons.insights_outlined),
-            label: Text(
-              'Phân tích ${source.id == 'codex' ? 'Codex' : source.name}',
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onTap,
+              icon: const Icon(Icons.insights_outlined),
+              label: Text(
+                'Phân tích ${source.id == 'codex' ? 'Codex' : source.name}',
+              ),
             ),
           ),
         ],

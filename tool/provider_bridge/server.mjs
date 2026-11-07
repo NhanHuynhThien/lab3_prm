@@ -18,7 +18,9 @@ export function bridgeServer({ token, collect, port = 8787, origins = ['http://l
     res.setHeader('X-Content-Type-Options', 'nosniff');
     const finish = (status, data) => { res.writeHead(status); res.end(JSON.stringify(data)); };
     const listenPort = server.address()?.port ?? port;
-    if (![`127.0.0.1:${listenPort}`, `localhost:${listenPort}`].includes(req.headers.host)) return finish(403, {});
+    // 10.0.2.2 is the Android emulator's alias for this Mac's loopback; an IP
+    // literal, so allowing it does not reopen DNS rebinding.
+    if (![`127.0.0.1:${listenPort}`, `localhost:${listenPort}`, `10.0.2.2:${listenPort}`].includes(req.headers.host)) return finish(403, {});
     const origin = req.headers.origin;
     if (origin && !origins.includes(origin)) return finish(403, {});
     if (origin) {

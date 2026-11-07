@@ -5,10 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/provider_usage.dart';
 import '../models/cloud_sync_status.dart';
+import '../services/provider_snapshot_store.dart';
 import '../services/provider_sync_service.dart';
 
 final providerSyncServiceFactoryProvider =
     Provider<ProviderSyncService Function()>((ref) => LoopbackProviderSync.new);
+
+final providerSnapshotStoreProvider = Provider<ProviderSnapshotStore>(
+  (ref) => FirestoreProviderSnapshotStore(),
+);
 
 final providerSyncServiceProvider = Provider<ProviderSyncService>((ref) {
   final service = ref.read(providerSyncServiceFactoryProvider)();
@@ -49,7 +54,40 @@ class ProviderSyncViewModel extends Notifier<ProviderSyncState> {
       _timer?.cancel();
       lifecycle.dispose();
     });
+    _watchAccount();
     return const ProviderSyncState();
+  }
+
+  /// The account's saved figures, shown whenever no direct pairing is live.
+  ProviderSnapshot? _cloud;
+
+  void _watchAccount() {
+    final uid = ref.read(cloudOwnerProvider);
+    if (uid == null) return;
+    try {
+      final sub = ref.read(providerSnapshotStoreProvider).watch(uid).listen(
+        (saved) {
+          _cloud = saved;
+          if (saved == null || !ref.mounted || state.enabled) return;
+          state = ProviderSyncState(snapshot: saved, error: state.error);
+        },
+        // Offline or unreadable: keep whatever is already shown.
+        onError: (Object _) {},
+      );
+      ref.onDispose(sub.cancel);
+    } catch (_) {
+      // Firestore unavailable (e.g. not initialised): nothing to show yet.
+    }
+  }
+
+  Future<void> _save(ProviderSnapshot snapshot) async {
+    final uid = ref.read(cloudOwnerProvider);
+    if (uid == null) return;
+    try {
+      await ref.read(providerSnapshotStoreProvider).save(uid, snapshot);
+    } catch (_) {
+      // Keep showing live data; the next refresh retries the save.
+    }
   }
 
   Future<void> connect(String token) async {
@@ -110,6 +148,7 @@ class ProviderSyncViewModel extends Notifier<ProviderSyncState> {
         enabled: true,
         snapshot: ProviderSnapshot(next.collectedAt, List.unmodifiable(rows)),
       );
+      unawaited(_save(next));
       assert(() {
         debugPrint(
           'Provider sync: ${rows.where((r) => r.status == 'ready').length} ready sources; '
@@ -118,6 +157,10 @@ class ProviderSyncViewModel extends Notifier<ProviderSyncState> {
         return true;
       }());
     } catch (error) {
+      assert(() {
+        debugPrint('Provider sync failed: $error');
+        return true;
+      }());
       if (!ref.mounted || epoch != _epoch) return;
       state = ProviderSyncState(
         enabled: true,
@@ -133,7 +176,7 @@ class ProviderSyncViewModel extends Notifier<ProviderSyncState> {
     _epoch++;
     _timer?.cancel();
     _token = null;
-    state = const ProviderSyncState();
+    state = ProviderSyncState(snapshot: _cloud);
   }
 }
 

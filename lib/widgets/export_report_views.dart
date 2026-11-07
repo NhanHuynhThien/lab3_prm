@@ -27,9 +27,7 @@ class ExportReportPeriodSelector extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppSpace.xs),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
+        ActionButtons(
           children:
               [
                 'Tháng này',
@@ -38,14 +36,10 @@ class ExportReportPeriodSelector extends StatelessWidget {
                 'Toàn bộ dữ liệu',
               ].map((p) {
                 final isSelected = selectedPeriod == p;
-                return ChoiceChip(
-                  label: Text(p),
+                return SelectionButton(
+                  label: p,
                   selected: isSelected,
-                  onSelected: isWorking
-                      ? null
-                      : (val) {
-                          if (val) onSelected(p);
-                        },
+                  onPressed: isWorking ? null : () => onSelected(p),
                 );
               }).toList(),
         ),

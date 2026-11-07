@@ -10,6 +10,10 @@ Inter; primary#006C49,background#FAF8FF,mint#E8F7EF; radius20/12; spacing4/8/12/
 
 | Ngày | Thay đổi | Lý do / giới hạn |
 |---|---|---|
+|07/11|Companion desktop dùng Inter/green/mint TokenLedger, tài khoản, consent, trạng thái nguồn và nút đồng bộ. Mobile thay hướng dẫn terminal bằng quy trình cài app desktop|Giảm thao tác thiết lập theo yêu cầu user|
+|07/11|Dàn đều nhóm nút theo chiều rộng, đồng bộ chiều cao nút chính/nút viền/bộ lọc, CTA đơn rộng hết card. Các nhóm nút và bộ lọc xuống hàng khi chữ lớn|Theo ảnh và phản hồi user ở nhiều màn. Kiểm tra toàn bộ widget suite và máy ảo|
+|07/11|Tinh gọn Tổng quan còn số liệu chính, xu hướng và phiên gần đây. Ngân sách hiện khi đã đặt, biểu đồ hiện khi có chi phí hoặc dữ liệu chưa biết. Bỏ card hạn mức/mục đích và chỉ số tài khoản active khỏi Tổng quan|Theo phản hồi card trùng thông tin. Hạn mức và mục đích tiếp tục truy cập qua Tài khoản/Phân tích|
+|07/11|Tổng quan sổ thủ công đặt nút Ghi sử dụng cùng hàng với bộ chọn kỳ, chia chiều rộng trong khung và xuống dòng nhãn khi chữ lớn|Theo ảnh và yêu cầu user. Kiểm tra layout ở các chiều rộng và cỡ chữ bằng widget test|
 |19–21/10|StudentPay→TokenLedger, token hexagon brand; expense→usage,category→9purposes,bills→accounts/quota|Topic được user xác nhận giảng viên duyệt; mapping8màn giữ tại fidelity|
 |21/10|Account model/default purposes/timezone/cycle/source; multiple quota windows; data scope và history drilldown|Dữ liệu AI cần phân biệt model, kỳ, unknown và actual/manual cost|
 |21/10|DraftGuard, persistent controllers/Retry, SaveButton busy,48dp controls, ActionSurface focus/semantics, chart/legend responsive|Đọc được ở text2, giữ draft và tránh duplicate writes|

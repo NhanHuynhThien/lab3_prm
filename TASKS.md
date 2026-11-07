@@ -13,6 +13,8 @@ Cập nhật 04/11/2026. Đây là **file duy nhất điều khiển tiến đ�
 
 ## Công việc đã làm
 
+- [x] 07/11: Thêm Companion desktop Electron, cấu hình Firebase public tách khỏi Dart, đăng nhập trình duyệt, consent theo UID, đồng bộ/tạm dừng/đăng xuất và tùy chọn tự khởi động. Bộ cài và kết quả kiểm tra cập nhật sau khi chạy verification trong lượt này.
+
 - [x] Google login thật và workspace keyed theo UID; session change dispose state/listeners. Source: `lib/services/firebase_auth_service.dart`, `lib/widgets/auth_gate.dart`.
 - [x] Account/usage/quota CRUD và realtime Firestore owner rules; integer USD micros, unknown khác 0. Nghiệm thu native còn được tách dưới đây.
 - [x] Dashboard agent riêng, tổng quan token/nguồn/thời gian/mục đích; provider detail có nhãn nguồn và giới hạn dữ liệu.

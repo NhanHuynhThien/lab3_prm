@@ -208,6 +208,16 @@ service cloud.firestore {
         keys(request.resource.data.payload,['reportingTimezone']) && zone(request.resource.data.payload.reportingTimezone) &&
         receipt(uid,request.resource.data.lastOperationId,'settings',setting,'update',request.resource.data.revision);
     }
+    // Last companion snapshot (token/model/purpose aggregates as JSON text),
+    // so an account sees its figures on login without the companion running.
+    match /users/{uid}/provider_snapshots/{snapshot} {
+      allow read: if owner(uid);
+      allow create, update: if owner(uid) && snapshot == 'latest' &&
+        keys(request.resource.data,['ownerId','savedAt','json']) &&
+        request.resource.data.ownerId == uid && request.resource.data.savedAt == request.time &&
+        required(request.resource.data.json,600000);
+      allow delete: if owner(uid);
+    }
     match /users/{uid}/mutations/{op} {
       allow read: if owner(uid);
       allow create: if owner(uid) && id(op) &&

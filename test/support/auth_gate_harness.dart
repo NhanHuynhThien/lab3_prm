@@ -12,7 +12,6 @@ import 'package:token_ledger/services/firestore_ledger_repository.dart';
 import 'package:token_ledger/viewmodels/auth_viewmodel.dart';
 import 'package:token_ledger/viewmodels/cloud_ledger_viewmodel.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
-import 'package:token_ledger/viewmodels/provider_auto_connect.dart';
 import 'package:token_ledger/viewmodels/provider_sync_viewmodel.dart';
 import 'package:token_ledger/services/provider_sync_service.dart';
 
@@ -54,7 +53,6 @@ class AuthGateHarness {
     WidgetTester tester, {
     double width = 412,
     double scale = 1,
-    ProviderAutoConnect? autoConnect,
     ProviderSyncService Function()? providerSyncFactory,
   }) async {
     tester.view.physicalSize = Size(width, 800);
@@ -68,8 +66,6 @@ class AuthGateHarness {
     container = ProviderContainer(
       overrides: [
         authServiceProvider.overrideWithValue(service),
-        if (autoConnect != null)
-          providerAutoConnectProvider.overrideWithValue(autoConnect),
         if (providerSyncFactory != null)
           providerSyncServiceFactoryProvider.overrideWithValue(
             providerSyncFactory,

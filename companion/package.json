@@ -1,0 +1,78 @@
+{
+  "name": "tokenledger-companion",
+  "productName": "TokenLedger Companion",
+  "version": "0.1.0",
+  "description": "Đồng bộ số liệu CLI trên máy tính vào TokenLedger",
+  "private": true,
+  "license": "UNLICENSED",
+  "author": "TokenLedger",
+  "type": "module",
+  "main": "src/main.mjs",
+  "scripts": {
+    "prepare:runtime": "node scripts/prepare.mjs",
+    "start": "npm run prepare:runtime && electron .",
+    "test": "node --test test/*.test.mjs",
+    "test:smoke": "node scripts/smoke.mjs",
+    "build:mac": "npm run prepare:runtime && electron-builder --mac dmg --arm64",
+    "build:dir": "npm run prepare:runtime && electron-builder --mac dir --arm64",
+    "build:win": "npm run prepare:runtime && electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0",
+    "playwright": "1.65.0"
+  },
+  "build": {
+    "appId": "com.tokenledger.companion.desktop",
+    "productName": "TokenLedger Companion",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "src/**/*",
+      "runtime/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "publish": null,
+    "mac": {
+      "category": "public.app-category.productivity",
+      "identity": null,
+      "icon": "assets/icon.png",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "sign": false,
+      "title": "TokenLedger Companion",
+      "contents": [
+        {
+          "x": 140,
+          "y": 160
+        },
+        {
+          "x": 420,
+          "y": 160,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

@@ -117,14 +117,9 @@ class DashboardBalanceCard extends StatelessWidget {
 }
 
 class DashboardMetricsCard extends StatelessWidget {
-  const DashboardMetricsCard({
-    super.key,
-    required this.summary,
-    required this.activeAccountsCount,
-  });
+  const DashboardMetricsCard({super.key, required this.summary});
 
   final UsageSummary summary;
-  final int activeAccountsCount;
 
   @override
   Widget build(BuildContext context) => Panel(
@@ -147,27 +142,23 @@ class DashboardMetricsCard extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        const Divider(),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: DashboardMetric('Phiên sử dụng', '${summary.count}'),
-            ),
-            Expanded(
-              child: DashboardMetric(
-                'Tài khoản active',
-                '$activeAccountsCount',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         Text(
-          '${summary.unknownCost} phiên chưa biết chi phí · ${summary.unknownTokens} phiên chưa biết token',
+          '${summary.count} phiên sử dụng',
           style: Theme.of(context).textTheme.bodySmall,
         ),
+        if (summary.unknownCost > 0 || summary.unknownTokens > 0) ...[
+          const SizedBox(height: 4),
+          Text(
+            [
+              if (summary.unknownCost > 0)
+                '${summary.unknownCost} phiên chưa biết chi phí',
+              if (summary.unknownTokens > 0)
+                '${summary.unknownTokens} phiên chưa biết token',
+            ].join(' · '),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
       ],
     ),
   );

@@ -42,10 +42,13 @@ class ProductPdfStorageCard extends ConsumerWidget {
             style: TextStyle(fontSize: 12, color: AppColors.muted),
           ),
           const SizedBox(height: AppSpace.md),
-          FilledButton.icon(
-            onPressed: () => ExportReportDialog.show(context),
-            icon: const Icon(Icons.file_download_outlined, size: 18),
-            label: const Text('Xuất báo cáo PDF'),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => ExportReportDialog.show(context),
+              icon: const Icon(Icons.file_download_outlined, size: 18),
+              label: const Text('Xuất báo cáo PDF'),
+            ),
           ),
           if (reports.isNotEmpty) ...[
             const SizedBox(height: AppSpace.md),

@@ -153,7 +153,7 @@ ThemeData buildAppTheme() {
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(48, AppSpace.button),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         textStyle: base.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
@@ -164,7 +164,8 @@ ThemeData buildAppTheme() {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        minimumSize: const Size(48, AppSpace.touch),
+        minimumSize: const Size(48, AppSpace.button),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         foregroundColor: AppColors.text,
         side: const BorderSide(color: AppColors.border),
         shape: RoundedRectangleBorder(

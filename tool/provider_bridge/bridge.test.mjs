@@ -117,6 +117,7 @@ test('bridge auth/origin/host boundaries and concurrent refresh coalescing', asy
   try {
     assert.equal((await request()).status, 401);
     assert.equal((await request({ Host: 'evil.test' })).status, 403);
+    assert.equal((await request({ Host: `10.0.2.2:${server.address().port}` })).status, 401);
     assert.equal((await request({ Origin: 'https://evil.test', Authorization: `Bearer ${token}` })).status, 403);
     assert.equal(calls, 0);
     const headers = { Origin: 'http://localhost:4183', Authorization: `Bearer ${token}` };

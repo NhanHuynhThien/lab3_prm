@@ -10,6 +10,7 @@ import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
 import 'export_report_views.dart';
+import 'action_buttons.dart';
 
 class ExportReportDialog extends ConsumerStatefulWidget {
   const ExportReportDialog({super.key});
@@ -139,16 +140,12 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
   }
 
   Widget _buildActions(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.end,
-      spacing: 8,
-      runSpacing: 8,
+    return ActionButtons(
       children: [
         TextButton(
           onPressed: _isWorking ? null : () => Navigator.pop(context),
           child: Text(_completedReport != null ? 'Đóng' : 'Hủy'),
         ),
-        const SizedBox(width: AppSpace.sm),
         if (_completedReport == null) ...[
           FilledButton.icon(
             onPressed: _isWorking ? null : _generate,

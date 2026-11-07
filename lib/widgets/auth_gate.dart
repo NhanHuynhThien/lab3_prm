@@ -10,7 +10,6 @@ import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/cloud_ledger_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
-import '../viewmodels/provider_auto_connect.dart';
 import '../viewmodels/provider_sync_viewmodel.dart';
 import 'common.dart';
 import 'cloud_sync_banner.dart';
@@ -92,19 +91,6 @@ class _WorkspaceScope extends StatefulWidget {
 }
 
 class _WorkspaceScopeState extends State<_WorkspaceScope> {
-  @override
-  void initState() {
-    super.initState();
-    final pairing = widget.parent.read(providerAutoConnectProvider);
-    if (pairing.permits(widget.user)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _container.read(providerSyncProvider.notifier).connect(pairing.token);
-        }
-      });
-    }
-  }
-
   late final _container = ProviderContainer(
     overrides: [
       platformApiProvider.overrideWithValue(

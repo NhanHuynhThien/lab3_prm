@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/provider_usage.dart';
@@ -10,24 +11,40 @@ abstract interface class ProviderSyncService {
 }
 
 class LoopbackProviderSync implements ProviderSyncService {
-  LoopbackProviderSync({http.Client? client})
-    : _client = client ?? http.Client();
+  LoopbackProviderSync({http.Client? client, List<Uri>? endpoints})
+    : _client = client ?? http.Client(),
+      endpoints = endpoints ?? defaultEndpoints;
   final http.Client _client;
-  static final endpoint = Uri.parse('http://127.0.0.1:8787/v1/snapshot');
+  final List<Uri> endpoints;
+
+  /// 127.0.0.1 works with `adb reverse` or on the host itself; the Android
+  /// emulator also reaches the Mac's loopback as 10.0.2.2 without it.
+  static List<Uri> get defaultEndpoints => [
+    Uri.parse('http://127.0.0.1:8787/v1/snapshot'),
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
+      Uri.parse('http://10.0.2.2:8787/v1/snapshot'),
+  ];
 
   @override
   Future<ProviderSnapshot> fetch(String pairingToken) async {
-    try {
-      return await _fetch(pairingToken).timeout(const Duration(seconds: 30));
-    } catch (error) {
-      if (error is ProviderSyncFailure) rethrow;
-      throw const ProviderSyncFailure(
-        'Chưa kết nối được nguồn trên máy. Kiểm tra companion và thử lại.',
-      );
+    for (final endpoint in endpoints) {
+      try {
+        return await _fetch(
+          endpoint,
+          pairingToken,
+        ).timeout(const Duration(seconds: 30));
+      } on ProviderSyncFailure {
+        rethrow;
+      } catch (_) {
+        // Unreachable endpoint: try the next one before reporting.
+      }
     }
+    throw const ProviderSyncFailure(
+      'Chưa kết nối được nguồn trên máy. Kiểm tra companion và thử lại.',
+    );
   }
 
-  Future<ProviderSnapshot> _fetch(String pairingToken) async {
+  Future<ProviderSnapshot> _fetch(Uri endpoint, String pairingToken) async {
     if (!RegExp(r'^[a-f0-9]{64}$').hasMatch(pairingToken)) {
       throw const ProviderSyncFailure('Mã ghép nối cần đủ 64 ký tự hex.');
     }

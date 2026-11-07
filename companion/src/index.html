@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>TokenLedger Companion</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="renderer.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand">
+          <img src="../assets/mark.svg" alt="" width="44" height="44" />
+          <div>
+            <strong>TokenLedger</strong><span>Companion cho máy tính</span>
+          </div>
+        </div>
+        <span id="status" class="badge" role="status">Đang khởi động</span>
+      </header>
+      <section class="intro">
+        <h1>Số liệu trên máy.<br />Liền mạch với điện thoại.</h1>
+        <p>
+          Kết nối một lần để đồng bộ token, model và mục đích sử dụng từ các
+          nguồn AI trên máy này.
+        </p>
+      </section>
+      <section class="account panel">
+        <div class="account-icon" aria-hidden="true">G</div>
+        <div class="account-copy">
+          <h2 id="account-title">Kết nối tài khoản của bạn</h2>
+          <p id="account-detail">
+            Dùng cùng tài khoản Google với ứng dụng TokenLedger.
+          </p>
+        </div>
+        <button id="disconnect" class="link" hidden>Đăng xuất</button>
+      </section>
+      <div class="columns">
+        <section class="panel setup">
+          <h2 id="setup-title">Bắt đầu đồng bộ</h2>
+          <p class="muted" id="setup-description">
+            Đăng nhập trong trình duyệt của bạn, sau đó quay lại đây.
+          </p>
+          <label class="check"
+            ><input id="consent" type="checkbox" /><span
+              >Tôi đồng ý đồng bộ số liệu tổng hợp từ máy này vào tài khoản
+              TokenLedger.</span
+            ></label
+          >
+          <label class="check"
+            ><input id="auto-start" type="checkbox" /><span
+              >Tự mở Companion khi đăng nhập máy tính</span
+            ></label
+          >
+          <button id="connect" class="primary">
+            <img
+              src="../assets/google-g.png"
+              alt=""
+              width="20"
+              height="20"
+            /><span>Đăng nhập Google</span>
+          </button>
+          <div id="controls" class="actions" hidden>
+            <button id="sync" class="primary">Đồng bộ ngay</button
+            ><button id="pause" class="secondary">Tạm dừng</button>
+          </div>
+          <p id="error" class="error" role="alert" hidden></p>
+          <p id="login-note" class="muted note" hidden>
+            Hoàn tất đăng nhập trong trình duyệt. Cửa sổ này sẽ tự cập nhật.
+          </p>
+        </section>
+        <section class="panel sources">
+          <h2>Nguồn trên máy này</h2>
+          <ul id="sources">
+            <li data-source="codex">
+              <span>Codex</span><span class="source-status">Chờ đồng bộ</span>
+            </li>
+            <li data-source="claude">
+              <span>Claude Code</span
+              ><span class="source-status">Chờ đồng bộ</span>
+            </li>
+            <li data-source="google">
+              <span>Gemini CLI</span
+              ><span class="source-status">Chờ đồng bộ</span>
+            </li>
+            <li data-source="antigravity">
+              <span>Antigravity</span
+              ><span class="source-status">Chờ đồng bộ</span>
+            </li>
+          </ul>
+          <div class="last-sync">
+            <span>Đồng bộ gần nhất</span
+            ><strong id="last-sync">Chưa đồng bộ</strong>
+          </div>
+        </section>
+      </div>
+      <footer>
+        <span class="privacy-icon" aria-hidden="true">↗</span>
+        <p>
+          Đồng bộ mỗi 5 phút khi máy đang hoạt động. Nội dung hội thoại và ghi
+          chú được giữ trên máy. Đóng cửa sổ để tiếp tục chạy ở thanh menu.
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

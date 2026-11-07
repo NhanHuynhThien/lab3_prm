@@ -148,6 +148,29 @@ void main() {
                   isNull,
                   reason: '${entry.key} initial',
                 );
+                if (entry.key == 'dashboard') {
+                  final action = find.ancestor(
+                    of: find.text('Ghi sử dụng'),
+                    matching: find.byWidgetPredicate((w) => w is FilledButton),
+                  );
+                  final actionRect = tester.getRect(action);
+                  final rangeRect = tester.getRect(find.byType(RangePicker));
+                  expect(
+                    actionRect.center.dy,
+                    closeTo(rangeRect.center.dy, 0.1),
+                  );
+                  expect(actionRect.height, closeTo(rangeRect.height, 0.1));
+                  expect(actionRect.width, closeTo(rangeRect.width, 0.1));
+                  expect(actionRect.left, greaterThanOrEqualTo(0));
+                  expect(rangeRect.right, lessThanOrEqualTo(width));
+                  expect(
+                    find.descendant(
+                      of: find.byType(FilterBar),
+                      matching: find.byType(SingleChildScrollView),
+                    ),
+                    findsNothing,
+                  );
+                }
                 if (find.byType(AppBar).evaluate().isNotEmpty) {
                   final bar = tester.getRect(find.byType(AppBar));
                   final title = tester.getRect(

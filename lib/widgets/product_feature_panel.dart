@@ -66,26 +66,29 @@ class ProductFeaturePanel extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: AppSpace.md),
-              OutlinedButton.icon(
-                key: const ValueKey('refresh-product-config'),
-                onPressed: config.refreshing
-                    ? null
-                    : () async {
-                        final success = await ref
-                            .read(productFeaturesProvider.notifier)
-                            .refreshConfig();
-                        if (context.mounted) {
-                          showMessage(
-                            context,
-                            success ? 'Đã lấy cấu hình khả dụng.' : 'Chưa lấy được cấu hình. Giá trị cũ được giữ.',
-                          );
-                        }
-                      },
-                icon: const Icon(Icons.refresh),
-                label: Text(
-                  config.refreshing
-                      ? 'Đang lấy cấu hình...'
-                      : 'Làm mới cấu hình',
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  key: const ValueKey('refresh-product-config'),
+                  onPressed: config.refreshing
+                      ? null
+                      : () async {
+                          final success = await ref
+                              .read(productFeaturesProvider.notifier)
+                              .refreshConfig();
+                          if (context.mounted) {
+                            showMessage(
+                              context,
+                              success ? 'Đã lấy cấu hình khả dụng.' : 'Chưa lấy được cấu hình. Giá trị cũ được giữ.',
+                            );
+                          }
+                        },
+                  icon: const Icon(Icons.refresh),
+                  label: Text(
+                    config.refreshing
+                        ? 'Đang lấy cấu hình...'
+                        : 'Làm mới cấu hình',
+                  ),
                 ),
               ),
               const SizedBox(height: AppSpace.md),
@@ -160,9 +163,7 @@ class ProductFeaturePanel extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: AppSpace.md),
-              Wrap(
-                spacing: 12,
-                runSpacing: 8,
+              ActionButtons(
                 children: [
                   FilledButton.icon(
                     onPressed: () => NotificationCenterSheet.show(context),
