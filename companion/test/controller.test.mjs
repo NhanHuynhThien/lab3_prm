@@ -23,7 +23,7 @@ function harness(overrides = {}) {
     },
     sync: async (uid) => {
       calls.push(`sync:${uid}`);
-      return ["codex"];
+      return { providers: ["codex"], published: true };
     },
     logout: async () => {
       calls.push("logout");
@@ -96,7 +96,7 @@ test("concurrent sync requests share one call and logout waits for it", async ()
   const second = h.controller.sync();
   const disconnected = h.controller.disconnect();
   assert.deepEqual(h.calls, ["sync:A"]);
-  finish(["codex"]);
+  finish({ providers: ["codex"], published: true });
   await Promise.all([first, second, disconnected]);
   assert.deepEqual(h.calls, ["sync:A", "startup:false", "logout"]);
   assert.equal(h.controller.state.account, null);
@@ -110,7 +110,7 @@ test("a synchronous collection failure can be retried without a stuck lock", asy
   const h = harness({
     sync: () => {
       if (++attempts === 1) throw new Error("offline");
-      return ["claude"];
+      return { providers: ["claude"], published: true };
     },
   });
   await h.controller.initialize();
@@ -165,7 +165,7 @@ test("a usage change during an upload schedules one latest token refresh", async
         await new Promise((resolve) => {
           finish = resolve;
         });
-      return ["codex"];
+      return { providers: ["codex"], published: true };
     },
   });
   await h.controller.initialize();
@@ -193,7 +193,7 @@ test("failed realtime uploads retry and closing disposes the watcher", async () 
     watchChanges: () => ({ close: () => closed++ }),
     sync: async () => {
       if (++attempts === 1) throw new Error("offline");
-      return ["claude"];
+      return { providers: ["claude"], published: true };
     },
   });
   await h.controller.initialize();
@@ -207,64 +207,101 @@ test("failed realtime uploads retry and closing disposes the watcher", async () 
   assert.equal(closed, 1);
 });
 
-test("sync interval defaults to five seconds and restores a saved choice", async () => {
-  const fresh = harness();
-  await fresh.controller.initialize();
-  assert.equal(fresh.controller.state.syncIntervalMs, 5000);
-  await fresh.controller.close();
-  const restored = harness({
-    readPreferences: async () => ({ uid: "A", syncIntervalMs: 30000 }),
-  });
-  await restored.controller.initialize();
-  assert.equal(restored.controller.state.syncIntervalMs, 30000);
-  await restored.controller.close();
-});
-
-test("changing an active sync window reconfigures the watcher and validates input", async () => {
-  const windows = [];
-  let closed = 0;
+test("legacy timing preferences are ignored and the watcher uses internal defaults", async () => {
+  let options;
   const h = harness({
-    watchChanges: (_changed, options) => {
-      windows.push(options);
-      return { close: () => closed++ };
+    readPreferences: async () => ({ uid: "A", syncIntervalMs: 30000 }),
+    watchChanges: (_changed, value) => {
+      options = value;
+      return { close() {} };
     },
   });
   await h.controller.initialize();
   await h.controller.connect({ consent: true, autoStart: false });
-  assert.equal(windows[0].maxWaitMs, 5000);
-  await h.controller.setSyncInterval(2000);
-  assert.equal(windows[1].debounceMs, 2000);
-  assert.equal(windows[1].maxWaitMs, 2000);
-  assert.equal(h.preferences().syncIntervalMs, 2000);
-  await assert.rejects(h.controller.setSyncInterval(0), /chu kỳ/);
-  await assert.rejects(h.controller.setSyncInterval("2000"), /chu kỳ/);
-  assert.equal(windows.length, 2);
+  assert.equal(options, undefined);
+  assert.equal("syncIntervalMs" in h.controller.snapshot(), false);
+  assert.equal("syncIntervalMs" in h.preferences(), false);
   await h.controller.close();
-  assert.equal(closed, 2);
 });
 
-test("changing the window during an upload keeps the latest follow-up refresh", async () => {
-  let finish;
-  const modes = [];
+test("unchanged background refreshes leave visible state and last sync untouched", async () => {
+  let changed, finish;
   const h = harness({
-    watchChanges: () => ({ close() {} }),
-    sync: async (_uid, options) => {
-      modes.push(options.tokensOnly);
-      if (modes.length === 1)
-        await new Promise((resolve) => {
-          finish = resolve;
-        });
-      return ["codex"];
+    watchChanges: (callback) => {
+      changed = callback;
+      return { close() {} };
+    },
+    sync: () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  });
+  await h.controller.initialize();
+  h.controller.update({
+    enabled: true,
+    consent: true,
+    providers: ["codex"],
+    lastSyncedAt: "2026-11-01T00:00:00Z",
+  });
+  h.controller.schedule();
+  const before = h.controller.snapshot();
+  const events = [];
+  h.controller.on("change", (state) => events.push(state));
+  changed();
+  const pending = h.controller.pending;
+  await Promise.resolve();
+  assert.equal(h.controller.state.busy, false);
+  finish({ providers: ["codex"], published: false });
+  await pending;
+  assert.deepEqual(events, []);
+  assert.deepEqual(h.controller.snapshot(), before);
+  await h.controller.close();
+});
+
+test("new background data updates the last sync without showing a spinner", async () => {
+  const h = harness();
+  await h.controller.initialize();
+  h.controller.update({ enabled: true, consent: true, lastSyncedAt: null });
+  const events = [];
+  h.controller.on("change", (state) => events.push(state));
+  await h.controller.requestUsageSync();
+  assert.ok(h.controller.state.lastSyncedAt);
+  assert.deepEqual(h.controller.state.providers, ["codex"]);
+  assert.equal(events.length, 1);
+  assert.ok(events.every((state) => state.busy === false));
+  await h.controller.close();
+});
+
+test("manual sync shows progress and shares an already running background upload", async () => {
+  let finish,
+    calls = 0;
+  const h = harness({
+    sync: () => {
+      calls++;
+      return new Promise((resolve) => {
+        finish = resolve;
+      });
     },
   });
   await h.controller.initialize();
-  const connecting = h.controller.connect({ consent: true, autoStart: false });
-  while (!finish) await new Promise((resolve) => setImmediate(resolve));
-  await h.controller.setSyncInterval(10000);
-  finish();
-  await connecting;
-  while (h.controller.pending) await h.controller.pending;
-  assert.deepEqual(modes, [false, true]);
-  assert.equal(h.controller.state.syncIntervalMs, 10000);
+  h.controller.update({ consent: true });
+  const events = [];
+  h.controller.on("change", (state) => events.push(state.busy));
+  const background = h.controller.sync({ tokensOnly: true });
+  await Promise.resolve();
+  assert.equal(h.controller.state.busy, false);
+  const manual = h.controller.sync({ interactive: true });
+  assert.equal(h.controller.state.busy, true);
+  finish({ providers: [], published: false });
+  await Promise.all([background, manual]);
+  assert.equal(calls, 1);
+  assert.deepEqual(events, [true, false]);
+  const next = h.controller.sync({ interactive: true });
+  assert.equal(h.controller.state.busy, true);
+  await Promise.resolve();
+  finish({ providers: [], published: false });
+  await next;
+  assert.equal(calls, 2);
+  assert.equal(h.controller.state.busy, false);
   await h.controller.close();
 });

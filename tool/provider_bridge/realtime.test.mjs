@@ -200,13 +200,16 @@ test("cloud sync skips unchanged token snapshots, retries failed writes and rese
       },
     },
   );
-  await sync("A");
-  await sync("A", { tokensOnly: true });
+  assert.deepEqual(await sync("A"), { providers: ["codex"], published: true });
+  assert.deepEqual(await sync("A", { tokensOnly: true }), {
+    providers: ["codex"],
+    published: false,
+  });
   assert.equal(writes, 1);
   amount = 20;
   fail = true;
   await assert.rejects(sync("A", { tokensOnly: true }), /offline/);
-  await sync("A", { tokensOnly: true });
+  assert.equal((await sync("A", { tokensOnly: true })).published, true);
   assert.equal(writes, 3);
   await sync("B", { tokensOnly: true });
   assert.equal(full, 2);

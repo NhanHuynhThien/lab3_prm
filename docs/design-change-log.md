@@ -28,7 +28,7 @@ Inter; primary#006C49,background#FAF8FF,mint#E8F7EF; radius20/12; spacing4/8/12/
 |05/11|Lịch sử thêm bộ lọc dạng nút, nút đang lọc nền mint viền primary; Cá nhân gom Remote Config/Analytics vào mục thu gọn "Thông tin kỹ thuật"; biểu đồ vòng dùng 5 màu token (primary/amber/accent/chartSecondary/chartTertiary), bỏ `disabled` quá nhạt; picker tiếng Việt|Theo đánh giá UX: lọc đúng luồng README, giảm chữ kỹ thuật, phân biệt mục đích rõ hơn. Chưa annotate Figma|
 |22/10|Panel đổi Material, lazyvisitedtabs/Offstage/TickerMode, fade180ms/chart280ms, bỏ IntrinsicHeight/loop/blur|Sửa Ink/ListTile assertion và giảm layout/animation work; reduced motion giữ đúng|
 
-Provider asset provenance tại [assets/providers](../assets/providers/README.md), Google button tại [assets/auth](../assets/auth/README.md). Custom Flutter Google button, không claim SDK-rendered hoặc đã được Google duyệt.
+Provider asset provenance tại [assets/providers](../assets/README.md#provider-marks), Google button tại [assets/auth](../assets/README.md#google-sign-in-asset). Custom Flutter Google button, không claim SDK-rendered hoặc đã được Google duyệt.
 
 ## Fidelity và performance còn phải nghiệm thu
 

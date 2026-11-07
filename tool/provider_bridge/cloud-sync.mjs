@@ -31,7 +31,9 @@ export function createCloudSync(
       snapshot = null;
       digest = null;
     }
-    let next, nextDigest;
+    let next,
+      nextDigest,
+      published = false;
     const providers = await write(config, {
       expectedUid: uid,
       collect: async () => {
@@ -39,11 +41,14 @@ export function createCloudSync(
         nextDigest = snapshotDigest(next);
         return next;
       },
-      shouldWrite: () => !tokensOnly || nextDigest !== digest,
+      shouldWrite: () => {
+        published = !tokensOnly || nextDigest !== digest;
+        return published;
+      },
     });
     // Failed writes never replace the last successfully published baseline.
     snapshot = next;
     digest = nextDigest;
-    return providers;
+    return { providers, published };
   };
 }

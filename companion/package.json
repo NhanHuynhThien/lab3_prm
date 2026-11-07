@@ -1,7 +1,7 @@
 {
   "name": "tokenledger-companion",
   "productName": "TokenLedger Companion",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "Đồng bộ số liệu CLI trên máy tính vào TokenLedger",
   "private": true,
   "license": "UNLICENSED",

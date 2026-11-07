@@ -206,13 +206,6 @@ class _ConnectionsState extends ConsumerState<ProviderConnectionsScreen> {
             ],
           const GeminiWebImportPanel(),
           const SizedBox(height: 16),
-          const Panel(
-            child: Text(
-              'Claude cần bật status line theo file do node tool/provider_bridge/setup.mjs tạo. '
-              'Gemini CLI cần lịch sử phiên; Antigravity dùng agy /usage. '
-              'Chưa có nguồn sẽ hiện “Cần kết nối nguồn”, không dùng dữ liệu mẫu.',
-            ),
-          ),
         ],
       ),
     );

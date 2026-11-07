@@ -66,8 +66,8 @@ export function watchUsageChanges(
   onChange,
   {
     directories = roots(),
-    debounceMs = 1000,
-    maxWaitMs = 3000,
+    debounceMs = 250,
+    maxWaitMs = 1000,
     pollMs = 10_000,
     watchImpl = watch,
   } = {},

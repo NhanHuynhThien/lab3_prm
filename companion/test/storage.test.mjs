@@ -29,16 +29,21 @@ test("preferences remain owner-scoped, validate fields and use private file mode
   }
 });
 
-test("sync window is persisted, and invalid legacy settings use the default", async () => {
+test("legacy interval fields do not override background sync or discard consent", async () => {
   const root = await mkdtemp(join(tmpdir(), "tokenledger-preferences-"));
   try {
     const store = preferencesStore(root);
-    await store.write({ syncIntervalMs: 10000 });
-    assert.equal((await store.read()).syncIntervalMs, 10000);
-    await store.write({ syncIntervalMs: 1 });
-    assert.equal((await store.read()).syncIntervalMs, 5000);
-    await store.write({});
-    assert.equal((await store.read()).syncIntervalMs, 5000);
+    await store.write({
+      uid: "A",
+      consent: true,
+      enabled: true,
+      syncIntervalMs: 30000,
+    });
+    const preferences = await store.read();
+    assert.equal(preferences.uid, "A");
+    assert.equal(preferences.consent, true);
+    assert.equal(preferences.enabled, true);
+    assert.equal("syncIntervalMs" in preferences, false);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

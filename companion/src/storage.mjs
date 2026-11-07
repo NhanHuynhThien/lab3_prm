@@ -1,7 +1,6 @@
 import { readFile, writeFile, rename, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { normalizeSyncInterval } from "./settings.mjs";
 
 export function preferencesStore(directory) {
   const file = join(directory, "preferences.json");
@@ -11,7 +10,6 @@ export function preferencesStore(directory) {
         const value = JSON.parse(await readFile(file, "utf8"));
         return {
           uid: typeof value.uid === "string" ? value.uid : null,
-          syncIntervalMs: normalizeSyncInterval(value.syncIntervalMs),
           enabled: value.enabled === true,
           consent: value.consent === true,
           lastSyncedAt:
@@ -29,7 +27,6 @@ export function preferencesStore(directory) {
         return {
           enabled: false,
           consent: false,
-          syncIntervalMs: normalizeSyncInterval(),
         };
       }
     },

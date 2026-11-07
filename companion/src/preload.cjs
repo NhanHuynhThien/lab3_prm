@@ -5,7 +5,6 @@ contextBridge.exposeInMainWorld("companion", {
   status: () => invoke("status"),
   connect: (value) => invoke("connect", value),
   sync: () => invoke("sync"),
-  syncInterval: (milliseconds) => invoke("sync-interval", milliseconds),
   pause: () => invoke("pause"),
   resume: () => invoke("resume"),
   disconnect: () => invoke("disconnect"),

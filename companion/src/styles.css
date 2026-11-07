@@ -249,37 +249,21 @@ li > span:first-child {
 .source-status.ready {
   color: #006c49;
 }
-.last-sync {
+.clock {
   border-top: 1px solid #e8ece9;
   padding-top: 14px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.last-sync > span {
+.clock > span {
   font-size: 11px;
   color: #52625c;
 }
-.last-sync strong {
+.clock time {
   font-size: 12px;
   font-weight: 550;
   font-variant-numeric: tabular-nums;
-}
-footer {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 18px;
-  color: #52625c;
-  font-size: 11px;
-}
-.privacy-icon {
-  color: #006c49;
-  font-size: 20px;
-  line-height: 1.2;
-}
-footer p {
-  max-width: 650px;
 }
 [hidden] {
   display: none !important;
@@ -305,29 +289,4 @@ footer p {
   * {
     transition: none !important;
   }
-}
-
-.interval-setting {
-  display: grid;
-  gap: 6px;
-  margin: 18px 0;
-}
-.interval-setting label {
-  font-size: 12px;
-  font-weight: 600;
-}
-.interval-setting select {
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
-  border: 1px solid #a4b2aa;
-  border-radius: 10px;
-  background: white;
-  color: #131b2e;
-  font: inherit;
-  cursor: pointer;
-}
-.interval-setting select:focus-visible {
-  outline: 3px solid #80c4a8;
-  outline-offset: 3px;
 }

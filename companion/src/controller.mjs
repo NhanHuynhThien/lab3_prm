@@ -1,9 +1,4 @@
 import { EventEmitter } from "node:events";
-import {
-  DEFAULT_SYNC_INTERVAL_MS,
-  isSyncInterval,
-  normalizeSyncInterval,
-} from "./settings.mjs";
 
 export class CompanionController extends EventEmitter {
   constructor(dependencies) {
@@ -11,7 +6,6 @@ export class CompanionController extends EventEmitter {
     this.d = dependencies;
     this.state = {
       account: null,
-      syncIntervalMs: DEFAULT_SYNC_INTERVAL_MS,
       enabled: false,
       consent: false,
       busy: false,
@@ -41,7 +35,6 @@ export class CompanionController extends EventEmitter {
   async persist() {
     await this.d.writePreferences({
       uid: this.state.account?.uid ?? null,
-      syncIntervalMs: this.state.syncIntervalMs,
       enabled: this.state.enabled,
       consent: this.state.consent,
       lastSyncedAt: this.state.lastSyncedAt,
@@ -56,7 +49,6 @@ export class CompanionController extends EventEmitter {
     const sameOwner = account && preferences.uid === account.uid;
     this.update({
       account,
-      syncIntervalMs: normalizeSyncInterval(preferences.syncIntervalMs),
       consent: sameOwner && preferences.consent === true,
       lastSyncedAt: sameOwner ? (preferences.lastSyncedAt ?? null) : null,
       providers: sameOwner ? (preferences.providers ?? []) : [],
@@ -87,32 +79,14 @@ export class CompanionController extends EventEmitter {
   schedule() {
     this.stopSchedule();
     this.watcher =
-      this.d.watchChanges?.(
-        () => {
-          void this.requestUsageSync();
-        },
-        {
-          debounceMs: this.state.syncIntervalMs,
-          maxWaitMs: this.state.syncIntervalMs,
-          pollMs: Math.min(10_000, this.state.syncIntervalMs),
-        },
-      ) ?? null;
+      this.d.watchChanges?.(() => {
+        void this.requestUsageSync();
+      }) ?? null;
     this.watcher?.ready?.catch(() => {});
     this.timer = setInterval(() => {
       if (this.state.enabled) void this.sync();
     }, this.d.intervalMs ?? 300_000);
     this.timer.unref?.();
-  }
-  async setSyncInterval(milliseconds) {
-    if (!isSyncInterval(milliseconds))
-      throw new Error("Chọn chu kỳ 2, 5, 10 hoặc 30 giây.");
-    this.update({ syncIntervalMs: milliseconds });
-    await this.persist();
-    if (this.state.enabled && !this.closing) {
-      this.schedule();
-      if (this.pending) this.usageDirty = true;
-      else await this.requestUsageSync();
-    }
   }
   connect(options) {
     if (this.connecting) return this.connecting;
@@ -167,20 +141,34 @@ export class CompanionController extends EventEmitter {
     await this.persist();
     await this.pending;
   }
-  async sync({ tokensOnly = false } = {}) {
-    if (this.pending) return this.pending;
+  async sync({ tokensOnly = false, interactive = false } = {}) {
+    if (this.pending) {
+      if (interactive && !this.state.busy) this.update({ busy: true });
+      return this.pending;
+    }
     if (!this.state.account || !this.state.consent || this.closing) return;
     clearTimeout(this.retryTimer);
     const account = this.state.account;
-    this.update({ busy: true, error: null });
+    if (interactive) this.update({ busy: true, error: null });
     this.pending = Promise.resolve().then(async () => {
       try {
-        const providers = await this.d.sync(account.uid, { tokensOnly });
+        const { providers, published } = await this.d.sync(account.uid, {
+          tokensOnly,
+        });
         this.retryAttempt = 0;
-        this.update({ providers, lastSyncedAt: new Date().toISOString() });
-        await this.persist();
+        if (published) {
+          this.update({
+            providers,
+            lastSyncedAt: new Date().toISOString(),
+            error: null,
+          });
+          await this.persist();
+        } else if (this.state.error) {
+          this.update({ error: null });
+        }
       } catch (error) {
-        this.update({ error: error.message });
+        if (this.state.error !== error.message)
+          this.update({ error: error.message });
         if (this.state.enabled && !this.closing) {
           const wait =
             this.d.retryMs ??
@@ -193,7 +181,7 @@ export class CompanionController extends EventEmitter {
         }
       } finally {
         this.pending = null;
-        this.update({ busy: false });
+        if (this.state.busy) this.update({ busy: false });
         if (this.usageDirty && this.state.enabled && !this.closing) {
           this.usageDirty = false;
           queueMicrotask(() => {

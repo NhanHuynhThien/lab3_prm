@@ -2,7 +2,7 @@ import { _electron as electron } from "playwright";
 import assert from "node:assert/strict";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -51,18 +51,20 @@ try {
   }));
   assert.equal(bridge.node, "undefined");
   assert.ok(!bridge.actions.includes("loadSecret"));
-  const interval = window.getByLabel("Thời gian cập nhật token", {
-    exact: true,
-  });
-  assert.equal(await interval.inputValue(), "5000");
-  await interval.selectOption("2000");
+  assert.equal(await window.locator("#sync-interval").count(), 0);
+  assert.ok(!bridge.actions.includes("syncInterval"));
+  assert.equal(await window.locator("footer").count(), 0);
+  await window.getByText("Giờ hiện tại", { exact: true }).waitFor();
+  const clockBefore = await window.locator("#clock").textContent();
+  assert.ok(clockBefore);
   await window.waitForFunction(
-    async () => (await window.companion.status()).syncIntervalMs === 2000,
+    (previous) => document.getElementById("clock").textContent !== previous,
+    clockBefore,
+    { timeout: 5000 },
   );
-  await interval.selectOption("5000");
-  await window.waitForFunction(
-    async () => (await window.companion.status()).syncIntervalMs === 5000,
-  );
+  const clockTime = await window.locator("#clock").getAttribute("datetime");
+  assert.ok(Math.abs(Date.now() - Date.parse(clockTime)) < 3000);
+
   const consent = window.locator("#consent");
   if (await consent.isVisible()) {
     assert.equal(await window.locator("#connect").isDisabled(), true);
@@ -75,7 +77,7 @@ try {
     resolve(tmpdir(), "tokenledger-companion.png");
   await window.screenshot({ path: screenshot });
   console.log(
-    `PASS packaged app, consent controls, isolated renderer. Screenshot: ${screenshot}`,
+    `PASS packaged app, live clock, consent controls, isolated renderer. Screenshot: ${screenshot}`,
   );
 } finally {
   if (desktop) {

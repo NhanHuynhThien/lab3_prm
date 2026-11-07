@@ -113,7 +113,7 @@ else {
               await controller.connect(value);
               break;
             case "sync":
-              await controller.sync();
+              await controller.sync({ interactive: true });
               break;
             case "pause":
               await controller.pause();
@@ -123,9 +123,6 @@ else {
               break;
             case "disconnect":
               await controller.disconnect();
-              break;
-            case "sync-interval":
-              await controller.setSyncInterval(value);
               break;
             case "auto-start":
               await startup.set(value);
@@ -182,7 +179,7 @@ function publish() {
       {
         label: state.busy ? "Đang đồng bộ…" : "Đồng bộ ngay",
         enabled: !!state.account && state.consent && !state.busy,
-        click: () => void controller.sync(),
+        click: () => void controller.sync({ interactive: true }),
       },
       {
         label: state.enabled ? "Tạm dừng đồng bộ" : "Tiếp tục đồng bộ",
