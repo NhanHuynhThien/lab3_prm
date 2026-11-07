@@ -1,4 +1,9 @@
 import { EventEmitter } from "node:events";
+import {
+  DEFAULT_SYNC_INTERVAL_MS,
+  isSyncInterval,
+  normalizeSyncInterval,
+} from "./settings.mjs";
 
 export class CompanionController extends EventEmitter {
   constructor(dependencies) {
@@ -6,6 +11,7 @@ export class CompanionController extends EventEmitter {
     this.d = dependencies;
     this.state = {
       account: null,
+      syncIntervalMs: DEFAULT_SYNC_INTERVAL_MS,
       enabled: false,
       consent: false,
       busy: false,
@@ -19,6 +25,10 @@ export class CompanionController extends EventEmitter {
     this.timer = null;
     this.loginAbort = null;
     this.closing = false;
+    this.watcher = null;
+    this.usageDirty = false;
+    this.retryTimer = null;
+    this.retryAttempt = 0;
   }
 
   snapshot() {
@@ -31,6 +41,7 @@ export class CompanionController extends EventEmitter {
   async persist() {
     await this.d.writePreferences({
       uid: this.state.account?.uid ?? null,
+      syncIntervalMs: this.state.syncIntervalMs,
       enabled: this.state.enabled,
       consent: this.state.consent,
       lastSyncedAt: this.state.lastSyncedAt,
@@ -45,6 +56,7 @@ export class CompanionController extends EventEmitter {
     const sameOwner = account && preferences.uid === account.uid;
     this.update({
       account,
+      syncIntervalMs: normalizeSyncInterval(preferences.syncIntervalMs),
       consent: sameOwner && preferences.consent === true,
       lastSyncedAt: sameOwner ? (preferences.lastSyncedAt ?? null) : null,
       providers: sameOwner ? (preferences.providers ?? []) : [],
@@ -57,12 +69,50 @@ export class CompanionController extends EventEmitter {
       await this.enable();
     }
   }
-  schedule() {
+  stopSchedule() {
     clearInterval(this.timer);
+    clearTimeout(this.retryTimer);
+    this.watcher?.close();
+    this.watcher = null;
+    this.usageDirty = false;
+  }
+  requestUsageSync() {
+    if (!this.state.enabled || !this.state.consent || this.closing) return;
+    if (this.pending) {
+      this.usageDirty = true;
+      return this.pending;
+    }
+    return this.sync({ tokensOnly: true });
+  }
+  schedule() {
+    this.stopSchedule();
+    this.watcher =
+      this.d.watchChanges?.(
+        () => {
+          void this.requestUsageSync();
+        },
+        {
+          debounceMs: this.state.syncIntervalMs,
+          maxWaitMs: this.state.syncIntervalMs,
+          pollMs: Math.min(10_000, this.state.syncIntervalMs),
+        },
+      ) ?? null;
+    this.watcher?.ready?.catch(() => {});
     this.timer = setInterval(() => {
       if (this.state.enabled) void this.sync();
     }, this.d.intervalMs ?? 300_000);
     this.timer.unref?.();
+  }
+  async setSyncInterval(milliseconds) {
+    if (!isSyncInterval(milliseconds))
+      throw new Error("Chọn chu kỳ 2, 5, 10 hoặc 30 giây.");
+    this.update({ syncIntervalMs: milliseconds });
+    await this.persist();
+    if (this.state.enabled && !this.closing) {
+      this.schedule();
+      if (this.pending) this.usageDirty = true;
+      else await this.requestUsageSync();
+    }
   }
   connect(options) {
     if (this.connecting) return this.connecting;
@@ -105,31 +155,52 @@ export class CompanionController extends EventEmitter {
     await this.d.retireLegacyService();
     this.update({ enabled: true, error: null });
     await this.persist();
+    if (!this.state.enabled || this.closing) return;
+    this.retryAttempt = 0;
     this.schedule();
     await this.sync();
   }
   async pause() {
-    clearInterval(this.timer);
+    this.stopSchedule();
     this.timer = null;
     this.update({ enabled: false });
     await this.persist();
     await this.pending;
   }
-  async sync() {
+  async sync({ tokensOnly = false } = {}) {
     if (this.pending) return this.pending;
     if (!this.state.account || !this.state.consent || this.closing) return;
+    clearTimeout(this.retryTimer);
     const account = this.state.account;
     this.update({ busy: true, error: null });
     this.pending = Promise.resolve().then(async () => {
       try {
-        const providers = await this.d.sync(account.uid);
+        const providers = await this.d.sync(account.uid, { tokensOnly });
+        this.retryAttempt = 0;
         this.update({ providers, lastSyncedAt: new Date().toISOString() });
         await this.persist();
       } catch (error) {
         this.update({ error: error.message });
+        if (this.state.enabled && !this.closing) {
+          const wait =
+            this.d.retryMs ??
+            Math.min(30_000, 1000 * 2 ** Math.min(++this.retryAttempt, 5));
+          this.retryTimer = setTimeout(() => {
+            if (this.state.enabled && !this.closing)
+              void this.sync({ tokensOnly });
+          }, wait);
+          this.retryTimer.unref?.();
+        }
       } finally {
         this.pending = null;
         this.update({ busy: false });
+        if (this.usageDirty && this.state.enabled && !this.closing) {
+          this.usageDirty = false;
+          queueMicrotask(() => {
+            if (this.state.enabled && !this.closing)
+              void this.sync({ tokensOnly: true });
+          });
+        }
       }
     });
     return this.pending;
@@ -151,7 +222,7 @@ export class CompanionController extends EventEmitter {
   }
   async close() {
     this.closing = true;
-    clearInterval(this.timer);
+    this.stopSchedule();
     this.loginAbort?.abort();
     await this.connecting;
     await this.pending;

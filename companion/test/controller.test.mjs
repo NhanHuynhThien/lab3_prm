@@ -150,3 +150,121 @@ test("closing aborts an unfinished browser login and does not start sync", async
   await connecting;
   assert.deepEqual(h.calls, []);
 });
+
+test("a usage change during an upload schedules one latest token refresh", async () => {
+  let changed, finish;
+  const modes = [];
+  const h = harness({
+    watchChanges: (callback) => {
+      changed = callback;
+      return { close() {} };
+    },
+    sync: async (_uid, options) => {
+      modes.push(options.tokensOnly);
+      if (modes.length === 1)
+        await new Promise((resolve) => {
+          finish = resolve;
+        });
+      return ["codex"];
+    },
+  });
+  await h.controller.initialize();
+  const connecting = h.controller.connect({ consent: true, autoStart: false });
+  while (!finish) await new Promise((resolve) => setImmediate(resolve));
+  changed();
+  changed();
+  changed();
+  finish();
+  await connecting;
+  while (h.controller.pending) await h.controller.pending;
+  assert.deepEqual(modes, [false, true]);
+  await h.controller.pause();
+  changed();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(modes, [false, true]);
+  await h.controller.close();
+});
+
+test("failed realtime uploads retry and closing disposes the watcher", async () => {
+  let attempts = 0,
+    closed = 0;
+  const h = harness({
+    retryMs: 10,
+    watchChanges: () => ({ close: () => closed++ }),
+    sync: async () => {
+      if (++attempts === 1) throw new Error("offline");
+      return ["claude"];
+    },
+  });
+  await h.controller.initialize();
+  await h.controller.connect({ consent: true, autoStart: false });
+  const deadline = Date.now() + 1000;
+  while (attempts < 2 && Date.now() < deadline)
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(attempts, 2);
+  assert.equal(h.controller.state.error, null);
+  await h.controller.close();
+  assert.equal(closed, 1);
+});
+
+test("sync interval defaults to five seconds and restores a saved choice", async () => {
+  const fresh = harness();
+  await fresh.controller.initialize();
+  assert.equal(fresh.controller.state.syncIntervalMs, 5000);
+  await fresh.controller.close();
+  const restored = harness({
+    readPreferences: async () => ({ uid: "A", syncIntervalMs: 30000 }),
+  });
+  await restored.controller.initialize();
+  assert.equal(restored.controller.state.syncIntervalMs, 30000);
+  await restored.controller.close();
+});
+
+test("changing an active sync window reconfigures the watcher and validates input", async () => {
+  const windows = [];
+  let closed = 0;
+  const h = harness({
+    watchChanges: (_changed, options) => {
+      windows.push(options);
+      return { close: () => closed++ };
+    },
+  });
+  await h.controller.initialize();
+  await h.controller.connect({ consent: true, autoStart: false });
+  assert.equal(windows[0].maxWaitMs, 5000);
+  await h.controller.setSyncInterval(2000);
+  assert.equal(windows[1].debounceMs, 2000);
+  assert.equal(windows[1].maxWaitMs, 2000);
+  assert.equal(h.preferences().syncIntervalMs, 2000);
+  await assert.rejects(h.controller.setSyncInterval(0), /chu kỳ/);
+  await assert.rejects(h.controller.setSyncInterval("2000"), /chu kỳ/);
+  assert.equal(windows.length, 2);
+  await h.controller.close();
+  assert.equal(closed, 2);
+});
+
+test("changing the window during an upload keeps the latest follow-up refresh", async () => {
+  let finish;
+  const modes = [];
+  const h = harness({
+    watchChanges: () => ({ close() {} }),
+    sync: async (_uid, options) => {
+      modes.push(options.tokensOnly);
+      if (modes.length === 1)
+        await new Promise((resolve) => {
+          finish = resolve;
+        });
+      return ["codex"];
+    },
+  });
+  await h.controller.initialize();
+  const connecting = h.controller.connect({ consent: true, autoStart: false });
+  while (!finish) await new Promise((resolve) => setImmediate(resolve));
+  await h.controller.setSyncInterval(10000);
+  finish();
+  await connecting;
+  while (h.controller.pending) await h.controller.pending;
+  assert.deepEqual(modes, [false, true]);
+  assert.equal(h.controller.state.syncIntervalMs, 10000);
+  await h.controller.close();
+});

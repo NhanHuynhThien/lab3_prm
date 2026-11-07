@@ -1,8 +1,16 @@
+import { SYNC_INTERVALS, DEFAULT_SYNC_INTERVAL_MS } from "./settings.mjs";
 const el = (id) => document.getElementById(id);
 let latest;
 let working = false;
 let consentChoice = false;
 let autoStartChoice = true;
+for (const interval of SYNC_INTERVALS) {
+  const option = document.createElement("option");
+  option.value = String(interval.milliseconds);
+  option.textContent = interval.label;
+  el("sync-interval").append(option);
+}
+el("sync-interval").value = String(DEFAULT_SYNC_INTERVAL_MS);
 
 function render(state) {
   latest = state;
@@ -21,6 +29,12 @@ function render(state) {
   el("auto-start").checked =
     state.account && state.consent ? state.autoStart : autoStartChoice;
   el("auto-start").disabled = working || state.signingIn;
+  el("sync-interval").value = String(
+    state.syncIntervalMs ?? DEFAULT_SYNC_INTERVAL_MS,
+  );
+  el("sync-interval").disabled = working || state.signingIn;
+  el("interval-description").textContent =
+    `Gom thay đổi log trong ${(state.syncIntervalMs ?? DEFAULT_SYNC_INTERVAL_MS) / 1000} giây rồi gửi số liệu mới.`;
   el("connect").hidden = !!state.account && state.consent;
   el("connect").disabled = working || state.signingIn || !el("consent").checked;
   el("connect").querySelector("span").textContent = state.signingIn
@@ -40,7 +54,7 @@ function render(state) {
       ? "Đồng bộ tạm dừng"
       : "Bắt đầu đồng bộ";
   el("setup-description").textContent = active
-    ? "Companion cập nhật số liệu mỗi 5 phút và khi máy hoạt động trở lại."
+    ? "Token cập nhật khi log CLI thay đổi. Hạn mức được kiểm tra định kỳ."
     : state.consent
       ? "Bấm Tiếp tục để cập nhật tự động trở lại."
       : "Đăng nhập trong trình duyệt của bạn, sau đó quay lại đây.";
@@ -99,6 +113,10 @@ el("auto-start").addEventListener("change", () => {
   autoStartChoice = el("auto-start").checked;
   if (latest?.account && latest.consent)
     void run(() => window.companion.autoStart(autoStartChoice));
+});
+el("sync-interval").addEventListener("change", () => {
+  const milliseconds = Number(el("sync-interval").value);
+  void run(() => window.companion.syncInterval(milliseconds));
 });
 el("connect").addEventListener("click", () => {
   const options = {

@@ -13,7 +13,11 @@ Cập nhật 04/11/2026. Đây là **file duy nhất điều khiển tiến đ�
 
 ## Công việc đã làm
 
-- [x] 07/11: Thêm Companion desktop Electron, cấu hình Firebase public tách khỏi Dart, đăng nhập trình duyệt, consent theo UID, đồng bộ/tạm dừng/đăng xuất và tùy chọn tự khởi động. Bộ cài và kết quả kiểm tra cập nhật sau khi chạy verification trong lượt này.
+- [x] 07/11: Companion 0.1.2 thêm bộ chọn chu kỳ gom cập nhật token 2/5/10/30 giây, mặc định 5 giây, lưu lựa chọn qua lần mở app. Đổi chu kỳ khi đang upload vẫn giữ lượt cập nhật tiếp theo. Bản cũ trong Applications đã đưa vào Thùng rác theo yêu cầu. DMG 0.1.2 macOS arm64 đã tạo, 56 Node tests và smoke test trên app đóng gói pass, đã kiểm tra đổi 2/5 giây trong UI. User tự cài bản mới; bản local chưa ký/notarize.
+
+- [x] 07/11: Companion 0.1.1 theo dõi log usage, debounce 1–3 giây, gom thay đổi trong lúc đang gửi, tự retry và dừng watcher khi pause/logout. Token-only refresh giữ quota đã quan sát, cập nhật quota định kỳ 5 phút. Aggregate không đổi được bỏ qua để giảm ghi Firestore. Cần nghiệm thu latency với CLI và mạng thật.
+
+- [x] 07/11: Thêm Companion desktop Electron, cấu hình Firebase public tách khỏi Dart, đăng nhập trình duyệt, consent theo UID, đồng bộ/tạm dừng/đăng xuất và tùy chọn tự khởi động. Đã tạo DMG macOS Apple Silicon, 43 Node tests và 7 Flutter tests liên quan pass, analyze sạch, kiểm tra mở app đóng gói và renderer isolation pass. Android profile build/cài/mở trên emulator-5554 pass. Bản DMG local chưa ký/notarize; Windows và login/sync live bằng giao diện mới cần nghiệm thu riêng.
 
 - [x] Google login thật và workspace keyed theo UID; session change dispose state/listeners. Source: `lib/services/firebase_auth_service.dart`, `lib/widgets/auth_gate.dart`.
 - [x] Account/usage/quota CRUD và realtime Firestore owner rules; integer USD micros, unknown khác 0. Nghiệm thu native còn được tách dưới đây.

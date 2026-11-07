@@ -9,7 +9,7 @@
     />
     <title>TokenLedger Companion</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="renderer.js" defer></script>
+    <script src="renderer.js" type="module"></script>
   </head>
   <body>
     <main>
@@ -56,6 +56,16 @@
               >Tự mở Companion khi đăng nhập máy tính</span
             ></label
           >
+          <div class="interval-setting">
+            <label for="sync-interval">Thời gian cập nhật token</label>
+            <select
+              id="sync-interval"
+              aria-describedby="interval-description"
+            ></select>
+            <p id="interval-description" class="muted">
+              Gom thay đổi log trong 5 giây rồi gửi số liệu mới.
+            </p>
+          </div>
           <button id="connect" class="primary">
             <img
               src="../assets/google-g.png"
@@ -101,8 +111,9 @@
       <footer>
         <span class="privacy-icon" aria-hidden="true">↗</span>
         <p>
-          Đồng bộ mỗi 5 phút khi máy đang hoạt động. Nội dung hội thoại và ghi
-          chú được giữ trên máy. Đóng cửa sổ để tiếp tục chạy ở thanh menu.
+          Token cập nhật khi log CLI thay đổi. Hạn mức được kiểm tra mỗi 5 phút.
+          Nội dung hội thoại và ghi chú được giữ trên máy. Đóng cửa sổ để tiếp
+          tục chạy ở thanh menu.
         </p>
       </footer>
     </main>

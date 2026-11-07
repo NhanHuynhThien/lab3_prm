@@ -28,3 +28,18 @@ test("preferences remain owner-scoped, validate fields and use private file mode
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test("sync window is persisted, and invalid legacy settings use the default", async () => {
+  const root = await mkdtemp(join(tmpdir(), "tokenledger-preferences-"));
+  try {
+    const store = preferencesStore(root);
+    await store.write({ syncIntervalMs: 10000 });
+    assert.equal((await store.read()).syncIntervalMs, 10000);
+    await store.write({ syncIntervalMs: 1 });
+    assert.equal((await store.read()).syncIntervalMs, 5000);
+    await store.write({});
+    assert.equal((await store.read()).syncIntervalMs, 5000);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

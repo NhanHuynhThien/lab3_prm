@@ -17,10 +17,11 @@ import { startupSettings } from "./startup.mjs";
 import {
   login,
   logout,
-  syncOnce,
   readAccount,
   loadFirebaseConfig,
 } from "../runtime/provider_bridge/cloud.mjs";
+import { createCloudSync } from "../runtime/provider_bridge/cloud-sync.mjs";
+import { watchUsageChanges } from "../runtime/provider_bridge/usage-watch.mjs";
 import { uninstallBackground } from "../runtime/provider_bridge/platform.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -67,6 +68,7 @@ else {
     .then(async () => {
       const preferences = preferencesStore(app.getPath("userData"));
       const config = await loadFirebaseConfig();
+      const synchronize = createCloudSync(config);
       controller = new CompanionController({
         readAccount,
         readPreferences: preferences.read,
@@ -76,9 +78,10 @@ else {
         setAutoStart: (value) => startup.set(value),
         retireLegacyService: uninstallBackground,
         logout,
-        sync: async (expectedUid) => {
+        watchChanges: watchUsageChanges,
+        sync: async (expectedUid, options) => {
           try {
-            return await syncOnce(config, { expectedUid });
+            return await synchronize(expectedUid, options);
           } catch {
             throw new Error(
               "Chưa đồng bộ được. Kiểm tra kết nối mạng hoặc đăng nhập lại.",
@@ -120,6 +123,9 @@ else {
               break;
             case "disconnect":
               await controller.disconnect();
+              break;
+            case "sync-interval":
+              await controller.setSyncInterval(value);
               break;
             case "auto-start":
               await startup.set(value);

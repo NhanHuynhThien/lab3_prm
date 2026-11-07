@@ -32,7 +32,7 @@ Repo độc lập: [lab3_prm_web_admin](https://github.com/NhanHuynhThien/lab3_p
 
 ## Chạy mobile
 
-Giữ `pubspec.lock`. Cấu hình local duy nhất là `.env` JSON, Git ignore. Pairing token chỉ phục vụ ghép nối local; build mặc định không nhúng file env vào APK. Companion có bộ cài desktop tại `companion/dist/` sau khi build. Cài TokenLedger Companion, mở ứng dụng, đăng nhập cùng tài khoản Google với mobile và bật đồng bộ. Cửa sổ có đồng bộ ngay, tạm dừng, đăng xuất và tùy chọn tự mở khi đăng nhập máy. Đóng cửa sổ vẫn chạy ở thanh menu. Phiên dùng kho bảo mật hệ điều hành; chỉ số tổng hợp ghi vào `users/{uid}/provider_snapshots/latest` mỗi 5 phút. Lệnh CLI `cloud.mjs` tiếp tục dùng cho phát triển. `setup.mjs` chỉ còn chuẩn bị status line Claude và mã cho chế độ ghép trực tiếp khi dev. Không đưa Gemini/service-account keys vào file này. Phân tích Gemini và hộp thư cần địa chỉ backend qua `TOKENLEDGER_API_URL` (mặc định `http://127.0.0.1:8788`, chỉ dùng cho môi trường dev).
+Giữ `pubspec.lock`. Cấu hình local duy nhất là `.env` JSON, Git ignore. Pairing token chỉ phục vụ ghép nối local; build mặc định không nhúng file env vào APK. Companion có bộ cài desktop tại `companion/dist/` sau khi build. Cài TokenLedger Companion, mở ứng dụng, đăng nhập cùng tài khoản Google với mobile và bật đồng bộ. Cửa sổ có đồng bộ ngay, tạm dừng, đăng xuất và tùy chọn tự mở khi đăng nhập máy. Đóng cửa sổ vẫn chạy ở thanh menu. Phiên dùng kho bảo mật hệ điều hành; token được cập nhật theo thay đổi log CLI, gom sự kiện theo chu kỳ chọn trên giao diện (2/5/10/30 giây, mặc định 5 giây) và ghi vào `users/{uid}/provider_snapshots/latest` khi aggregate thay đổi. Native watcher có kiểm tra metadata dự phòng để xử lý sự kiện bị bỏ lỡ. Hạn mức được làm mới mỗi 5 phút; lỗi mạng tự thử lại. Lệnh CLI sync dành cho phát triển vẫn dùng chu kỳ 5 phút. Lệnh CLI `cloud.mjs` tiếp tục dùng cho phát triển. `setup.mjs` chỉ còn chuẩn bị status line Claude và mã cho chế độ ghép trực tiếp khi dev. Không đưa Gemini/service-account keys vào file này. Phân tích Gemini và hộp thư cần địa chỉ backend qua `TOKENLEDGER_API_URL` (mặc định `http://127.0.0.1:8788`, chỉ dùng cho môi trường dev).
 
 ```sh
 flutter pub get
@@ -62,7 +62,7 @@ npm test
 npm run build:mac
 ```
 
-Bản macOS Apple Silicon nằm ở `companion/dist/TokenLedger Companion-0.1.0-arm64.dmg` và thư mục `mac-arm64`. Gói runtime dùng Firebase public config tại `tool/provider_bridge/firebase-config.json`, chạy độc lập với source Flutter và Node cài ngoài. Source desktop ở `companion/src/`; các collector được tái sử dụng từ `tool/provider_bridge/`. CLI `login/once/install` dành cho phát triển, người dùng thao tác qua giao diện. Bản macOS local chưa ký/notarize; Windows cần build và nghiệm thu trên môi trường phù hợp.
+Bản macOS Apple Silicon nằm ở `companion/dist/TokenLedger Companion-0.1.2-arm64.dmg` và thư mục `mac-arm64`. Gói runtime dùng Firebase public config tại `tool/provider_bridge/firebase-config.json`, chạy độc lập với source Flutter và Node cài ngoài. Source desktop ở `companion/src/`; các collector được tái sử dụng từ `tool/provider_bridge/`. CLI `login/once/install` dành cho phát triển, người dùng thao tác qua giao diện. Bản macOS local chưa ký/notarize; Windows cần build và nghiệm thu trên môi trường phù hợp.
 
 ## Tiến độ và tài liệu bài
 

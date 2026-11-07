@@ -18,6 +18,9 @@ if (
 await mkdir(target, { recursive: true });
 for (const name of [
   "cloud.mjs",
+  "cloud-sync.mjs",
+  "token-snapshot.mjs",
+  "usage-watch.mjs",
   "platform.mjs",
   "server.mjs",
   "codex.mjs",

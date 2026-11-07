@@ -118,6 +118,7 @@ export async function syncOnce(
     load = loadSecret,
     save = saveSecret,
     expectedUid,
+    shouldWrite = () => true,
   } = {},
 ) {
   const stored = await load();
@@ -131,6 +132,10 @@ export async function syncOnce(
   if (session.refreshToken && session.refreshToken !== stored)
     await save(session.refreshToken);
   const snapshot = await collect();
+  const ready = snapshot.providers
+    .filter((provider) => provider.status === "ready")
+    .map((provider) => provider.id);
+  if (!shouldWrite(snapshot)) return ready;
   const res = await fetchImpl(
     `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents:commit`,
     {
@@ -145,9 +150,7 @@ export async function syncOnce(
     },
   );
   if (!res.ok) throw new Error(`Firestore từ chối ghi (${res.status}).`);
-  return snapshot.providers
-    .filter((p) => p.status === "ready")
-    .map((p) => p.id);
+  return ready;
 }
 
 function loginPage(cfg, state) {

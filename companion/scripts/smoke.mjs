@@ -51,6 +51,18 @@ try {
   }));
   assert.equal(bridge.node, "undefined");
   assert.ok(!bridge.actions.includes("loadSecret"));
+  const interval = window.getByLabel("Thời gian cập nhật token", {
+    exact: true,
+  });
+  assert.equal(await interval.inputValue(), "5000");
+  await interval.selectOption("2000");
+  await window.waitForFunction(
+    async () => (await window.companion.status()).syncIntervalMs === 2000,
+  );
+  await interval.selectOption("5000");
+  await window.waitForFunction(
+    async () => (await window.companion.status()).syncIntervalMs === 5000,
+  );
   const consent = window.locator("#consent");
   if (await consent.isVisible()) {
     assert.equal(await window.locator("#connect").isDisabled(), true);
