@@ -47,7 +47,18 @@ void main() {
     expect(value.quotaCount, 2);
     expect(value.attention, 2);
     expect(value.limiting(sources.last), isNull);
+    expect(value.connected.where(value.needsAttention).length, 2);
   });
+  test(
+    'quota level warns from the attention band and alerts at the user limit',
+    () {
+      const warn = AgentDashboard.warnUsedPercent * 1.0;
+      expect(AgentDashboard.level(warn - 1, null), QuotaLevel.normal);
+      expect(AgentDashboard.level(warn, null), QuotaLevel.warning);
+      expect(AgentDashboard.level(60, 50), QuotaLevel.alert);
+      expect(AgentDashboard.level(40, 50), QuotaLevel.normal);
+    },
+  );
   for (final width in [360.0, 412.0, 1440.0]) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(

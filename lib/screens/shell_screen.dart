@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/auth_session.dart';
+import '../models/workspace_tab.dart';
 import '../theme/app_theme.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
@@ -11,11 +12,11 @@ import '../viewmodels/token_limit_viewmodel.dart';
 import '../widgets/app_top_bar.dart';
 import '../widgets/desktop_sidebar.dart';
 import '../widgets/notification_button.dart';
+import 'accounts_screen.dart';
 import 'analytics_screen.dart';
 import 'dashboard_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
-import 'review_screen.dart';
 
 class ShellScreen extends ConsumerStatefulWidget {
   const ShellScreen({super.key, this.user});
@@ -32,21 +33,22 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
   final _visited = <int>{0};
   AuthUser? _profileUser;
   StreamSubscription<String>? _notificationRoute;
-  late final _pages = <Widget>[
-    RepaintBoundary(child: DashboardScreen(onAnalytics: () => _selectTab(2))),
-    RepaintBoundary(child: ReviewScreen(onAnalytics: () => _selectTab(2))),
-    const RepaintBoundary(child: AnalyticsScreen()),
-    RepaintBoundary(child: ProfileScreen(user: widget.user)),
+  late final _pages = [
+    for (final tab in WorkspaceTab.values)
+      RepaintBoundary(child: _buildPage(tab, widget.user)),
   ];
 
-  static const _screenNames = ['overview', 'review', 'analytics', 'profile'];
-  static const labels = ['Tổng quan', 'Đánh giá', 'Phân tích', 'Cá nhân'];
-  static const icons = [
-    Icons.space_dashboard_outlined,
-    Icons.fact_check_outlined,
-    Icons.donut_large_outlined,
-    Icons.person_outline_rounded,
-  ];
+  static final labels = [for (final tab in WorkspaceTab.values) tab.label];
+  static final icons = [for (final tab in WorkspaceTab.values) tab.icon];
+
+  Widget _buildPage(WorkspaceTab tab, AuthUser? user) => switch (tab) {
+    WorkspaceTab.overview => DashboardScreen(
+      onAnalytics: () => _selectTab(WorkspaceTab.analytics.index),
+    ),
+    WorkspaceTab.accounts => const AccountsScreen(),
+    WorkspaceTab.analytics => const AnalyticsScreen(),
+    WorkspaceTab.profile => ProfileScreen(user: user),
+  };
 
   late final AnimationController _tabFade = AnimationController(
     vsync: this,
@@ -60,21 +62,17 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
     final notifications = ref.read(notificationServiceProvider);
     void open(String route) {
       if (!mounted) return;
-      // Accounts now live under Profile.
-      final index = switch (route) {
-        '/overview' => 0,
-        '/analytics' => 2,
-        '/profile' || '/accounts' => 3,
-        _ => -1,
-      };
-      if (index >= 0) _selectTab(index);
+      final tab = WorkspaceTab.fromRoute(route);
+      if (tab != null) _selectTab(tab.index);
       notifications.takePendingRoute();
     }
 
     _notificationRoute = notifications.onTargetRouteRequested.listen(open);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref.read(productFeaturesProvider.notifier).screen(_screenNames[_index]);
+        ref
+            .read(productFeaturesProvider.notifier)
+            .screen(WorkspaceTab.values[_index].name);
         final pending = notifications.takePendingRoute();
         if (pending != null) open(pending);
       }
@@ -103,7 +101,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
       _index = index;
       _visited.add(index);
     });
-    ref.read(productFeaturesProvider.notifier).screen(_screenNames[index]);
+    ref
+        .read(productFeaturesProvider.notifier)
+        .screen(WorkspaceTab.values[index].name);
     _tabFade.duration = AppMotion.duration(context, AppMotion.short);
     if (MediaQuery.disableAnimationsOf(context)) {
       _tabFade.value = 1;
@@ -123,7 +123,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
 
     if (_profileUser != user) {
       _profileUser = user;
-      _pages[3] = RepaintBoundary(child: ProfileScreen(user: user));
+      _pages[WorkspaceTab.profile.index] = RepaintBoundary(
+        child: _buildPage(WorkspaceTab.profile, user),
+      );
     }
     final page = Stack(
       fit: StackFit.expand,
@@ -183,7 +185,8 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
                               const SizedBox(width: 8),
                               IconButton(
                                 tooltip: 'Cá nhân & trạng thái kết nối',
-                                onPressed: () => _selectTab(3),
+                                onPressed: () =>
+                                    _selectTab(WorkspaceTab.profile.index),
                                 icon: const Icon(Icons.person_outline_rounded),
                               ),
                             ],
@@ -236,4 +239,14 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
             ),
     );
   }
+}
+
+/// Presentation of each tab; order and identity come from [WorkspaceTab].
+extension on WorkspaceTab {
+  IconData get icon => switch (this) {
+    WorkspaceTab.overview => Icons.space_dashboard_outlined,
+    WorkspaceTab.accounts => Icons.layers_outlined,
+    WorkspaceTab.analytics => Icons.donut_large_outlined,
+    WorkspaceTab.profile => Icons.person_outline_rounded,
+  };
 }

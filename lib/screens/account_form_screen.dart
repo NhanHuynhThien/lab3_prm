@@ -21,6 +21,10 @@ class AccountFormScreen extends ConsumerStatefulWidget {
 
 class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
   final _key = GlobalKey<FormState>();
+
+  /// Optional fields validate on their own so a hidden error opens them.
+  final _advancedKey = GlobalKey<FormState>();
+  final _advanced = ExpansibleController();
   late final TextEditingController _alias,
       _product,
       _plan,
@@ -91,16 +95,13 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
     for (final c in _controllers) {
       c.dispose();
     }
+    _advanced.dispose();
     super.dispose();
   }
 
   /// Moves an untouched product suggestion along; typed names are kept.
   void _pickProvider(String next) {
-    const suggested = {
-      'Anthropic': 'Claude',
-      'OpenAI': 'Codex',
-      'Google': 'Gemini',
-    };
+    const suggested = LedgerValidation.productSuggestions;
     if (_product.text.trim() == (suggested[_provider] ?? '')) {
       _product.text = suggested[next] ?? '';
     }
@@ -109,7 +110,10 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
 
   Future<void> _save() async {
     if (_saving) return;
-    if (!_key.currentState!.validate()) return;
+    final basicValid = _key.currentState!.validate();
+    final advancedValid = _advancedKey.currentState?.validate() ?? true;
+    if (!advancedValid) _advanced.expand();
+    if (!basicValid || !advancedValid) return;
     FocusScope.of(context).unfocus();
     setState(() {
       _saving = true;
@@ -218,9 +222,10 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                 TextFormField(
                   controller: _product,
                   maxLength: LedgerValidation.shortTextLimit,
-                  decoration: const InputDecoration(
-                    labelText: 'Công cụ / sản phẩm',
-                    hintText: 'Claude, Codex, Gemini...',
+                  decoration: InputDecoration(
+                    labelText: 'Công cụ',
+                    hintText: LedgerValidation.productSuggestions[_provider],
+                    helperText: 'Tự điền theo nhà cung cấp, có thể sửa.',
                   ),
                   validator: (v) => LedgerValidation.text(
                     v,
@@ -243,46 +248,19 @@ class _AccountFormScreenState extends ConsumerState<AccountFormScreen> {
                       : (b) => setState(() => _billing = b!),
                 ),
                 const SizedBox(height: 24),
-                TextFormField(
-                  controller: _plan,
-                  validator: (v) => LedgerValidation.text(
-                    v,
-                    'tên gói',
-                    LedgerValidation.shortTextLimit,
-                    required: false,
-                  ),
-                  maxLength: LedgerValidation.shortTextLimit,
-                  decoration: const InputDecoration(
-                    labelText: 'Tên gói (tùy chọn)',
-                  ),
-                ),
+                AccountBudgetField(controller: _budget),
                 const SizedBox(height: 16),
-                TextFormField(
-                  key: const ValueKey('account-model'),
-                  controller: _model,
-                  maxLength: LedgerValidation.shortTextLimit,
-                  decoration: const InputDecoration(
-                    labelText: 'Model mặc định (tùy chọn)',
-                    helperText: 'Tên model, không phải tên công cụ. Có thể đổi theo phiên.',
-                  ),
-                  validator: (v) => LedgerValidation.text(
-                    v,
-                    'model mặc định',
-                    LedgerValidation.shortTextLimit,
-                    required: false,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                PurposeChipsSelector(
+                AccountAdvancedSection(
+                  controller: _advanced,
+                  formKey: _advancedKey,
+                  initiallyExpanded: widget.account != null,
+                  plan: _plan,
+                  model: _model,
+                  timezone: _timezone,
+                  cycle: _cycle,
                   purposes: _purposes,
-                  onChanged: (p) => setState(() => _purposes = p),
+                  onPurposesChanged: (p) => setState(() => _purposes = p),
                   enabled: !_saving,
-                ),
-                const SizedBox(height: 24),
-                AccountCycleFields(
-                  timezoneController: _timezone,
-                  cycleController: _cycle,
-                  budgetController: _budget,
                 ),
                 if (_error != null)
                   Padding(

@@ -34,6 +34,35 @@ Future<bool> confirmAction(
     ) ??
     false;
 
+/// Read-only explanation, e.g. how a figure was derived.
+Future<void> showInfo(BuildContext context, String title, List<String> lines) =>
+    showDialog<void>(
+      context: context,
+      animationStyle: MediaQuery.disableAnimationsOf(context)
+          ? AnimationStyle.noAnimation
+          : null,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final line in lines)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpace.sm),
+                child: Text(line),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng'),
+          ),
+        ],
+      ),
+    );
+
 /// One confirmation/write at a time, including keyboard and repeated taps.
 class ConfirmedActionButton extends StatefulWidget {
   const ConfirmedActionButton({

@@ -56,7 +56,7 @@ void main() {
           .position;
       scroll.jumpTo(300);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Đánh giá').last);
+      await tester.tap(find.text('Tài khoản').last);
       await tester.pump();
       reduce.value = true;
       await tester.pumpAndSettle();
@@ -71,7 +71,7 @@ void main() {
       await tester.tap(find.text('Tổng quan').last);
       await tester.pumpAndSettle();
       expect(scroll.pixels, 300);
-      await tester.tap(find.text('Đánh giá').last);
+      await tester.tap(find.text('Tài khoản').last);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Phân tích').last);
       await tester.pumpAndSettle();

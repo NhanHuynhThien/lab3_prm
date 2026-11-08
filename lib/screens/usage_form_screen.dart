@@ -52,12 +52,20 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
     _id = s?.id ?? ref.read(ledgerProvider.notifier).newId();
     final initialData = ref.read(ledgerProvider).asData?.value;
     final scope = ref.read(effectiveDataScopeProvider);
-    final suggested = initialData?.accounts
+    final active = initialData?.accounts
         .where(
           (a) => !a.archived && scope.includesAccount(a, initialData.sessions),
         )
-        .firstOrNull;
-    _accountId = s?.accountId ?? widget.accountId ?? suggested?.id;
+        .toList();
+    // A new entry continues from the last one recorded in the same scope.
+    final last = initialData?.latestSessionFor({
+      for (final a in active ?? const <AIAccount>[]) a.id,
+    });
+    _accountId =
+        s?.accountId ??
+        widget.accountId ??
+        last?.accountId ??
+        active?.firstOrNull?.id;
     _title = TextEditingController(text: s?.title ?? '');
     _input = TextEditingController(text: s?.inputTokens?.toString() ?? '');
     _output = TextEditingController(text: s?.outputTokens?.toString() ?? '');
@@ -76,7 +84,10 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
         : s!.effectiveCostBasis;
     _initialCostBasis = _costBasis;
     _purpose =
-        s?.purpose ?? account?.defaultPurposes.firstOrNull ?? Purpose.code;
+        s?.purpose ??
+        account?.defaultPurposes.firstOrNull ??
+        (last?.accountId == _accountId ? last?.purpose : null) ??
+        Purpose.code;
     _date = (s?.occurredAt ?? ref.read(clockProvider)()).toLocal();
     _initialText = _controllers.map((c) => c.text).toList();
     _initialAccountId = _accountId;

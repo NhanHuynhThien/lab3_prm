@@ -25,6 +25,18 @@ class LedgerData {
   };
   AIAccount? account(String id) => _accountsById[id];
 
+  /// The most recent session recorded on any of [accountIds], if one exists.
+  UsageSession? latestSessionFor(Set<String> accountIds) {
+    UsageSession? latest;
+    for (final s in sessions) {
+      if (accountIds.contains(s.accountId) &&
+          (latest == null || s.occurredAt.isAfter(latest.occurredAt))) {
+        latest = s;
+      }
+    }
+    return latest;
+  }
+
   LedgerData copyWith({
     List<AIAccount>? accounts,
     List<UsageSession>? sessions,

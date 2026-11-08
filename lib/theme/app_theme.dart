@@ -13,6 +13,9 @@ abstract final class AppColors {
   static const danger = Color(0xFFBA1A1A);
   static const error = Color(0xFFFFDAD6);
   static const amber = Color(0xFF895900);
+
+  /// Light tint behind cards whose quota is in the warning band.
+  static const amberSoft = Color(0xFFFFF1DC);
   static const disabled = Color(0xFFD3E3DC);
   // Documented dashboard extensions: quiet structural dividers and frame.
   static const line = Color(0xFFE8ECE9);
@@ -39,6 +42,13 @@ abstract final class AppSpace {
   static const dashboardGridBreakpoint = 720.0;
   static const providerLogoSize = 32.0;
   static const providerLogoTile = 56.0;
+  static const avatar = 56.0;
+
+  /// Diameter of the circular quota gauge on agent cards.
+  static const quotaRing = 56.0;
+
+  /// Tallest a typeahead suggestion list grows before it scrolls.
+  static const suggestionListHeight = 280.0;
 }
 
 abstract final class AppMotion {

@@ -10,26 +10,46 @@ import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/provider_sources_viewmodel.dart';
 import '../viewmodels/provider_sync_viewmodel.dart';
 import '../viewmodels/token_limit_viewmodel.dart';
+import 'agent_summary_card.dart';
 import 'common.dart';
 import 'provider_brand_icon.dart';
+import 'quota_ring.dart';
 import 'token_limit_dialog.dart';
 
-class AgentDashboardPanel extends ConsumerWidget {
+class AgentDashboardPanel extends ConsumerStatefulWidget {
   const AgentDashboardPanel({super.key, required this.onAnalytics});
   final VoidCallback onAnalytics;
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AgentDashboardPanel> createState() =>
+      _AgentDashboardPanelState();
+}
+
+class _AgentDashboardPanelState extends ConsumerState<AgentDashboardPanel> {
+  /// Show only agents that need attention; set from the summary card.
+  bool _attentionOnly = false;
+
+  void _connections() => Navigator.push(
+    context,
+    MaterialPageRoute<void>(builder: (_) => const ProviderConnectionsScreen()),
+  );
+
+  @override
+  Widget build(BuildContext context) {
     final dashboard = AgentDashboard(
       ref.watch(providerSourcesProvider),
       ref.watch(nowProvider),
     );
     final sync = ref.watch(providerSyncProvider);
-    void connections() => Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (_) => const ProviderConnectionsScreen(),
-      ),
-    );
+    final syncAction = sync.working
+        ? null
+        : sync.enabled
+        ? ref.read(providerSyncProvider.notifier).refresh
+        : _connections;
+    // A filter with nothing left to match falls back to every agent.
+    final filtering = _attentionOnly && dashboard.attention > 0;
+    final agents = filtering
+        ? dashboard.connected.where(dashboard.needsAttention)
+        : dashboard.connected;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -57,38 +77,34 @@ class AgentDashboardPanel extends ConsumerWidget {
             ),
             IconButton(
               tooltip: sync.enabled ? 'Cập nhật các agent' : 'Kết nối agent',
-              onPressed: sync.working
-                  ? null
-                  : sync.enabled
-                  ? ref.read(providerSyncProvider.notifier).refresh
-                  : connections,
+              onPressed: syncAction,
               icon: const Icon(Icons.sync_rounded),
-            ),
-            IconButton(
-              tooltip: 'Quản lý các nguồn AI',
-              onPressed: connections,
-              icon: const Icon(Icons.tune_rounded),
             ),
           ],
         ),
         if (sync.working)
           const LinearProgressIndicator(semanticsLabel: 'Cập nhật agent'),
-        if (sync.error != null)
-          Padding(
-            padding: const EdgeInsets.only(bottom: AppSpace.lg),
-            child: Text(
-              sync.error!,
-              style: const TextStyle(color: AppColors.danger),
-            ),
-          ),
+        if (sync.error case final error?) ...[
+          const SizedBox(height: AppSpace.sm),
+          InlineErrorBanner(message: error, onRetry: syncAction),
+          const SizedBox(height: AppSpace.sm),
+        ],
         const SizedBox(height: AppSpace.sm),
         if (dashboard.connected.isEmpty)
           EmptyFeedback(
             title: 'Chưa có agent nào',
             message: 'Kết nối Codex, Claude hoặc Gemini để theo dõi token.',
             action: 'Kết nối nguồn AI',
-            onAction: connections,
+            onAction: _connections,
+          )
+        else ...[
+          AgentSummaryCard(
+            dashboard: dashboard,
+            attentionOnly: filtering,
+            onAttentionTap: () => setState(() => _attentionOnly = !filtering),
           ),
+          const SizedBox(height: AppSpace.lg),
+        ],
         LayoutBuilder(
           builder: (context, c) {
             final columns = c.maxWidth >= AppSpace.dashboardGridBreakpoint
@@ -99,7 +115,7 @@ class AgentDashboardPanel extends ConsumerWidget {
               spacing: AppSpace.lg,
               runSpacing: AppSpace.lg,
               children: [
-                for (final source in dashboard.connected)
+                for (final source in agents)
                   SizedBox(
                     width: width,
                     child: _AgentCard(
@@ -109,7 +125,7 @@ class AgentDashboardPanel extends ConsumerWidget {
                         ref
                             .read(selectedSourceProvider.notifier)
                             .select(source.id);
-                        onAnalytics();
+                        widget.onAnalytics();
                       },
                     ),
                   ),
@@ -135,10 +151,14 @@ class _AgentCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final quota = dashboard.limiting(source);
     final key = agentLimitKey(source.id);
-    final alertAt = ref.watch(tokenLimitsProvider)[key];
+    final alertAt = ref.watch(tokenLimitsProvider.select((m) => m[key]));
+    final level = quota == null
+        ? QuotaLevel.normal
+        : AgentDashboard.level(quota.usedPercent, alertAt);
     final fresh = source.status == 'ready' && !source.stale(dashboard.now);
     final text = Theme.of(context).textTheme;
     return Panel(
+      color: level.tint,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -157,53 +177,37 @@ class _AgentCard extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpace.md),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: Text(
-                  source.totalTokens == null
-                      ? '—'
-                      : compactTokens(source.totalTokens),
-                  style: text.headlineMedium,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      source.totalTokens == null
+                          ? '—'
+                          : compactTokens(source.totalTokens),
+                      style: text.headlineMedium,
+                    ),
+                    Text(
+                      source.totalTokens == null
+                          ? 'chưa có số token'
+                          : source.tokenLabel,
+                      style: text.bodySmall,
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                source.totalTokens == null
-                    ? 'chưa có số token'
-                    : source.tokenLabel,
-                style: text.bodySmall,
-              ),
+              if (quota != null) ...[
+                const SizedBox(width: AppSpace.md),
+                QuotaRing(usedPercent: quota.usedPercent, level: level),
+              ],
             ],
           ),
-          const Divider(height: AppSpace.xl),
-          if (quota == null)
+          if (quota != null) ...[
+            const Divider(height: AppSpace.xl),
             Text(
-              'Chưa có hạn mức hiện hành để cảnh báo.',
+              'Quota ${quota.displayLabel} · đặt lại ${shortTime(quota.resetsAt)}',
               style: text.bodySmall,
-            )
-          else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Quota ${quota.displayLabel} · đặt lại ${shortTime(quota.resetsAt)}',
-                    style: text.bodySmall,
-                  ),
-                ),
-                Text(
-                  'đã dùng ${quota.usedPercent.toStringAsFixed(0)}%',
-                  style: text.labelLarge,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpace.sm),
-            AnimatedProgress(
-              value: quota.usedPercent / 100,
-              color: alertAt != null && quota.usedPercent >= alertAt
-                  ? AppColors.danger
-                  : quota.usedPercent >= 75
-                  ? AppColors.amber
-                  : AppColors.primary,
             ),
             Align(
               alignment: Alignment.centerRight,

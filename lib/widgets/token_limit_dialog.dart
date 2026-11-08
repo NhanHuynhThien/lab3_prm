@@ -53,17 +53,42 @@ class _LimitDialogState extends State<_LimitDialog> {
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: Text(widget.percent ? 'Cảnh báo hạn mức' : 'Giới hạn token'),
-    content: TextField(
-      controller: _controller,
-      autofocus: true,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: widget.percent ? 'Hạn mức đã dùng' : 'Số token',
-        suffixText: widget.percent ? '%' : null,
-        helperText: widget.percent
-            ? 'Báo lên điện thoại khi quota đã dùng đạt mức này.'
-            : 'Báo lên điện thoại khi đạt 80% và 100%.',
-      ),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: widget.percent ? 'Hạn mức đã dùng' : 'Số token',
+            suffixText: widget.percent ? '%' : null,
+            helperText: widget.percent
+                ? 'Báo lên điện thoại khi quota đã dùng đạt mức này.'
+                : 'Báo lên điện thoại khi đạt ${TokenAlertStore.warnPercent}% và 100%.',
+          ),
+        ),
+        if (widget.percent) ...[
+          const SizedBox(height: AppSpace.md),
+          // Rebuilds only the chips as the field changes.
+          ValueListenableBuilder(
+            valueListenable: _controller,
+            builder: (context, value, _) => Wrap(
+              spacing: AppSpace.sm,
+              runSpacing: AppSpace.sm,
+              children: [
+                for (final preset in TokenAlertStore.agentAlertPresets)
+                  ChoiceChip(
+                    label: Text('$preset%'),
+                    selected: value.text.trim() == '$preset',
+                    onSelected: (_) => _controller.text = '$preset',
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ],
     ),
     actions: [
       if (widget.current != null)

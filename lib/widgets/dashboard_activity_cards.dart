@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../models/ledger.dart';
 import '../screens/history_screen.dart';
+import '../services/usage_calculator.dart';
+import '../theme/app_theme.dart';
+import '../utils/formatters.dart';
 import 'charts.dart';
 import 'common.dart';
 import 'usage_row.dart';
@@ -80,4 +83,55 @@ class DashboardRecentCard extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// One-line recap of the manual ledger when agents lead the overview.
+class DashboardLedgerSummaryCard extends StatelessWidget {
+  const DashboardLedgerSummaryCard({
+    super.key,
+    required this.summary,
+    required this.rangeLabel,
+  });
+
+  final UsageSummary summary;
+  final String rangeLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final cost = summary.unknownCost == summary.count
+        ? 'chưa có chi phí'
+        : money(summary.costMicros);
+    return Panel(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpace.cardRadius),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const HistoryScreen()),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.edit_note_rounded, color: AppColors.primary),
+            const SizedBox(width: AppSpace.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sổ tự ghi · $rangeLabel',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  Text(
+                    '${summary.count} lần ghi · '
+                    '${compactTokens(summary.tokens)} token · $cost',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded),
+          ],
+        ),
+      ),
+    );
+  }
 }

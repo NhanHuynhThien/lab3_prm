@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/workspace_tab.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../models/cloud_sync_status.dart';
 import '../widgets/account_card.dart';
@@ -31,7 +32,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(ledgerProvider);
-    final feedback = ledgerFeedback(state, 'Tài khoản AI');
+    final feedback = ledgerFeedback(state, WorkspaceTab.accounts.label);
     final cloud = ref.watch(cloudOwnerProvider) != null;
     if (feedback != null) {
       return cloud ? ProviderLedgerFeedback(feedback: feedback) : feedback;
@@ -51,7 +52,7 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 28),
       children: [
         PageHeading(
-          'Tài khoản AI',
+          WorkspaceTab.accounts.label,
           'Tài khoản tự ghi, token và giới hạn cảnh báo.',
           action: FilledButton.icon(
             onPressed: () => Navigator.push(

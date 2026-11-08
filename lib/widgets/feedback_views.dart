@@ -143,3 +143,47 @@ class ErrorFeedback extends StatelessWidget {
     onAction: retry,
   );
 }
+
+/// Compact, non-blocking error with a retry action, placed above content.
+class InlineErrorBanner extends StatelessWidget {
+  const InlineErrorBanner({
+    super.key,
+    required this.message,
+    required this.onRetry,
+  });
+  final String message;
+
+  /// Null while a retry is already running.
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    liveRegion: true,
+    child: Container(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpace.md,
+        AppSpace.sm,
+        AppSpace.xs,
+        AppSpace.sm,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.error,
+        borderRadius: BorderRadius.circular(AppSpace.controlRadius),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline_rounded, color: AppColors.danger),
+          const SizedBox(width: AppSpace.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: AppColors.danger),
+            ),
+          ),
+          TextButton(onPressed: onRetry, child: const Text('Thử lại')),
+        ],
+      ),
+    ),
+  );
+}

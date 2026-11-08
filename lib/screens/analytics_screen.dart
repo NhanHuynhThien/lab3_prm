@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/usage_calculator.dart';
+import '../theme/app_theme.dart';
 import '../viewmodels/provider_sources_viewmodel.dart';
 import '../widgets/provider_analytics_panel.dart';
 import '../widgets/provider_ledger_feedback.dart';
@@ -25,6 +26,7 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   UsageMetric? _selectedMetric;
+  _AnalyticsView _view = _AnalyticsView.agents;
   UsageMetric get _metric =>
       _selectedMetric ??
       UsageCalculator.preferredMetric(ref.read(filteredSessionsProvider));
@@ -35,6 +37,42 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     if (feedback != null) {
       return hasSources ? ProviderLedgerFeedback(feedback: feedback) : feedback;
     }
+    // Opening an agent from Overview always lands on the agent view.
+    ref.listen(selectedSourceProvider, (_, _) {
+      if (_view != _AnalyticsView.agents) {
+        setState(() => _view = _AnalyticsView.agents);
+      }
+    });
+    final showAgents = hasSources && _view == _AnalyticsView.agents;
+    return ListView(
+      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 28),
+      children: [
+        const PageHeading(
+          'Phân tích sử dụng',
+          'Chi tiết từng agent và gợi ý tối ưu từ Gemini.',
+        ),
+        if (hasSources) ...[
+          SegmentedButton<_AnalyticsView>(
+            expandedInsets: EdgeInsets.zero,
+            segments: [
+              for (final view in _AnalyticsView.values)
+                ButtonSegment(value: view, label: Text(view.label)),
+            ],
+            selected: {_view},
+            onSelectionChanged: (s) => setState(() => _view = s.first),
+          ),
+          const SizedBox(height: AppSpace.xl),
+        ],
+        // Only the visible view is built, so the hidden one costs nothing.
+        if (showAgents)
+          const ProviderAnalyticsPanel()
+        else
+          ..._ledgerSections(context),
+      ],
+    );
+  }
+
+  List<Widget> _ledgerSections(BuildContext context) {
     final projection = ref.watch(analyticsProjectionProvider(_metric));
     final summary = projection.summary;
     final shares = projection.shares;
@@ -44,217 +82,194 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       UsageMetric.tokens => compactTokens(v),
       UsageMetric.sessions => '$v',
     };
-    return ListView(
-      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 28),
-      children: [
-        const PageHeading(
-          'Phân tích sử dụng',
-          'Chi tiết từng agent và gợi ý tối ưu từ Gemini.',
-        ),
-        if (hasSources) ...[
-          const ProviderAnalyticsPanel(),
-          const SizedBox(height: 24),
-          const SectionTitle('Phiên tự ghi'),
+    return [
+      const FilterBar(),
+      const SizedBox(height: 16),
+      ActionButtons(
+        maxColumns: 3,
+        children: [
+          for (final metric in UsageMetric.values)
+            SelectionButton(
+              label: metric.label,
+              selected: _metric == metric,
+              onPressed: () => setState(() => _selectedMetric = metric),
+            ),
         ],
-        const FilterBar(),
-        const SizedBox(height: 16),
-        ActionButtons(
-          maxColumns: 3,
+      ),
+      const SizedBox(height: 24),
+      const GeminiAnalysisCard(),
+      const SizedBox(height: 24),
+      Panel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (final metric in UsageMetric.values)
-              SelectionButton(
-                label: metric.label,
-                selected: _metric == metric,
-                onPressed: () => setState(() => _selectedMetric = metric),
-              ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        const GeminiAnalysisCard(),
-        const SizedBox(height: 24),
-        Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SectionTitle('Theo mục đích · ${_metric.label.toLowerCase()}'),
-              if (total == 0)
-                EmptyFeedback(
-                  title: 'Chưa có số liệu cho chỉ số này',
-                  message: 'Bạn có thể đổi sang số phiên hoặc bổ sung dữ liệu sử dụng.',
-                  action: 'Ghi sử dụng',
-                  onAction: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => const UsageFormScreen(),
-                    ),
+            SectionTitle(
+              'Theo mục đích · ${_metric.label.toLowerCase()}',
+              action: 'Cách tính',
+              onAction: () => showInfo(context, 'Cách tính số liệu', [
+                'Chi phí thực do bạn xác nhận: ${preciseMoney(summary.actualCostMicros)}',
+                'Nhập tay: ${preciseMoney(summary.manualCostMicros)} · Chưa phân loại: ${preciseMoney(summary.unspecifiedCostMicros)}',
+                '${summary.unknownCost} phiên thiếu chi phí · ${summary.unknownTokens} phiên thiếu token. Không tính dữ liệu thiếu là 0.',
+              ]),
+            ),
+            if (total == 0)
+              EmptyFeedback(
+                title: 'Chưa có số liệu cho chỉ số này',
+                message: 'Bạn có thể đổi sang số phiên hoặc bổ sung dữ liệu sử dụng.',
+                action: 'Ghi sử dụng',
+                onAction: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => const UsageFormScreen(),
                   ),
-                )
-              else
-                LayoutBuilder(
-                  builder: (context, c) {
-                    final legend = Column(
-                      children: shares
-                          .map(
-                            (p) => ActionSurface(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (_) =>
-                                      HistoryScreen(purpose: p.purpose),
-                                ),
+                ),
+              )
+            else
+              LayoutBuilder(
+                builder: (context, c) {
+                  final legend = Column(
+                    children: shares
+                        .map(
+                          (p) => ActionSurface(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    HistoryScreen(purpose: p.purpose),
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: AdaptivePair(
+                                breakpoint: 220,
+                                leading: Row(
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color:
+                                            PurposeRing.colors[shares.indexOf(
+                                                  p,
+                                                ) %
+                                                PurposeRing.colors.length],
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(child: Text(p.purpose.label)),
+                                  ],
                                 ),
-                                child: AdaptivePair(
-                                  breakpoint: 220,
-                                  leading: Row(
-                                    children: [
-                                      Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              PurposeRing.colors[shares.indexOf(
-                                                    p,
-                                                  ) %
-                                                  PurposeRing.colors.length],
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(child: Text(p.purpose.label)),
-                                    ],
-                                  ),
-                                  trailing: Wrap(
-                                    spacing: 12,
-                                    runSpacing: 8,
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.center,
-                                    children: [
-                                      Text(
-                                        '${(p.value / total * 100).toStringAsFixed(1)}%',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                      ),
-                                      Text(
-                                        format(p.value),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelLarge,
-                                      ),
-                                      const Icon(Icons.chevron_right, size: 18),
-                                    ],
-                                  ),
+                                trailing: Wrap(
+                                  spacing: 12,
+                                  runSpacing: 8,
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text(
+                                      '${(p.value / total * 100).toStringAsFixed(1)}%',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall,
+                                    ),
+                                    Text(
+                                      format(p.value),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge,
+                                    ),
+                                    const Icon(Icons.chevron_right, size: 18),
+                                  ],
                                 ),
                               ),
                             ),
-                          )
-                          .toList(),
-                    );
-                    final ring = Semantics(
-                      excludeSemantics: true,
-                      label:
-                          'Tổng ${format(total)}. Chi tiết từng mục đích ở danh sách.',
-                      child: PurposeRing(
-                        shares: shares,
-                        center: format(total),
-                        onSelected: (share) => Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (_) =>
-                                HistoryScreen(purpose: share.purpose),
                           ),
+                        )
+                        .toList(),
+                  );
+                  final ring = Semantics(
+                    excludeSemantics: true,
+                    label:
+                        'Tổng ${format(total)}. Chi tiết từng mục đích ở danh sách.',
+                    child: PurposeRing(
+                      shares: shares,
+                      center: format(total),
+                      onSelected: (share) => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (_) => HistoryScreen(purpose: share.purpose),
                         ),
                       ),
-                    );
-                    return c.maxWidth >= 660
-                        ? Row(
-                            children: [
-                              SizedBox(width: 240, child: Center(child: ring)),
-                              const SizedBox(width: 32),
-                              Expanded(child: legend),
-                            ],
-                          )
-                        : Column(
-                            children: [
-                              ring,
-                              const SizedBox(height: 20),
-                              legend,
-                            ],
-                          );
-                  },
+                    ),
+                  );
+                  return c.maxWidth >= 660
+                      ? Row(
+                          children: [
+                            SizedBox(width: 240, child: Center(child: ring)),
+                            const SizedBox(width: 32),
+                            Expanded(child: legend),
+                          ],
+                        )
+                      : Column(
+                          children: [ring, const SizedBox(height: 20), legend],
+                        );
+                },
+              ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 24),
+      Panel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionTitle('So sánh tài khoản'),
+            ...projection.comparisons.map((comparison) {
+              final a = comparison.account;
+              final value = comparison.value;
+              return ActionSurface(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (_) => HistoryScreen(accountId: a.id),
+                  ),
                 ),
-              const SizedBox(height: 16),
-              Text(
-                'Chi phí thực do bạn xác nhận: ${preciseMoney(summary.actualCostMicros)} · Nhập tay: ${preciseMoney(summary.manualCostMicros)} · Chưa phân loại: ${preciseMoney(summary.unspecifiedCostMicros)}',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${summary.unknownCost} phiên thiếu chi phí · ${summary.unknownTokens} phiên thiếu token. Không tính dữ liệu thiếu là 0.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        Panel(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SectionTitle('So sánh tài khoản'),
-              ...projection.comparisons.map((comparison) {
-                final a = comparison.account;
-                final s = comparison.summary;
-                final value = comparison.value;
-                return ActionSurface(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => HistoryScreen(accountId: a.id),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Column(
-                      children: [
-                        AdaptivePair(
-                          leading: Text(
-                            a.alias,
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                          trailing: Text(format(value)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Column(
+                    children: [
+                      AdaptivePair(
+                        leading: Text(
+                          a.alias,
+                          style: Theme.of(context).textTheme.labelLarge,
                         ),
-                        const SizedBox(height: 8),
-                        AnimatedProgress(value: total == 0 ? 0 : value / total),
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            '${s.count} phiên · ${s.unknownCost} phiên chưa biết chi phí',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                      ],
-                    ),
+                        trailing: Text(format(value)),
+                      ),
+                      const SizedBox(height: 8),
+                      AnimatedProgress(value: total == 0 ? 0 : value / total),
+                    ],
                   ),
-                );
-              }),
-              if (projection.comparisons.isEmpty)
-                const Text('Chưa có phiên trong kỳ để so sánh tài khoản.'),
-            ],
-          ),
+                ),
+              );
+            }),
+            if (projection.comparisons.isEmpty)
+              const Text('Chưa có phiên trong kỳ để so sánh tài khoản.'),
+          ],
         ),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: () => ExportReportDialog.show(context),
-          icon: const Icon(Icons.picture_as_pdf_outlined),
-          label: const Text('Xuất báo cáo PDF'),
-        ),
-      ],
-    );
+      ),
+      const SizedBox(height: 24),
+      OutlinedButton.icon(
+        onPressed: () => ExportReportDialog.show(context),
+        icon: const Icon(Icons.picture_as_pdf_outlined),
+        label: const Text('Xuất báo cáo PDF'),
+      ),
+    ];
   }
+}
+
+enum _AnalyticsView {
+  agents('Agent'),
+  ledger('Sổ tự ghi');
+
+  const _AnalyticsView(this.label);
+  final String label;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../screens/provider_connections_screen.dart';
 import '../services/usage_tips.dart';
 import '../models/provider_analysis.dart';
 import '../theme/app_theme.dart';
@@ -42,20 +43,7 @@ class ProviderAnalyticsPanel extends ConsumerWidget {
                   ProviderBrandIcon(source.id),
                   const SizedBox(width: 12),
                   Expanded(child: Text(source.name, style: theme.titleLarge)),
-                  if (state.enabled)
-                    IconButton(
-                      tooltip: 'Cập nhật số liệu',
-                      onPressed: state.working
-                          ? null
-                          : ref.read(providerSyncProvider.notifier).refresh,
-                      icon: const Icon(Icons.sync_rounded),
-                    ),
                 ],
-              ),
-              const SizedBox(height: 8),
-              StatusTag(
-                source.status == 'ready' ? 'Có dữ liệu' : 'Chờ kết nối',
-                neutral: source.status != 'ready',
               ),
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
@@ -75,20 +63,27 @@ class ProviderAnalyticsPanel extends ConsumerWidget {
                   ),
                 ],
               ),
-              if (state.error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    state.error!,
-                    style: const TextStyle(color: AppColors.danger),
-                  ),
+              if (state.error case final error?) ...[
+                const SizedBox(height: AppSpace.md),
+                InlineErrorBanner(
+                  message: error,
+                  onRetry: state.working
+                      ? null
+                      : state.enabled
+                      ? ref.read(providerSyncProvider.notifier).refresh
+                      : () => Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ProviderConnectionsScreen(),
+                          ),
+                        ),
                 ),
+              ],
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpace.lg),
         if (source.activity != null) ...[
-          const SizedBox(height: 16),
           ProviderActivityPanel(
             activity: source.activity!,
             tips: usageTips(source.activity!, source, now),

@@ -39,7 +39,28 @@ class DashboardScreen extends ConsumerWidget {
           : feedback;
     }
     if (showProviderFirst) {
-      return _Page(children: [AgentDashboardPanel(onAnalytics: onAnalytics)]);
+      // Agents lead this layout, so manual logging stays one tap away.
+      return Stack(
+        children: [
+          _Page(
+            bottomInset: AppSpace.button + AppSpace.xl,
+            children: [
+              AgentDashboardPanel(onAnalytics: onAnalytics),
+              const _LedgerRecap(),
+            ],
+          ),
+          PositionedDirectional(
+            end: AppSpace.lg,
+            bottom: AppSpace.lg,
+            child: FloatingActionButton.extended(
+              heroTag: null,
+              onPressed: () => _openUsageForm(context),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Ghi sử dụng'),
+            ),
+          ),
+        ],
+      );
     }
     final data = state.requireValue;
     final projection = ref.watch(dashboardProjectionProvider);
@@ -70,10 +91,7 @@ class DashboardScreen extends ConsumerWidget {
             style: FilledButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 12),
             ),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(builder: (_) => const UsageFormScreen()),
-            ),
+            onPressed: () => _openUsageForm(context),
             icon: const Icon(Icons.add_rounded, size: 20),
             label: const Text('Ghi sử dụng', textAlign: TextAlign.center),
           ),
@@ -101,21 +119,49 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-class _Page extends StatelessWidget {
-  const _Page({required this.children});
-  final List<Widget> children;
+/// Shown only once the manual ledger has entries in the selected range.
+class _LedgerRecap extends ConsumerWidget {
+  const _LedgerRecap();
   @override
-  Widget build(BuildContext context) => Center(
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: AppSpace.dashboardWidth),
-      child: ListView(
-        padding: EdgeInsets.all(
-          MediaQuery.sizeOf(context).width < 600 ? 16 : 28,
-        ),
-        children: children,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(
+      dashboardProjectionProvider.select((p) => p.summary),
+    );
+    if (summary.count == 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpace.lg),
+      child: DashboardLedgerSummaryCard(
+        summary: summary,
+        rangeLabel: ref.watch(rangeProvider).label,
       ),
-    ),
-  );
+    );
+  }
+}
+
+void _openUsageForm(BuildContext context) => Navigator.push(
+  context,
+  MaterialPageRoute<void>(builder: (_) => const UsageFormScreen()),
+);
+
+class _Page extends StatelessWidget {
+  const _Page({required this.children, this.bottomInset = 0});
+  final List<Widget> children;
+
+  /// Extra space below the content, e.g. so a floating button never covers it.
+  final double bottomInset;
+  @override
+  Widget build(BuildContext context) {
+    final edge = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 28.0;
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppSpace.dashboardWidth),
+        child: ListView(
+          padding: EdgeInsets.fromLTRB(edge, edge, edge, edge + bottomInset),
+          children: children,
+        ),
+      ),
+    );
+  }
 }
 
 /// Two cards side by side on wide screens, stacked on phones.

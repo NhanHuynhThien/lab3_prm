@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../models/product_features.dart';
+import '../models/workspace_tab.dart';
 
 abstract interface class AnalyticsTransport {
   Future<void> enable(bool enabled);
@@ -16,7 +17,7 @@ class ProductEvent {
   final Map<String, Object> parameters;
 
   static ProductEvent? screen(String screen) =>
-      const {'overview', 'review', 'analytics', 'profile'}.contains(screen)
+      WorkspaceTab.isScreenName(screen)
       ? ProductEvent._('screen_view', {'screen_name': screen})
       : null;
 

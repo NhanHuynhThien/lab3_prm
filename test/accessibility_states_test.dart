@@ -168,7 +168,12 @@ void main() {
           await expectLater(tester, meetsGuideline(textContrastGuideline));
           await h.open(tester, container, const ShellScreen(), width: width);
           await tester.pumpAndSettle();
-          for (final tab in ['Tổng quan', 'Đánh giá', 'Phân tích', 'Cá nhân']) {
+          for (final tab in [
+            'Tổng quan',
+            'Tài khoản',
+            'Phân tích',
+            'Cá nhân',
+          ]) {
             await tester.tap(find.text(tab).last);
             await tester.pumpAndSettle();
             await expectLater(

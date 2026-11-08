@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../models/notification_item.dart';
+import '../models/workspace_tab.dart';
 import 'notification_contracts.dart';
 export 'notification_contracts.dart';
 
@@ -236,17 +237,11 @@ class NotificationService {
     if (item.data['ownerUid'] != null && item.data['ownerUid'] != _ownerId) {
       return;
     }
-    if (!{
-      '/overview',
-      '/accounts',
-      '/analytics',
-      '/profile',
-    }.contains(item.route)) {
-      return;
-    }
+    final route = item.route;
+    if (route == null || WorkspaceTab.fromRoute(route) == null) return;
     markAsRead(item.id);
-    _pendingRoute = item.route;
-    _openedRouteController.add(item.route!);
+    _pendingRoute = route;
+    _openedRouteController.add(route);
   }
 
   String? takePendingRoute() {

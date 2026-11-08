@@ -16,6 +16,12 @@ abstract final class ReportingCalendar {
         isUtc: true,
       );
 
+  /// Selectable zones for pickers, `UTC` first; `device` is legacy-only.
+  static final zoneNames = List<String>.unmodifiable([
+    'UTC',
+    ...(_locations.keys.where((z) => z != 'UTC').toList()..sort()),
+  ]);
+
   static void validateZone(String zone) {
     if (zone != 'device' && zone != 'UTC' && !_locations.containsKey(zone)) {
       throw ArgumentError(

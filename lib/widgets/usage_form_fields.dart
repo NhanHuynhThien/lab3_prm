@@ -191,24 +191,39 @@ class UsageCostSection extends StatelessWidget {
           }
         },
       ),
-      const SizedBox(height: 24),
-      DropdownButtonFormField<CostBasis>(
-        isExpanded: true,
-        initialValue: costBasis,
-        decoration: const InputDecoration(
-          labelText: 'Loại chi phí',
-          helperText:
-              'Không tự ước tính giá. Dữ liệu cũ không tự coi là chi phí thực.',
-        ),
-        items: [CostBasis.manual, CostBasis.actual, CostBasis.unspecified]
-            .map(
-              (b) => DropdownMenuItem(
-                value: b,
-                child: Text(b.label, overflow: TextOverflow.ellipsis),
+      // The type only applies to a known cost; save ignores it otherwise.
+      ValueListenableBuilder<TextEditingValue>(
+        valueListenable: costController,
+        builder: (context, value, _) => value.text.trim().isEmpty
+            ? const SizedBox.shrink()
+            : Padding(
+                padding: const EdgeInsets.only(top: 24),
+                child: DropdownButtonFormField<CostBasis>(
+                  isExpanded: true,
+                  initialValue: costBasis,
+                  decoration: const InputDecoration(
+                    labelText: 'Loại chi phí',
+                    helperText: 'Không tự ước tính giá. Dữ liệu cũ không tự coi là chi phí thực.',
+                  ),
+                  items:
+                      [
+                            CostBasis.manual,
+                            CostBasis.actual,
+                            CostBasis.unspecified,
+                          ]
+                          .map(
+                            (b) => DropdownMenuItem(
+                              value: b,
+                              child: Text(
+                                b.label,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                  onChanged: saving ? null : (b) => onCostBasisChanged(b!),
+                ),
               ),
-            )
-            .toList(),
-        onChanged: saving ? null : (b) => onCostBasisChanged(b!),
       ),
       const SizedBox(height: 24),
       Text(

@@ -32,9 +32,9 @@ void main() {
 
       expect(find.text('Ngân sách còn lại · Kỳ hiện tại'), findsOneWidget);
       expect(tester.takeException(), isNull);
-      await tester.tap(find.text('Đánh giá').last);
+      await tester.tap(find.text('Tài khoản').last);
       await tester.pumpAndSettle();
-      expect(find.text('Sổ tự ghi · kỳ hiện tại'), findsOneWidget);
+      expect(find.text('Thêm tài khoản'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Phân tích').last);
       await tester.pumpAndSettle();
@@ -42,7 +42,7 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Cá nhân').last);
       await tester.pumpAndSettle();
-      expect(find.text('Kết nối dữ liệu'), findsOneWidget);
+      expect(find.text('Dữ liệu'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

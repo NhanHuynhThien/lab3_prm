@@ -99,7 +99,10 @@ class SectionTitle extends StatelessWidget {
 
 class PageHeading extends StatelessWidget {
   const PageHeading(this.title, this.subtitle, {super.key, this.action});
-  final String title, subtitle;
+  final String title;
+
+  /// Optional supporting line; null when the title says enough.
+  final String? subtitle;
   final Widget? action;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -115,12 +118,14 @@ class PageHeading extends StatelessWidget {
                   ?.copyWith(letterSpacing: -.5),
             ),
           ),
-          const SizedBox(height: AppSpace.sm),
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodyMedium
-                ?.copyWith(color: AppColors.muted),
-          ),
+          if (subtitle case final subtitle?) ...[
+            const SizedBox(height: AppSpace.sm),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: AppColors.muted),
+            ),
+          ],
         ],
       );
       return Padding(

@@ -79,7 +79,6 @@ void main() {
         expect(h.stores['B']!.activeListeners, 4);
         await h.nav(tester, 'Cá nhân');
         expect(find.text('User B'), findsOneWidget);
-        expect(find.text('Đã đăng nhập Google'), findsOneWidget);
         expect(find.text('Mở demo local riêng biệt'), findsNothing);
         await h.nav(tester, 'Tài khoản');
         expect(find.text('Private A'), findsNothing);
@@ -136,7 +135,6 @@ void main() {
         expect(h.root.exists(ledgerProvider), isFalse);
         await h.nav(tester, 'Cá nhân');
         expect(find.text('Lỗi kết nối'), findsOneWidget);
-        expect(find.text('Đã đăng nhập Google'), findsOneWidget);
         await h.tap(tester, 'Đăng xuất Google');
         expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
         expect(h.stores['A']!.documents.length, 1);

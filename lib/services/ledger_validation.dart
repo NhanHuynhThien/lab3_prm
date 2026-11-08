@@ -14,6 +14,13 @@ abstract final class LedgerValidation {
   static const maxExactInteger = 9007199254740991;
   static const providers = ['Anthropic', 'OpenAI', 'Google', 'Khác'];
 
+  /// Product prefilled for each provider; a name the user typed is kept.
+  static const productSuggestions = {
+    'Anthropic': 'Claude',
+    'OpenAI': 'Codex',
+    'Google': 'Gemini',
+  };
+
   static String? text(
     String? value,
     String label,

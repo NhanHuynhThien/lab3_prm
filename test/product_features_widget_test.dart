@@ -167,12 +167,12 @@ void main() {
         backend.events.where((e) => e.parameters['screen_name'] == 'overview'),
         hasLength(1),
       );
-      await tester.tap(find.text('Đánh giá').last);
+      await tester.tap(find.text('Tài khoản').last);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Đánh giá').last);
+      await tester.tap(find.text('Tài khoản').last);
       await tester.pumpAndSettle();
       expect(
-        backend.events.where((e) => e.parameters['screen_name'] == 'review'),
+        backend.events.where((e) => e.parameters['screen_name'] == 'accounts'),
         hasLength(1),
       );
       expect(transport.fetches, 1);

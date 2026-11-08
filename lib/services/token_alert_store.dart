@@ -9,6 +9,9 @@ class TokenAlertStore {
   final Future<SharedPreferences> Function() _open;
 
   static const warnPercent = 80;
+
+  /// Quick picks offered when setting an agent's quota alert percent.
+  static const agentAlertPresets = [50, 80, 90];
   static const maxLimit = 1000000000000;
 
   Future<Map<String, int>> loadLimits() async {
