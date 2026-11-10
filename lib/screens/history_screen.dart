@@ -97,6 +97,8 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final summary = projection.summary;
 
     final zone = data.reportingTimezone;
+    // Subscription CLI usage has no per-session cost: say nothing about it.
+    final hasCost = summary.unknownCost < summary.count;
     final header = <Widget>[
       const DataScopePicker(),
       HistoryFilterBar(
@@ -117,7 +119,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ),
         ),
       const SizedBox(height: 16),
-      if (_accountId != null)
+      // Only an account with a budget has a budget cycle to switch to.
+      if (_useAccountCycle ||
+          data.account(_accountId ?? '')?.budgetMicros != null)
         OutlinedButton(
           onPressed: () => setState(() => _useAccountCycle = !_useAccountCycle),
           child: Text(
@@ -138,14 +142,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
       ),
       const SizedBox(height: 24),
       Text(
-        '${summary.count} phiên · ${money(summary.costMicros)} đã ghi · ${compactTokens(summary.tokens)} token',
+        [
+          '${summary.count} phiên',
+          if (hasCost) '${money(summary.costMicros)} đã ghi',
+          '${compactTokens(summary.tokens)} token',
+        ].join(' · '),
         style: Theme.of(context).textTheme.titleMedium,
       ),
-      const SizedBox(height: 8),
-      Text(
-        '${summary.unknownCost} phiên chưa biết chi phí',
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
+      if (hasCost) ...[
+        const SizedBox(height: 8),
+        Text(
+          '${summary.unknownCost} phiên chưa biết chi phí',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
       const SizedBox(height: 16),
       if (sessions.isEmpty)
         const EmptyFeedback(

@@ -53,7 +53,14 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         ..._ledgerSections(context),
         if (hasSources) ...[
           const SizedBox(height: AppSpace.xl),
-          const SectionTitle('Từng agent'),
+          const SectionTitle('Từng agent · 30 ngày gần nhất'),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpace.md),
+            child: Text(
+              'Phần này luôn tính 30 ngày gần nhất từ Companion, không theo kỳ đã chọn ở trên.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
           const ProviderAnalyticsPanel(),
         ],
       ],

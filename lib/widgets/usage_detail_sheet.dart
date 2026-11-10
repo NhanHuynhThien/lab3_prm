@@ -67,7 +67,7 @@ class UsageDetailSheet extends ConsumerWidget {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 24),
-            _DetailLine('Chi phí', preciseMoney(session.costMicros)),
+            if (!auto) _DetailLine('Chi phí', preciseMoney(session.costMicros)),
             _DetailLine(
               'Input token',
               session.inputTokens?.toString() ?? 'Chưa biết',
@@ -88,7 +88,8 @@ class UsageDetailSheet extends ConsumerWidget {
               '${shortTime(session.occurredAt, timezone: data.reportingTimezone)} · ${ReportingCalendar.zoneLabel(data.reportingTimezone)}',
             ),
             _DetailLine('Nguồn', session.dataSource.label),
-            _DetailLine('Loại chi phí', session.effectiveCostBasis.label),
+            if (!auto)
+              _DetailLine('Loại chi phí', session.effectiveCostBasis.label),
             _DetailLine('Model', session.modelId ?? 'Chưa biết'),
             if (session.note.isNotEmpty)
               Padding(

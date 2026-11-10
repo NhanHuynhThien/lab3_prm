@@ -67,14 +67,18 @@ class ProviderUsageCard extends StatelessWidget {
                 _Metric('Context hiện tại', compactTokens(usage.contextTokens)),
                 _Metric('Ước tính phiên', money(usage.estimatedCostMicros)),
               ],
-              const _Metric('Phí đã charge', 'Chưa có nguồn'),
             ],
           ),
           const SizedBox(height: 24),
-          Text('Hạn mức · ${usage.windows.length}', style: text.titleMedium),
+          Text(
+            usage.windows.isEmpty
+                ? 'Hạn mức hiện tại'
+                : 'Hạn mức hiện tại · ${usage.windows.length}',
+            style: text.titleMedium,
+          ),
           const SizedBox(height: 12),
           if (usage.windows.isEmpty)
-            Text('Chưa có số liệu hạn mức từ nguồn.', style: text.bodySmall)
+            Text('Nguồn này chưa cung cấp hạn mức.', style: text.bodySmall)
           else
             LayoutBuilder(
               builder: (context, box) {

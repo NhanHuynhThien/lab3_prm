@@ -167,7 +167,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SectionTitle(
-                  'Hạn mức đã ghi nhận',
+                  'Hạn mức hiện tại',
                   action: a.archived || auto ? null : 'Thêm cửa sổ',
                   onAction: () => Navigator.push(
                     context,

@@ -43,7 +43,10 @@ class UsageRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${account?.alias ?? 'Tài khoản đã xóa'} ·${session.purpose.label} · ${shortDate(session.occurredAt, timezone: timezone)}',
+                    // Automatic titles already name the tool and purpose.
+                    session.dataSource == DataSource.companion
+                        ? '${shortDate(session.occurredAt, timezone: timezone)} ${shortTime(session.occurredAt, timezone: timezone)}'
+                        : '${account?.alias ?? 'Tài khoản đã xóa'} · ${session.purpose.label} · ${shortDate(session.occurredAt, timezone: timezone)}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -51,18 +54,23 @@ class UsageRow extends StatelessWidget {
               trailing: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    session.costMicros == null
-                        ? '—'
-                        : money(session.costMicros),
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                  const SizedBox(height: 4),
+                  if (session.costMicros != null ||
+                      session.dataSource != DataSource.companion) ...[
+                    Text(
+                      session.costMicros == null
+                          ? '—'
+                          : money(session.costMicros),
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   Text(
                     session.knownTokens == null
                         ? 'Chưa biết'
                         : '${compactTokens(session.knownTokens)} token',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: session.dataSource == DataSource.companion
+                        ? Theme.of(context).textTheme.labelLarge
+                        : Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
               ),
