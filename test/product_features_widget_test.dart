@@ -23,12 +23,11 @@ import 'product_features_test.dart'
     show FakeAnalyticsTransport, FakeConfigTransport;
 import 'support/auth_fakes.dart';
 import 'support/ledger_cloud_fake.dart';
+import 'support/app_fonts.dart';
 
 void main() {
   setUpAll(() async {
-    await (FontLoader(
-      'Inter',
-    )..addFont(rootBundle.load('assets/fonts/Inter-Variable.ttf'))).load();
+    await loadAppFonts();
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();

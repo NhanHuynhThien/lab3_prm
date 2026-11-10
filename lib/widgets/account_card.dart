@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/auto_usage.dart';
 import '../models/ledger.dart';
 import '../screens/account_detail_screen.dart';
 import '../theme/app_theme.dart';
@@ -77,7 +78,10 @@ class AccountCard extends ConsumerWidget {
               limitKey: account.id,
               tokens: summary.tokens,
               caption: 'token kỳ này',
-              footer: '${money(summary.costMicros)} · ${summary.count} phiên',
+              // Subscriptions bill a flat fee: no per-session cost to show.
+              footer: isAutoId(account.id)
+                  ? '${summary.count} phiên'
+                  : '${money(summary.costMicros)} · ${summary.count} phiên',
             ),
           ],
         ),

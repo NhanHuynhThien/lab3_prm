@@ -22,21 +22,28 @@ class Panel extends StatelessWidget {
   final Color color;
   final EdgeInsets? padding;
   @override
-  Widget build(BuildContext context) => Material(
-    color: color,
-    shape: RoundedRectangleBorder(
+  Widget build(BuildContext context) => DecoratedBox(
+    // Same border and shadow for every card, tinted ones included.
+    decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(AppSpace.cardRadius),
-      side: color == AppColors.surface
-          ? const BorderSide(color: AppColors.line)
-          : BorderSide.none,
+      boxShadow: AppDecor.cardShadow,
     ),
-    child: Padding(
-      padding:
-          padding ??
-          EdgeInsets.all(
-            MediaQuery.sizeOf(context).width < 600 ? AppSpace.lg : AppSpace.xl,
-          ),
-      child: child,
+    child: Material(
+      color: color,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpace.cardRadius),
+        side: const BorderSide(color: AppColors.line),
+      ),
+      child: Padding(
+        padding:
+            padding ??
+            EdgeInsets.all(
+              MediaQuery.sizeOf(context).width < 600
+                  ? AppSpace.lg
+                  : AppSpace.xl,
+            ),
+        child: child,
+      ),
     ),
   );
 }

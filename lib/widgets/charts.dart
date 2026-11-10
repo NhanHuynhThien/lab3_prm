@@ -7,19 +7,31 @@ import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 
 class UsageBarChart extends StatelessWidget {
-  const UsageBarChart({super.key, required this.values, required this.now});
+  const UsageBarChart({
+    super.key,
+    required this.values,
+    required this.now,
+    this.tokens = false,
+  });
   final List<int?> values;
   final DateTime now;
-  static String _label(int? value) => value == null ? '—' : money(value);
+
+  /// Token counts instead of USD micros.
+  final bool tokens;
+  String _label(int? value) => value == null
+      ? '—'
+      : tokens
+      ? compactTokens(value)
+      : money(value);
   @override
   Widget build(BuildContext context) {
     final highest = values.fold<int>(0, (a, b) => math.max(a, b ?? 0));
     return Semantics(
       excludeSemantics: true,
       label:
-          'Chi phí nhập tay, USD. ${values.indexed.map((entry) {
+          '${tokens ? 'Token' : 'Chi phí nhập tay, USD'}. ${values.indexed.map((entry) {
             final date = DateTime(now.year, now.month, now.day - (values.length - 1 - entry.$1));
-            return '${date.day}/${date.month}/${date.year}: ${money(entry.$2)}';
+            return '${date.day}/${date.month}/${date.year}: ${_label(entry.$2)}';
           }).join('; ')}',
       child: LayoutBuilder(
         builder: (context, constraints) {

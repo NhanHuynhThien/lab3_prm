@@ -56,6 +56,27 @@ test('foreign save snapshot','DENY','provider_snapshots/latest','create',{}, {'p
 test('snapshot other id deny','DENY','provider_snapshots/x','create',{}, {'provider_snapshots/x':snap});
 test('snapshot extra field deny','DENY','provider_snapshots/latest','create',{}, {'provider_snapshots/latest':{...snap,raw:'x'}});
 test('snapshot too large deny','DENY','provider_snapshots/latest','create',{}, {'provider_snapshots/latest':{...snap,json:'x'.repeat(600001)}});
+const AUTO='auto_usage/auto-codex-0123456789abcdef-20261020';
+const autoRow={ownerId:'A',provider:'codex',detectedPurpose:'debug',model:'gpt-5',inputTokens:1200,outputTokens:300,
+  occurredAt:PAST,startedAt:PAST,syncedAt:NOW};
+test('owner read auto usage','ALLOW',AUTO,'get');
+test('foreign read auto usage','DENY',AUTO,'get',{}, {},'B');
+test('companion create auto usage','ALLOW',AUTO,'create',{}, {[AUTO]:autoRow});
+test('foreign create auto usage','DENY',AUTO,'create',{}, {[AUTO]:autoRow},'B');
+test('auto usage bad id deny','DENY','auto_usage/u1','create',{}, {'auto_usage/u1':autoRow});
+test('auto usage provider/id mismatch deny','DENY',AUTO,'create',{}, {[AUTO]:{...autoRow,provider:'claude'}});
+test('auto usage extra field deny','DENY',AUTO,'create',{}, {[AUTO]:{...autoRow,prompt:'x'}});
+test('auto usage negative tokens deny','DENY',AUTO,'create',{}, {[AUTO]:{...autoRow,inputTokens:-1}});
+test('auto usage bad purpose deny','DENY',AUTO,'create',{}, {[AUTO]:{...autoRow,detectedPurpose:'invented'}});
+test('auto usage stale sync time deny','DENY',AUTO,'create',{}, {[AUTO]:{...autoRow,syncedAt:PAST}});
+test('phone edits auto purpose','ALLOW',AUTO,'update',{[AUTO]:autoRow}, {[AUTO]:{...autoRow,purpose:'code',title:'',note:'ok'}});
+test('phone hides auto usage','ALLOW',AUTO,'update',{[AUTO]:autoRow}, {[AUTO]:{...autoRow,hidden:true}});
+test('companion cannot unhide','DENY',AUTO,'update',{[AUTO]:{...autoRow,hidden:true}}, {[AUTO]:{...autoRow,hidden:false}});
+test('companion refresh keeps hidden','ALLOW',AUTO,'update',{[AUTO]:{...autoRow,hidden:true}},
+  {[AUTO]:{...autoRow,hidden:true,inputTokens:2000}});
+test('auto usage delete deny','DENY',AUTO,'delete',{[AUTO]:autoRow});
+test('companion retires superseded row','ALLOW',AUTO,'update',{[AUTO]:autoRow}, {[AUTO]:{...autoRow,superseded:true}});
+test('superseded must be bool','DENY',AUTO,'update',{[AUTO]:autoRow}, {[AUTO]:{...autoRow,superseded:'yes'}});
 let a=account(), before={}, after={'accounts/a':a,'mutations/a-create':receipt('accounts','a','create',1)};
 transaction('account create',before,after,Object.keys(after));
 for (const [name, mutate] of [

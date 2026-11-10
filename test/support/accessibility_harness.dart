@@ -9,6 +9,7 @@ import 'package:token_ledger/theme/app_theme.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 
 import '../ledger_viewmodel_test.dart' show MemoryRepository;
+import 'app_fonts.dart';
 
 class StateRepository extends MemoryRepository {
   bool failReads = false;
@@ -34,9 +35,7 @@ class AccessibilityHarness {
   final DateTime now = DateTime(2026, 10, 21, 10);
 
   static Future<void> loadFonts() async {
-    await (FontLoader(
-      'Inter',
-    )..addFont(rootBundle.load('assets/fonts/Inter-Variable.ttf'))).load();
+    await loadAppFonts();
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();

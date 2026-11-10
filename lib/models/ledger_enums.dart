@@ -59,6 +59,9 @@ enum BillingMode {
 
 enum DataSource {
   manual('Nhập tay'),
+
+  /// Read automatically from local CLI logs by the desktop Companion.
+  companion('Tự động từ Companion'),
   demo('Demo giả định'),
   legacy('Dữ liệu cũ chưa phân loại');
 

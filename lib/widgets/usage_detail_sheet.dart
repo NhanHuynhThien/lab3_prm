@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/ledger.dart';
+import '../screens/auto_usage_edit_screen.dart';
 import '../screens/usage_form_screen.dart';
 import '../services/reporting_calendar.dart';
 import '../theme/app_theme.dart';
@@ -47,6 +48,7 @@ class UsageDetailSheet extends ConsumerWidget {
       );
     }
     final account = data.account(session.accountId);
+    final auto = session.dataSource == DataSource.companion;
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
       child: ConstrainedBox(
@@ -101,19 +103,24 @@ class UsageDetailSheet extends ConsumerWidget {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute<void>(
-                        builder: (_) => UsageFormScreen(session: session),
+                        builder: (_) => auto
+                            ? AutoUsageEditScreen(session: session)
+                            : UsageFormScreen(session: session),
                       ),
                     ),
                     icon: const Icon(Icons.edit_outlined),
                     label: const Text('Sửa phiên'),
                   ),
                 ConfirmedActionButton(
-                  label: 'Xóa phiên',
-                  icon: Icons.delete_outline,
+                  label: auto ? 'Ẩn phiên' : 'Xóa phiên',
+                  icon: auto
+                      ? Icons.visibility_off_outlined
+                      : Icons.delete_outline,
                   destructive: true,
-                  title: 'Xóa phiên sử dụng?',
-                  message:
-                      '${session.title} sẽ bị xóa; tổng chi phí và token được tính lại. Không thể hoàn tác.',
+                  title: auto ? 'Ẩn phiên tự động?' : 'Xóa phiên sử dụng?',
+                  message: auto
+                      ? '${session.title} sẽ không còn tính vào tổng token và không bị Companion thêm lại.'
+                      : '${session.title} sẽ bị xóa; tổng chi phí và token được tính lại. Không thể hoàn tác.',
                   onConfirm: () =>
                       ref.read(ledgerProvider.notifier).deleteUsage(session.id),
                   onSuccess: () => Navigator.pop(context),

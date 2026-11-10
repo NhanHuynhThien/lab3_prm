@@ -6,10 +6,9 @@ import '../viewmodels/ledger_viewmodel.dart';
 import '../models/cloud_sync_status.dart';
 import '../widgets/account_card.dart';
 import '../widgets/common.dart';
-import '../widgets/data_scope_picker.dart';
 import '../widgets/ledger_feedback.dart';
 import '../widgets/provider_ledger_feedback.dart';
-import 'account_form_screen.dart';
+import 'provider_connections_screen.dart';
 
 class AccountsScreen extends ConsumerStatefulWidget {
   const AccountsScreen({super.key});
@@ -38,10 +37,13 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       return cloud ? ProviderLedgerFeedback(feedback: feedback) : feedback;
     }
     final data = state.requireValue;
+    // Archived history exists only from older manual accounts.
+    final hasArchived = data.accounts.any((a) => a.archived);
+    final archived = _archived && hasArchived;
     final accounts = data.accounts
         .where(
           (a) =>
-              a.archived == _archived &&
+              a.archived == archived &&
               '${a.alias} ${a.product} ${a.provider}'.toLowerCase().contains(
                 _search.toLowerCase(),
               ),
@@ -53,59 +55,51 @@ class _AccountsScreenState extends ConsumerState<AccountsScreen> {
       children: [
         PageHeading(
           WorkspaceTab.accounts.label,
-          'Tài khoản tự ghi, token và giới hạn cảnh báo.',
-          action: FilledButton.icon(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) => const AccountFormScreen(),
+          'Companion tự thêm tài khoản khi bạn dùng Codex, Claude Code hoặc Gemini CLI.',
+        ),
+        if (data.accounts.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: 'Tìm tài khoản hoặc nhà cung cấp',
+                prefixIcon: Icon(Icons.search_rounded),
               ),
+              onChanged: (s) => setState(() => _search = s),
             ),
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Thêm tài khoản'),
           ),
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Tìm tài khoản hoặc nhà cung cấp',
-                  prefixIcon: Icon(Icons.search_rounded),
-                ),
-                onChanged: (s) => setState(() => _search = s),
-              ),
+        if (hasArchived)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: SegmentedButton<bool>(
+              expandedInsets: EdgeInsets.zero,
+              segments: const [
+                ButtonSegment(value: false, label: Text('Đang dùng')),
+                ButtonSegment(value: true, label: Text('Đã lưu trữ')),
+              ],
+              selected: {archived},
+              onSelectionChanged: (s) => setState(() => _archived = s.first),
             ),
-            const SizedBox(width: 4),
-            const DataScopePicker(),
-          ],
-        ),
-        const SizedBox(height: 12),
-        SegmentedButton<bool>(
-          expandedInsets: EdgeInsets.zero,
-          segments: const [
-            ButtonSegment(value: false, label: Text('Đang dùng')),
-            ButtonSegment(value: true, label: Text('Đã lưu trữ')),
-          ],
-          selected: {_archived},
-          onSelectionChanged: (s) => setState(() => _archived = s.first),
-        ),
-        const SizedBox(height: 24),
+          ),
         if (accounts.isEmpty)
           Panel(
             child: EmptyFeedback(
-              title: 'Chưa có tài khoản phù hợp',
-              message: _archived
-                  ? 'Tài khoản đã lưu trữ vẫn giữ nguyên lịch sử sử dụng.'
-                  : 'Thêm Claude, Codex hoặc công cụ AI khác để bắt đầu.',
-              action: 'Thêm tài khoản',
-              onAction: () => Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (_) => const AccountFormScreen(),
-                ),
-              ),
+              title: _search.isEmpty
+                  ? 'Chưa có tài khoản nào'
+                  : 'Không có tài khoản phù hợp',
+              message: _search.isEmpty
+                  ? 'Mở Companion trên máy tính, đăng nhập cùng tài khoản Google và bật đồng bộ.'
+                  : 'Thử từ khóa khác.',
+              action: _search.isEmpty ? 'Kết nối nguồn AI' : null,
+              onAction: _search.isEmpty
+                  ? () => Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (_) => const ProviderConnectionsScreen(),
+                      ),
+                    )
+                  : null,
             ),
           ),
         ...accounts.map((a) => AccountCard(key: ValueKey(a.id), account: a)),

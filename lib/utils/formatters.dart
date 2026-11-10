@@ -44,6 +44,15 @@ String shortTime(DateTime date, {String timezone = 'device'}) {
   return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
 }
 
+/// Reset moment with the day when it is not today, e.g. "10:45 ngày 14/11".
+String resetLabel(DateTime at, DateTime now, {String timezone = 'device'}) {
+  final day = shortDate(at, timezone: timezone);
+  final time = shortTime(at, timezone: timezone);
+  return day == shortDate(now, timezone: timezone)
+      ? '$time hôm nay'
+      : '$time ngày $day';
+}
+
 int? parseUsd(String raw) {
   if (raw.trim().isEmpty) return null;
   final match = RegExp(r'^(\d{1,7})(?:[.,](\d{1,6}))?$').firstMatch(raw.trim());

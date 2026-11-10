@@ -9,6 +9,7 @@ import '../models/ledger.dart';
 import '../services/analytics_service.dart';
 import '../services/cloud_ledger_repository.dart';
 import '../services/ledger_validation.dart';
+import 'auto_ledger_link.dart';
 import 'cloud_ledger_mutations.dart';
 import 'ledger_viewmodel.dart';
 import 'product_features_viewmodel.dart';
@@ -29,7 +30,8 @@ class _PendingCommand {
   final ProductEvent? event;
 }
 
-class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
+class CloudLedgerViewModel extends LedgerViewModel
+    with CloudLedgerMutations, AutoLedgerLink {
   @override
   bool get isCloud => true;
   CloudSyncStatus sync = const CloudSyncStatus();
@@ -51,10 +53,12 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
   Completer<LedgerData>? _waiting;
   Future<LedgerData>? _connecting;
   final _commands = <String, _PendingCommand>{};
+  void Function()? _republish;
 
   @override
   Future<LedgerData> build() {
     _repo = ref.watch(cloudRepositoryProvider);
+    watchAuto(() => _republish?.call());
     ref.onDispose(() {
       _epoch++;
       final waiting = _waiting;
@@ -165,7 +169,7 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
       // Persistence is off, so an unconfirmed offline snapshot is just empty.
       if (!serverSeen) return;
       try {
-        final data = LedgerData(
+        final manual = LedgerData(
           accounts: a.records
               .map(
                 (r) => r.value.copyWith(
@@ -178,7 +182,8 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
               s.records.firstOrNull?.value.reportingTimezone ??
               'Asia/Ho_Chi_Minh',
         );
-        LedgerValidation.snapshot(data);
+        LedgerValidation.snapshot(manual);
+        final data = withAuto(manual);
         _last = data;
         if (!ready.isCompleted) ready.complete(data);
         if (!_bootActive) state = AsyncData(data);
@@ -201,6 +206,7 @@ class CloudLedgerViewModel extends LedgerViewModel with CloudLedgerMutations {
       );
     }
 
+    _republish = publish;
     try {
       listen(_repo.watchAccounts(), (v) => _accounts = v);
       listen(_repo.watchAllUsage(), (v) => _usage = v);

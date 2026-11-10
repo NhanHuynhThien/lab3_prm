@@ -6,7 +6,7 @@ import '../theme/app_theme.dart';
 import '../viewmodels/provider_sources_viewmodel.dart';
 import '../widgets/provider_analytics_panel.dart';
 import '../widgets/provider_ledger_feedback.dart';
-import 'usage_form_screen.dart';
+import 'provider_connections_screen.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/reporting_viewmodel.dart';
 import '../widgets/charts.dart';
@@ -26,10 +26,14 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   UsageMetric? _selectedMetric;
-  _AnalyticsView _view = _AnalyticsView.agents;
-  UsageMetric get _metric =>
-      _selectedMetric ??
-      UsageCalculator.preferredMetric(ref.read(filteredSessionsProvider));
+  bool get _hasCost =>
+      ref.read(filteredSessionsProvider).any((s) => s.costMicros != null);
+
+  /// A cost pick falls back once the period has no costed session.
+  UsageMetric get _metric => _selectedMetric == UsageMetric.cost && !_hasCost
+      ? UsageCalculator.preferredMetric(ref.read(filteredSessionsProvider))
+      : _selectedMetric ??
+            UsageCalculator.preferredMetric(ref.read(filteredSessionsProvider));
   @override
   Widget build(BuildContext context) {
     final feedback = ledgerFeedback(ref.watch(ledgerProvider), 'Phân tích');
@@ -37,13 +41,8 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     if (feedback != null) {
       return hasSources ? ProviderLedgerFeedback(feedback: feedback) : feedback;
     }
-    // Opening an agent from Overview always lands on the agent view.
-    ref.listen(selectedSourceProvider, (_, _) {
-      if (_view != _AnalyticsView.agents) {
-        setState(() => _view = _AnalyticsView.agents);
-      }
-    });
-    final showAgents = hasSources && _view == _AnalyticsView.agents;
+    // One ledger now (Companion rows and any manual history), so there is
+    // no Agent / ledger switch: totals first, then each agent's live quota.
     return ListView(
       padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 28),
       children: [
@@ -51,23 +50,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           'Phân tích sử dụng',
           'Chi tiết từng agent và gợi ý tối ưu từ Gemini.',
         ),
+        ..._ledgerSections(context),
         if (hasSources) ...[
-          SegmentedButton<_AnalyticsView>(
-            expandedInsets: EdgeInsets.zero,
-            segments: [
-              for (final view in _AnalyticsView.values)
-                ButtonSegment(value: view, label: Text(view.label)),
-            ],
-            selected: {_view},
-            onSelectionChanged: (s) => setState(() => _view = s.first),
-          ),
           const SizedBox(height: AppSpace.xl),
+          const SectionTitle('Từng agent'),
+          const ProviderAnalyticsPanel(),
         ],
-        // Only the visible view is built, so the hidden one costs nothing.
-        if (showAgents)
-          const ProviderAnalyticsPanel()
-        else
-          ..._ledgerSections(context),
       ],
     );
   }
@@ -85,16 +73,18 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
     return [
       const FilterBar(),
       const SizedBox(height: 16),
-      ActionButtons(
-        maxColumns: 3,
-        children: [
+      // One row; cost only when some session in the period has a cost
+      // (subscription CLI usage never does).
+      SegmentedButton<UsageMetric>(
+        expandedInsets: EdgeInsets.zero,
+        showSelectedIcon: false,
+        segments: [
           for (final metric in UsageMetric.values)
-            SelectionButton(
-              label: metric.label,
-              selected: _metric == metric,
-              onPressed: () => setState(() => _selectedMetric = metric),
-            ),
+            if (metric != UsageMetric.cost || _hasCost)
+              ButtonSegment(value: metric, label: Text(metric.label)),
         ],
+        selected: {_metric},
+        onSelectionChanged: (s) => setState(() => _selectedMetric = s.first),
       ),
       const SizedBox(height: 24),
       const GeminiAnalysisCard(),
@@ -115,12 +105,12 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
             if (total == 0)
               EmptyFeedback(
                 title: 'Chưa có số liệu cho chỉ số này',
-                message: 'Bạn có thể đổi sang số phiên hoặc bổ sung dữ liệu sử dụng.',
-                action: 'Ghi sử dụng',
+                message: 'Đổi sang số phiên, hoặc kết nối Companion để dữ liệu tự cập nhật.',
+                action: 'Kết nối nguồn AI',
                 onAction: () => Navigator.push(
                   context,
                   MaterialPageRoute<void>(
-                    builder: (_) => const UsageFormScreen(),
+                    builder: (_) => const ProviderConnectionsScreen(),
                   ),
                 ),
               )
@@ -264,12 +254,4 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       ),
     ];
   }
-}
-
-enum _AnalyticsView {
-  agents('Agent'),
-  ledger('Sổ tự ghi');
-
-  const _AnalyticsView(this.label);
-  final String label;
 }

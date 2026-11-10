@@ -23,6 +23,7 @@ import 'package:token_ledger/theme/app_theme.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 
 import 'ledger_viewmodel_test.dart' show MemoryRepository;
+import 'support/app_fonts.dart';
 
 const _imageRoot = String.fromEnvironment(
   'UI_AUDIT_OUTPUT',
@@ -32,9 +33,7 @@ const _imageRoot = String.fromEnvironment(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
-    await (FontLoader(
-      'Inter',
-    )..addFont(rootBundle.load('assets/fonts/Inter-Variable.ttf'))).load();
+    await loadAppFonts();
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
@@ -146,19 +145,10 @@ void main() {
                   reason: '${entry.key} initial',
                 );
                 if (entry.key == 'dashboard') {
-                  final action = find.ancestor(
-                    of: find.text('Ghi sử dụng'),
-                    matching: find.byWidgetPredicate((w) => w is FilledButton),
-                  );
-                  final actionRect = tester.getRect(action);
+                  // No manual-entry button: the range picker owns the row.
+                  expect(find.text('Ghi sử dụng'), findsNothing);
                   final rangeRect = tester.getRect(find.byType(RangePicker));
-                  expect(
-                    actionRect.center.dy,
-                    closeTo(rangeRect.center.dy, 0.1),
-                  );
-                  expect(actionRect.height, closeTo(rangeRect.height, 0.1));
-                  expect(actionRect.width, closeTo(rangeRect.width, 0.1));
-                  expect(actionRect.left, greaterThanOrEqualTo(0));
+                  expect(rangeRect.left, greaterThanOrEqualTo(0));
                   expect(rangeRect.right, lessThanOrEqualTo(width));
                   expect(
                     find.descendant(

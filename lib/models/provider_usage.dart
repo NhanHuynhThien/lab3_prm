@@ -31,6 +31,26 @@ class ProviderQuota {
     _ => displayLabel,
   };
 
+  /// Plain Vietnamese scope for UI copy: model group (if any) and window,
+  /// without provider bucket names such as "Weekly Limit Remaining", whose
+  /// "Remaining" reads as the opposite of the used percent shown beside it.
+  String get scopeLabel {
+    final period = window == null ? displayLabel : windowLabel;
+    final name = group
+        ?.replaceAll(RegExp(r'\s+models?$', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s+and\s+', caseSensitive: false), ' và ')
+        .trim();
+    return name == null || name.isEmpty || name == 'codex'
+        ? period
+        : '$name · $period';
+  }
+
+  /// "Đã dùng 75% · còn 25%": both sides, so a ring is never misread.
+  String get usageLabel {
+    final used = usedPercent.clamp(0, 100).round();
+    return 'Đã dùng $used% · còn ${100 - used}%';
+  }
+
   String get displayLabel {
     final match = RegExp(r'^(.*?) · (\d+) phút$').firstMatch(label);
     if (match == null) return label;

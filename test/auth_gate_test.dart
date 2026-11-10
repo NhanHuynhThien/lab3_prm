@@ -113,6 +113,7 @@ void main() {
         );
         h.service.signInGate!.complete();
         await h.settle(tester);
+        // Identity lives in the header island only.
         expect(find.text('Người A'), findsOneWidget);
         expect(h.repository.loads, 0);
       } finally {

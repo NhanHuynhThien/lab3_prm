@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/auto_usage.dart';
 import '../models/ledger.dart';
 import '../services/ledger_validation.dart';
 import '../utils/formatters.dart';
@@ -52,11 +53,10 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
     _id = s?.id ?? ref.read(ledgerProvider.notifier).newId();
     final initialData = ref.read(ledgerProvider).asData?.value;
     final scope = ref.read(effectiveDataScopeProvider);
-    final active = initialData?.accounts
-        .where(
-          (a) => !a.archived && scope.includesAccount(a, initialData.sessions),
-        )
-        .toList();
+    bool usable(AIAccount a) =>
+        acceptsManualUsage(a) &&
+        scope.includesAccount(a, initialData!.sessions);
+    final active = initialData?.accounts.where(usable).toList();
     // A new entry continues from the last one recorded in the same scope.
     final last = initialData?.latestSessionFor({
       for (final a in active ?? const <AIAccount>[]) a.id,
@@ -209,7 +209,7 @@ class _UsageFormScreenState extends ConsumerState<UsageFormScreen> {
     final data = state.requireValue;
     final selected = data.account(_accountId ?? '');
     final accounts = data.accounts
-        .where((a) => !a.archived || a.id == _accountId)
+        .where((a) => acceptsManualUsage(a) || a.id == _accountId)
         .toList();
     final emptyGuard = checkUsageEmptyGuards(
       context: context,

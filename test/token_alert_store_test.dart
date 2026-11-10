@@ -26,4 +26,17 @@ void main() {
       expect(await store.loadLimits(), isEmpty);
     },
   );
+
+  test('limits and alert claims never leak between Google accounts', () async {
+    SharedPreferences.setMockInitialValues({});
+    final a = TokenAlertStore(null, 'uidA');
+    final b = TokenAlertStore(null, 'uidB');
+    await a.saveLimit('agent:codex', 80);
+    expect(await a.loadLimits(), {'agent:codex': 80});
+    expect(await b.loadLimits(), isEmpty);
+    expect(await TokenAlertStore().loadLimits(), isEmpty);
+    expect(await a.claimOnce('k'), isTrue);
+    expect(await b.claimOnce('k'), isTrue);
+    expect(await a.claimOnce('k'), isFalse);
+  });
 }

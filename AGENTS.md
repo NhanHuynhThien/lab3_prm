@@ -45,8 +45,8 @@ Người dùng chỉ định PDF **PRM393 - Lab 3 From Design to Working App wit
 ## Design system và motion
 
 - Đọc `docs/fidelity-check.md` và `docs/design-change-log.md`.
-- Inter, primary#006C49, background#FAF8FF, mint#E8F7EF; radius20/12, spacing4/8/12/16/24/32, touch≥48, CTA52.
-- Login tham chiếu composition BeeWise Mobile của user; dùng tokens/logo TokenLedger. Ghi rõ mọi đổi typography/palette và Figma còn cần annotate.
+- Font theo BeeWise LMS (10/11): Google Sans chữ thường, Nunito 800 tiêu đề (`AppFonts`, OFL trong `assets/fonts/`); Inter chỉ cho PDF. primary#006C49, background#FAF8FF, mint#E8F7EF; radius20/12, spacing4/8/12/16/24/32, touch≥48, CTA52. Mọi card qua `Panel`: viền hairline + `AppDecor.cardShadow`.
+- Login và header mobile tham chiếu composition BeeWise LMS của user (header: thẻ avatar + lời chào + tên, nút tròn mint); dùng tokens/logo TokenLedger. Ghi rõ mọi đổi typography/palette và Figma còn cần annotate.
 - 4 mobile tabs; desktop sidebar. Tôn trọng text scale/reduced motion, không perpetual decoration. Giữ tab state; tránh replay/chart work ở tab offstage.
 - Dùng skill UI phù hợp theo preserve; không áp style web marketing trái system design mobile.
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/agent_dashboard.dart';
+import '../models/cloud_sync_status.dart';
 import '../models/provider_usage.dart';
 import '../services/local_alert_notifier.dart';
 import '../services/token_alert_store.dart';
@@ -12,7 +13,7 @@ import 'provider_sources_viewmodel.dart';
 import 'reporting_viewmodel.dart';
 
 final tokenAlertStoreProvider = Provider<TokenAlertStore>(
-  (ref) => TokenAlertStore(),
+  (ref) => TokenAlertStore(null, ref.watch(cloudOwnerProvider)),
 );
 final alertNotifierProvider = Provider<AlertNotifier>(
   (ref) => SystemAlertNotifier(),
@@ -75,7 +76,7 @@ final tokenAlertWatcherProvider = Provider<void>((ref) {
       notify(
         key,
         '${source.name} đã dùng ${quota.usedPercent.toStringAsFixed(0)}% hạn mức',
-        'Quota ${quota.displayLabel} · đặt lại lúc ${shortTime(quota.resetsAt)}.',
+        '${quota.scopeLabel} · ${quota.usageLabel} · đặt lại ${resetLabel(quota.resetsAt, now)}.',
       );
     }());
   }

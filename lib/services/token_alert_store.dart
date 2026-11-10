@@ -3,10 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Device-local token limits and the alert levels already delivered.
 ///
 /// Kept on the device so the Firestore account schema and rules stay unchanged.
+/// With an [owner] UID every key is namespaced, so a limit set by one Google
+/// account never fires alerts for another account on the same device.
 class TokenAlertStore {
-  TokenAlertStore([Future<SharedPreferences> Function()? open])
+  TokenAlertStore([Future<SharedPreferences> Function()? open, this.owner])
     : _open = open ?? SharedPreferences.getInstance;
   final Future<SharedPreferences> Function() _open;
+  final String? owner;
+  String get _ns => owner == null ? '' : 'u.$owner.';
 
   static const warnPercent = 80;
 
@@ -23,17 +27,17 @@ class TokenAlertStore {
     }
     return {
       for (final key in prefs.getKeys())
-        if (key.startsWith('token_limit.') && prefs.getInt(key) != null)
-          key.substring('token_limit.'.length): prefs.getInt(key)!,
+        if (key.startsWith('${_ns}token_limit.') && prefs.getInt(key) != null)
+          key.substring('${_ns}token_limit.'.length): prefs.getInt(key)!,
     };
   }
 
   Future<void> saveLimit(String accountId, int? limit) async {
     final prefs = await _open();
     if (limit == null) {
-      await prefs.remove('token_limit.$accountId');
+      await prefs.remove('${_ns}token_limit.$accountId');
     } else {
-      await prefs.setInt('token_limit.$accountId', limit);
+      await prefs.setInt('${_ns}token_limit.$accountId', limit);
     }
   }
 
@@ -53,7 +57,7 @@ class TokenAlertStore {
         : 0;
     if (reached == 0) return null;
     final prefs = await _open();
-    final key = 'token_alert.$accountId.$cycle';
+    final key = '${_ns}token_alert.$accountId.$cycle';
     if ((prefs.getInt(key) ?? 0) >= reached) return null;
     await prefs.setInt(key, reached);
     return reached;
@@ -62,8 +66,8 @@ class TokenAlertStore {
   /// True the first time [key] is claimed; later calls return false.
   Future<bool> claimOnce(String key) async {
     final prefs = await _open();
-    if (prefs.getBool('token_alert.$key') ?? false) return false;
-    await prefs.setBool('token_alert.$key', true);
+    if (prefs.getBool('${_ns}token_alert.$key') ?? false) return false;
+    await prefs.setBool('${_ns}token_alert.$key', true);
     return true;
   }
 }

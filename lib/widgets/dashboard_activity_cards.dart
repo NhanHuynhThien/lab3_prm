@@ -14,27 +14,34 @@ class DashboardTrendCard extends StatelessWidget {
     super.key,
     required this.dailyCosts,
     required this.now,
+    this.tokens = false,
   });
 
+  /// Daily USD micros, or token counts when [tokens] is true.
   final List<int?> dailyCosts;
   final DateTime now;
+  final bool tokens;
 
   @override
   Widget build(BuildContext context) => Panel(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionTitle('Chi phí 7 ngày gần đây'),
+        SectionTitle(
+          tokens ? 'Token 7 ngày gần đây' : 'Chi phí 7 ngày gần đây',
+        ),
         if (dailyCosts.every((v) => v == 0))
-          const EmptyFeedback(
-            title: 'Chưa có chi phí trong 7 ngày qua',
-            message: 'Ghi một phiên để bắt đầu theo dõi.',
+          EmptyFeedback(
+            title: tokens
+                ? 'Chưa có token trong 7 ngày qua'
+                : 'Chưa có chi phí trong 7 ngày qua',
+            message: 'Số liệu tự cập nhật khi Companion đồng bộ.',
           )
         else
-          UsageBarChart(values: dailyCosts, now: now),
+          UsageBarChart(values: dailyCosts, now: now, tokens: tokens),
         const SizedBox(height: 16),
         Text(
-          'Luôn tính 7 ngày gần nhất theo chi phí nhập tay. “—” là ngày có phiên nhưng chưa biết chi phí.',
+          tokens ? 'Luôn tính 7 ngày gần nhất, không theo kỳ đã chọn.' : 'Luôn tính 7 ngày gần nhất theo chi phí nhập tay. “—” là ngày có phiên nhưng chưa biết chi phí.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],

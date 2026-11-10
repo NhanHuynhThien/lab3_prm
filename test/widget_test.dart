@@ -34,7 +34,12 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Tài khoản').last);
       await tester.pumpAndSettle();
-      expect(find.text('Thêm tài khoản'), findsOneWidget);
+      // Accounts come from the Companion; there is no manual add button.
+      expect(find.text('Thêm tài khoản'), findsNothing);
+      expect(
+        find.textContaining('Companion tự thêm tài khoản'),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Phân tích').last);
       await tester.pumpAndSettle();
@@ -42,7 +47,7 @@ void main() {
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Cá nhân').last);
       await tester.pumpAndSettle();
-      expect(find.text('Dữ liệu'), findsOneWidget);
+      expect(find.text('Kết nối'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

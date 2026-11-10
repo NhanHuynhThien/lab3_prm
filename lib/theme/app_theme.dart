@@ -25,6 +25,19 @@ abstract final class AppColors {
   static const chartTertiary = Color(0xFF9BAD9F);
 }
 
+/// One card look across the app (header island, panels, agent cards):
+/// hairline border plus a soft, low shadow, after the BeeWise LMS cards.
+abstract final class AppDecor {
+  static const cardShadow = [
+    BoxShadow(color: Color(0x14131B2E), blurRadius: 16, offset: Offset(0, 6)),
+  ];
+}
+
+abstract final class AppFonts {
+  static const body = 'GoogleSans';
+  static const heading = 'Nunito';
+}
+
 abstract final class AppSpace {
   static const xs = 4.0;
   static const sm = 8.0;
@@ -84,11 +97,13 @@ class MotionAwareTransitions extends PageTransitionsBuilder {
 }
 
 ThemeData buildAppTheme() {
+  // BeeWise LMS typography: Google Sans for reading, Nunito for headings.
   const base = TextStyle(
-    fontFamily: 'Inter',
+    fontFamily: AppFonts.body,
     color: AppColors.text,
     fontFeatures: [FontFeature.tabularFigures()],
   );
+  final heading = base.copyWith(fontFamily: AppFonts.heading);
   final scheme = ColorScheme.fromSeed(seedColor: AppColors.primary).copyWith(
     primary: AppColors.primary,
     secondary: AppColors.primary,
@@ -100,25 +115,32 @@ ThemeData buildAppTheme() {
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    fontFamily: 'Inter',
+    fontFamily: AppFonts.body,
     scaffoldBackgroundColor: AppColors.background,
     textTheme: TextTheme(
-      displaySmall: base.copyWith(
+      displaySmall: heading.copyWith(
         fontSize: 28,
-        height: 1.15,
-        fontWeight: FontWeight.w700,
-        letterSpacing: -.7,
-      ),
-      headlineSmall: base.copyWith(
-        fontSize: 22,
-        height: 1.25,
-        fontWeight: FontWeight.w700,
+        height: 1.2,
+        fontWeight: FontWeight.w800,
         letterSpacing: -.5,
       ),
-      titleLarge: base.copyWith(
+      headlineMedium: heading.copyWith(
+        fontSize: 26,
+        height: 1.2,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -.4,
+      ),
+      headlineSmall: heading.copyWith(
+        fontSize: 22,
+        height: 1.25,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -.3,
+      ),
+      titleLarge: heading.copyWith(
         fontSize: 18,
         height: 1.3,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -.2,
       ),
       titleMedium: base.copyWith(
         fontSize: 14,

@@ -5,9 +5,11 @@ import '../models/auth_session.dart';
 import '../theme/app_theme.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/cloud_ledger_viewmodel.dart';
+import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
-import '../widgets/brand_mark.dart';
+import '../viewmodels/provider_sources_viewmodel.dart';
 import '../widgets/common.dart';
+import '../widgets/data_scope_picker.dart';
 import '../widgets/product_feature_cards.dart';
 import '../widgets/product_feature_panel.dart';
 import '../widgets/settings_group.dart';
@@ -44,59 +46,47 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = widget.user;
     final sync = ref.watch(cloudSyncProvider);
     final action = ref.watch(authActionProvider);
-    final photo = Uri.tryParse(user?.photoUrl ?? '');
     final notifications = ref.watch(notificationServiceProvider);
     final notificationsOn =
         notifications.permissionGranted &&
         (!notifications.backendAvailable || notifications.registered);
-    final text = Theme.of(context).textTheme;
+    final sources = ref
+        .watch(providerSourcesProvider)
+        .where((s) => s.status == 'ready')
+        .map((s) => s.name)
+        .toList();
+    // Identity (avatar, name) already sits in the header island; this page
+    // only holds what the header cannot: sync, settings, reports, sign-out.
     return ListView(
       padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 28),
       children: [
-        const PageHeading('Cá nhân', null),
+        // No page title: the selected tab already says "Cá nhân", so the
+        // first group heading sits right under the header island.
         SettingsGroup(
-          title: 'Tài khoản',
+          title: 'Kết nối',
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: AppSpace.md),
-              child: Row(
-                children: [
-                  if (user != null && photo?.scheme == 'https')
-                    ClipOval(
-                      child: Image.network(
-                        user.photoUrl!,
-                        width: AppSpace.avatar,
-                        height: AppSpace.avatar,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            const BrandMark(size: AppSpace.avatar),
-                      ),
-                    )
-                  else
-                    const BrandMark(size: AppSpace.avatar),
-                  const SizedBox(width: AppSpace.lg),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user?.displayName ?? 'Tài khoản Google',
-                          style: text.titleLarge,
-                        ),
-                        const SizedBox(height: AppSpace.xs),
-                        Text(
-                          user?.email ?? 'Google chưa cung cấp email',
-                          style: text.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+            SettingsTile(
+              icon: Icons.cloud_done_outlined,
+              title: user?.email ?? 'Tài khoản Google',
+              subtitle: 'Sổ ghi nhận lưu riêng theo tài khoản này',
+              trailing: StatusTag(sync.label, neutral: !sync.confirmed),
+            ),
+            SettingsTile(
+              icon: Icons.hub_outlined,
+              title: 'Companion và nguồn AI',
+              subtitle: sources.isEmpty
+                  ? 'Chưa nhận dữ liệu. Mở Companion trên máy tính để kết nối.'
+                  : 'Đang tự đồng bộ: ${sources.join(', ')}',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => const ProviderConnectionsScreen(),
+                ),
               ),
             ),
             SettingsTile(
               icon: Icons.logout,
-              title: action.working ? 'Đang đăng xuất...' : 'Đăng xuất Google',
+              title: action.working ? 'Đang đăng xuất...' : 'Đăng xuất',
               subtitle: action.failure?.message,
               destructive: true,
               onTap: action.working
@@ -106,30 +96,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
         ),
         SettingsGroup(
-          title: 'Dữ liệu',
-          children: [
-            SettingsTile(
-              icon: Icons.cloud_done_outlined,
-              title: 'Sổ ghi nhận của bạn',
-              subtitle: 'Lưu riêng theo tài khoản Google',
-              trailing: StatusTag(sync.label, neutral: !sync.confirmed),
-            ),
-            SettingsTile(
-              icon: Icons.hub_outlined,
-              title: 'Nguồn AI',
-              subtitle: 'Codex, Claude, Gemini và Antigravity',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (_) => const ProviderConnectionsScreen(),
-                ),
-              ),
-            ),
-            const ExportedReports(),
-          ],
-        ),
-        SettingsGroup(
-          title: 'Thông báo',
+          title: 'Cài đặt',
           children: [
             SettingsTile(
               icon: notificationsOn
@@ -143,9 +110,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         notifications.backendAvailable
                   ? 'Kết nối lại thông báo'
                   : 'Bật thông báo',
-              subtitle: notificationsOn
-                  ? 'Máy này nhận cảnh báo giới hạn token và thông báo từ TokenLedger.'
-                  : 'Nhận cảnh báo khi chạm giới hạn token đã đặt và thông báo từ TokenLedger.',
+              subtitle: 'Cảnh báo khi chạm giới hạn token đã đặt.',
               trailing: notificationsOn
                   ? const Icon(Icons.check_circle, color: AppColors.primary)
                   : null,
@@ -153,8 +118,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   ? null
                   : _enableNotifications,
             ),
+            SettingsTile(
+              icon: Icons.schedule,
+              title: 'Múi giờ báo cáo',
+              subtitle:
+                  ref.watch(ledgerProvider).asData?.value.reportingTimezone ??
+                  'Asia/Ho_Chi_Minh',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) => const ReportingSettingsScreen(),
+                ),
+              ),
+            ),
           ],
         ),
+        const SettingsGroup(title: 'Báo cáo', children: [ExportedReports()]),
         const DiagnosticsGroup(),
       ],
     );

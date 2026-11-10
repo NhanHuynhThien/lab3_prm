@@ -8,13 +8,13 @@ import '../utils/formatters.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/reporting_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
+import '../models/auto_usage.dart';
+import '../widgets/account_manage_actions.dart';
 import '../widgets/common.dart';
 import '../widgets/ledger_feedback.dart';
 import 'account_form_screen.dart';
 import 'dashboard_screen.dart';
-import 'history_screen.dart';
 import 'quota_form_screen.dart';
-import 'usage_form_screen.dart';
 
 class AccountDetailScreen extends ConsumerStatefulWidget {
   const AccountDetailScreen({super.key, required this.accountId});
@@ -55,23 +55,15 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
     final summary = projection.summary;
     final allCount = projection.totalSessions;
     final shares = projection.shares;
+    final auto = isAutoId(a.id);
+    final text = Theme.of(context).textTheme;
     return ContentPage(
       title: a.alias,
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
           const DataScopePicker(),
-          const SizedBox(height: 16),
-          Text(
-            'Tài khoản theo dõi · ${ReportingCalendar.zoneLabel(a.timezone)} · Kỳ bắt đầu ngày ${a.cycleStartDay}',
-          ),
-          if (a.defaultModelId != null)
-            Text('Model gợi ý: ${a.defaultModelId}'),
-          if (a.defaultPurposes.isNotEmpty)
-            Text(
-              'Mục đích gợi ý: ${a.defaultPurposes.map((p) => p.label).join(', ')}',
-            ),
-          const SizedBox(height: 16),
+          // The app bar already names the account; this row adds context.
           Row(
             children: [
               ProviderAvatar(a, size: 48),
@@ -80,27 +72,40 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      a.product,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
+                    if (a.product != a.alias)
+                      Text(a.product, style: text.titleLarge),
                     Text(
                       '${a.provider} · ${a.billingMode.label}',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: text.bodyMedium,
                     ),
+                    Text(
+                      'Kỳ bắt đầu ngày ${a.cycleStartDay} · ${ReportingCalendar.zoneLabel(a.timezone)}',
+                      style: text.bodySmall,
+                    ),
+                    if (a.defaultModelId != null)
+                      Text(
+                        'Model gợi ý: ${a.defaultModelId}',
+                        style: text.bodySmall,
+                      ),
+                    if (a.defaultPurposes.isNotEmpty)
+                      Text(
+                        'Mục đích gợi ý: ${a.defaultPurposes.map((p) => p.label).join(', ')}',
+                        style: text.bodySmall,
+                      ),
                   ],
                 ),
               ),
-              IconButton(
-                tooltip: 'Sửa tài khoản',
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) => AccountFormScreen(account: a),
+              if (!auto)
+                IconButton(
+                  tooltip: 'Sửa tài khoản',
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => AccountFormScreen(account: a),
+                    ),
                   ),
+                  icon: const Icon(Icons.edit_outlined),
                 ),
-                icon: const Icon(Icons.edit_outlined),
-              ),
             ],
           ),
           const SizedBox(height: 24),
@@ -109,34 +114,44 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Ngân sách còn lại · Kỳ hiện tại · Theo nguồn đã chọn',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                if (auto)
+                  Text(
+                    'Kỳ hiện tại · Gói thuê bao, Companion không đọc được hóa đơn',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  )
+                else
+                  Text(
+                    'Ngân sách còn lại · Kỳ hiện tại · Theo nguồn đã chọn',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 if (projection.periodStart != null)
                   Text(
                     'Từ ${ReportingCalendar.dayKey(projection.periodStart!, a.timezone)} đến trước ${ReportingCalendar.dayKey(projection.periodEnd!, a.timezone)}',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
-                const SizedBox(height: 8),
-                Text(
-                  a.budgetMicros == null
-                      ? 'Chưa đặt ngân sách'
-                      : money(projection.remainingBudgetMicros),
-                  style: Theme.of(context).textTheme.displaySmall,
-                ),
-                const SizedBox(height: 16),
-                AnimatedProgress(
-                  value: projection.budgetProgress,
-                  semanticValue: a.budgetMicros == null
-                      ? 'Chưa đặt ngân sách'
-                      : null,
-                ),
+                if (!auto) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    a.budgetMicros == null
+                        ? 'Chưa đặt ngân sách'
+                        : money(projection.remainingBudgetMicros),
+                    style: Theme.of(context).textTheme.displaySmall,
+                  ),
+                  const SizedBox(height: 16),
+                  AnimatedProgress(
+                    value: projection.budgetProgress,
+                    semanticValue: a.budgetMicros == null
+                        ? 'Chưa đặt ngân sách'
+                        : null,
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Text(
-                  'Đã ghi ${money(summary.costMicros)} · ${compactTokens(summary.tokens)} token · ${summary.count} phiên',
+                  auto
+                      ? '${compactTokens(summary.tokens)} token · ${summary.count} phiên'
+                      : 'Đã ghi ${money(summary.costMicros)} · ${compactTokens(summary.tokens)} token · ${summary.count} phiên',
                 ),
-                if (summary.unknownCost > 0)
+                if (!auto && summary.unknownCost > 0)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
@@ -153,7 +168,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
               children: [
                 SectionTitle(
                   'Hạn mức đã ghi nhận',
-                  action: a.archived ? null : 'Thêm cửa sổ',
+                  action: a.archived || auto ? null : 'Thêm cửa sổ',
                   onAction: () => Navigator.push(
                     context,
                     MaterialPageRoute<void>(
@@ -176,7 +191,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                     account: a,
                     quota: q,
                     now: now,
-                    onTap: a.archived
+                    onTap: a.archived || auto
                         ? null
                         : () => Navigator.push(
                             context,
@@ -192,16 +207,17 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
                   ),
                   if (q.sourceLabel.isNotEmpty) Text('Nguồn: ${q.sourceLabel}'),
                   if (q.note.isNotEmpty) Text(q.note),
-                  ConfirmedActionButton(
-                    label: 'Xóa cửa sổ ${q.window}',
-                    icon: Icons.delete_outline,
-                    destructive: true,
-                    title: 'Xóa cửa sổ hạn mức?',
-                    message: 'Chỉ xóa snapshot này; không thay usage hoặc các cửa sổ khác.',
-                    onConfirm: () => ref
-                        .read(ledgerProvider.notifier)
-                        .deleteQuota(a.id, q.windowKey),
-                  ),
+                  if (!auto)
+                    ConfirmedActionButton(
+                      label: 'Xóa cửa sổ ${q.window}',
+                      icon: Icons.delete_outline,
+                      destructive: true,
+                      title: 'Xóa cửa sổ hạn mức?',
+                      message: 'Chỉ xóa snapshot này; không thay usage hoặc các cửa sổ khác.',
+                      onConfirm: () => ref
+                          .read(ledgerProvider.notifier)
+                          .deleteQuota(a.id, q.windowKey),
+                    ),
                   const Divider(),
                 ],
               ],
@@ -236,59 +252,7 @@ class _AccountDetailScreenState extends ConsumerState<AccountDetailScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          if (!a.archived)
-            FilledButton.icon(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (_) => UsageFormScreen(accountId: a.id),
-                ),
-              ),
-              icon: const Icon(Icons.add),
-              label: const Text('Ghi sử dụng cho tài khoản'),
-            ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    HistoryScreen(accountId: a.id, useAccountCycle: true),
-              ),
-            ),
-            icon: const Icon(Icons.history),
-            label: const Text('Lịch sử tài khoản'),
-          ),
-          const SizedBox(height: 24),
-          ConfirmedActionButton(
-            label: a.archived ? 'Khôi phục tài khoản' : 'Lưu trữ tài khoản',
-            icon: a.archived
-                ? Icons.unarchive_outlined
-                : Icons.archive_outlined,
-            title: a.archived ? 'Khôi phục tài khoản?' : 'Lưu trữ tài khoản?',
-            message: a.archived
-                ? 'Tài khoản sẽ có thể ghi phiên mới.'
-                : 'Lịch sử được giữ nguyên. Tài khoản không nhận phiên mới.',
-            onConfirm: () => ref
-                .read(ledgerProvider.notifier)
-                .archiveAccount(a.id, !a.archived),
-          ),
-          if (allCount == 0 && a.quotaWindows.isNotEmpty)
-            const Text(
-              'Xóa các cửa sổ hạn mức ở trên để có thể xóa tài khoản này.',
-            ),
-          if (allCount == 0 && a.quotaWindows.isEmpty)
-            ConfirmedActionButton(
-              label: 'Xóa tài khoản rỗng',
-              icon: Icons.delete_outline,
-              destructive: true,
-              title: 'Xóa ${a.alias}?',
-              message:
-                  'Tài khoản rỗng sẽ bị xóa vĩnh viễn. Không thể hoàn tác.',
-              onConfirm: () =>
-                  ref.read(ledgerProvider.notifier).deleteAccount(a.id),
-              onSuccess: () => Navigator.pop(context),
-            ),
+          AccountManageActions(account: a, sessionCount: allCount),
         ],
       ),
     );

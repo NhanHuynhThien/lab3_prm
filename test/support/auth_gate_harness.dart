@@ -18,6 +18,7 @@ import 'package:token_ledger/services/provider_sync_service.dart';
 import '../ledger_viewmodel_test.dart' show MemoryRepository;
 import 'auth_fakes.dart';
 import 'ledger_cloud_fake.dart';
+import 'app_fonts.dart';
 
 class TrackingRepository extends MemoryRepository {
   int loads = 0, saves = 0;
@@ -41,9 +42,7 @@ class AuthGateHarness {
   late GlobalKey boundary;
 
   static Future<void> loadFonts() async {
-    await (FontLoader(
-      'Inter',
-    )..addFont(rootBundle.load('assets/fonts/Inter-Variable.ttf'))).load();
+    await loadAppFonts();
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();

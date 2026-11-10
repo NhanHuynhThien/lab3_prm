@@ -29,7 +29,7 @@ class ProviderQuotaMetric extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            window.displayLabel,
+            window.scopeLabel,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),

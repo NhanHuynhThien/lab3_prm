@@ -5,7 +5,10 @@ enum UsageRange {
   month('Tháng này'),
   lastMonth('Tháng trước'),
   week('7 ngày gần đây'),
-  all('Tất cả thời gian');
+  all('Tất cả thời gian'),
+
+  /// Days picked in the date range picker; bounds come from the caller.
+  custom('Tùy chọn');
 
   const UsageRange(this.label);
   final String label;
@@ -74,7 +77,7 @@ abstract final class UsageCalculator {
     final start =
         periodStart ??
         switch (range) {
-          UsageRange.month => ReportingCalendar.wall(
+          UsageRange.month || UsageRange.custom => ReportingCalendar.wall(
             timezone,
             now.year,
             now.month,
@@ -208,7 +211,36 @@ abstract final class UsageCalculator {
   static UsageMetric preferredMetric(List<UsageSession> sessions) =>
       sessions.any((s) => s.costMicros != null)
       ? UsageMetric.cost
+      : sessions.any((s) => s.knownTokens != null)
+      ? UsageMetric.tokens
       : UsageMetric.sessions;
+
+  /// Known tokens per day for the last 7 days; null when a day has sessions
+  /// but none with token counts.
+  static List<int?> dailyTokens(
+    List<UsageSession> sessions,
+    DateTime now, {
+    String timezone = 'device',
+  }) {
+    now = ReportingCalendar.at(now, timezone);
+    return List.generate(7, (i) {
+      final d = ReportingCalendar.wall(
+        timezone,
+        now.year,
+        now.month,
+        now.day - 6 + i,
+      );
+      final end = ReportingCalendar.wall(timezone, d.year, d.month, d.day + 1);
+      final day = summarize(
+        sessions.where(
+          (s) => !s.occurredAt.isBefore(d) && s.occurredAt.isBefore(end),
+        ),
+      );
+      return day.count > 0 && day.count == day.unknownTokens
+          ? null
+          : day.tokens;
+    });
+  }
 
   /// Null marks a day whose sessions all lack a cost: unknown is not $0.
   static List<int?> dailyCosts(

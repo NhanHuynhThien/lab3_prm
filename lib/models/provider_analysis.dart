@@ -25,7 +25,7 @@ class ProviderAnalysis {
             : remaining <= 25
             ? 'Nên theo dõi hạn mức'
             : 'Còn hạn mức sử dụng',
-        '${tightest.displayLabel} còn ${remaining.toStringAsFixed(1)}%. '
+        '${tightest.scopeLabel} còn ${remaining.toStringAsFixed(1)}%. '
         'Mỗi cửa sổ được đánh giá riêng; không cộng phần trăm giữa các model hoặc tài khoản.',
         warning: remaining <= 25,
       );

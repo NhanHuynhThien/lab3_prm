@@ -12,7 +12,6 @@ import '../viewmodels/provider_sources_viewmodel.dart';
 import '../models/cloud_sync_status.dart';
 import '../theme/app_theme.dart';
 import '../widgets/provider_ledger_feedback.dart';
-import 'usage_form_screen.dart';
 import '../widgets/optional_source_prompt.dart';
 
 export '../widgets/quota_row.dart';
@@ -38,30 +37,6 @@ class DashboardScreen extends ConsumerWidget {
             )
           : feedback;
     }
-    if (showProviderFirst) {
-      // Agents lead this layout, so manual logging stays one tap away.
-      return Stack(
-        children: [
-          _Page(
-            bottomInset: AppSpace.button + AppSpace.xl,
-            children: [
-              AgentDashboardPanel(onAnalytics: onAnalytics),
-              const _LedgerRecap(),
-            ],
-          ),
-          PositionedDirectional(
-            end: AppSpace.lg,
-            bottom: AppSpace.lg,
-            child: FloatingActionButton.extended(
-              heroTag: null,
-              onPressed: () => _openUsageForm(context),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Ghi sử dụng'),
-            ),
-          ),
-        ],
-      );
-    }
     final data = state.requireValue;
     final projection = ref.watch(dashboardProjectionProvider);
     final balance = DashboardBalanceCard(
@@ -74,91 +49,94 @@ class DashboardScreen extends ConsumerWidget {
       alerts: projection.budgetAlerts,
       unknownCostCount: projection.budgetUnknownCost,
     );
-    final metrics = DashboardMetricsCard(summary: projection.summary);
+    final metrics = DashboardMetricsCard(
+      summary: projection.summary,
+      hasCost: projection.hasCost,
+      rangeLabel: rangeLabelOf(
+        ref.watch(rangeProvider),
+        ref.watch(customDaysProvider),
+      ),
+    );
     final latest = DashboardRecentCard(
       sessions: projection.sessions,
       recentSessions: projection.recentSessions,
       data: data,
     );
+    // One ledger: Companion rows and manual entries feed the same cards; the
+    // agent panel only adds live quota on top when a source is connected.
     return _Page(
       children: [
-        const PageHeading(
-          'Tổng quan',
-          'AI đang hỗ trợ công việc của bạn như thế nào?',
-        ),
-        FilterBar(
-          leading: FilledButton.icon(
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+        // The period filter sits right under the title and governs every
+        // figure below it: totals, each agent's tokens, recent sessions.
+        if (showProviderFirst) ...[
+          AgentDashboardPanel(
+            onAnalytics: onAnalytics,
+            filter: Column(
+              children: [
+                const FilterBar(),
+                const SizedBox(height: AppSpace.lg),
+                metrics,
+              ],
             ),
-            onPressed: () => _openUsageForm(context),
-            icon: const Icon(Icons.add_rounded, size: 20),
-            label: const Text('Ghi sử dụng', textAlign: TextAlign.center),
           ),
-        ),
-        const SizedBox(height: 24),
-        if (projection.budgetAccounts.isNotEmpty)
-          _CardRow(left: balance, right: metrics, breakpoint: 680, leftFlex: 2)
-        else
+          const SizedBox(height: 24),
+        ] else ...[
+          const PageHeading(
+            'Tổng quan',
+            'AI đang hỗ trợ công việc của bạn như thế nào?',
+          ),
+          const FilterBar(),
+          const SizedBox(height: 24),
+        ],
+        if (projection.budgetAccounts.isNotEmpty) ...[
+          showProviderFirst
+              ? balance
+              : _CardRow(
+                  left: balance,
+                  right: metrics,
+                  breakpoint: 680,
+                  leftFlex: 2,
+                ),
+          const SizedBox(height: 16),
+        ] else if (!showProviderFirst) ...[
           metrics,
-        const SizedBox(height: 16),
-        if (projection.dailyCosts.any((cost) => cost != 0))
+          const SizedBox(height: 16),
+        ],
+        // Cost trend only when costs exist; subscriptions get tokens per day.
+        if (projection.hasCost
+            ? projection.dailyCosts.any((v) => v != 0)
+            : projection.dailyTokens.any((v) => v != 0))
           _CardRow(
             left: DashboardTrendCard(
-              dailyCosts: projection.dailyCosts,
+              dailyCosts: projection.hasCost
+                  ? projection.dailyCosts
+                  : projection.dailyTokens,
+              tokens: !projection.hasCost,
               now: projection.now,
             ),
             right: latest,
           )
         else
           latest,
-        const SizedBox(height: 16),
-        const OptionalSourcePrompt(),
+        if (!showProviderFirst) ...[
+          const SizedBox(height: 16),
+          const OptionalSourcePrompt(),
+        ],
       ],
     );
   }
 }
 
-/// Shown only once the manual ledger has entries in the selected range.
-class _LedgerRecap extends ConsumerWidget {
-  const _LedgerRecap();
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final summary = ref.watch(
-      dashboardProjectionProvider.select((p) => p.summary),
-    );
-    if (summary.count == 0) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpace.lg),
-      child: DashboardLedgerSummaryCard(
-        summary: summary,
-        rangeLabel: ref.watch(rangeProvider).label,
-      ),
-    );
-  }
-}
-
-void _openUsageForm(BuildContext context) => Navigator.push(
-  context,
-  MaterialPageRoute<void>(builder: (_) => const UsageFormScreen()),
-);
-
 class _Page extends StatelessWidget {
-  const _Page({required this.children, this.bottomInset = 0});
+  const _Page({required this.children});
   final List<Widget> children;
-
-  /// Extra space below the content, e.g. so a floating button never covers it.
-  final double bottomInset;
   @override
   Widget build(BuildContext context) {
     final edge = MediaQuery.sizeOf(context).width < 600 ? 16.0 : 28.0;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: AppSpace.dashboardWidth),
-        child: ListView(
-          padding: EdgeInsets.fromLTRB(edge, edge, edge, edge + bottomInset),
-          children: children,
-        ),
+        child: ListView(padding: EdgeInsets.all(edge), children: children),
       ),
     );
   }

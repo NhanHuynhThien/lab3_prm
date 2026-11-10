@@ -54,12 +54,12 @@ void main() {
         await h.settle(tester);
         expect(find.text('Private route A draft'), findsNothing);
         expect(find.text('Người A'), findsNothing);
-        expect(find.text('Người B'), findsOneWidget);
+        expect(find.text('Người B'), findsOneWidget); // header island
         expect(
           tester.state<NavigatorState>(find.byType(Navigator).last).canPop(),
           isFalse,
         );
-        await h.tap(tester, 'Đăng xuất Google');
+        await h.tap(tester, 'Đăng xuất');
         await h.settle(tester);
         expect(find.text('Đăng nhập bằng Google'), findsOneWidget);
         expect(find.text('Người B'), findsNothing);
@@ -86,7 +86,7 @@ void main() {
           ),
         );
         await h.settle(tester);
-        expect(find.text('Tên mới'), findsOneWidget);
+        expect(find.text('Tên mới'), findsOneWidget); // header island
         expect(find.text('Tên cũ'), findsNothing);
         expect(h.repository.loads, 0);
       } finally {
@@ -106,7 +106,7 @@ void main() {
           AuthProblem.network,
           'Không đăng xuất được. Hãy thử lại.',
         );
-        await h.tap(tester, 'Đăng xuất Google');
+        await h.tap(tester, 'Đăng xuất');
         await h.settle(tester);
         expect(h.container.read(authSessionProvider).requireValue!.uid, 'A');
         expect(
@@ -119,7 +119,7 @@ void main() {
         expect(find.text('Không đăng xuất được. Hãy thử lại.'), findsOneWidget);
         h.service.signOutError = null;
         h.service.signOutGate = Completer<void>();
-        await h.tap(tester, 'Đăng xuất Google');
+        await h.tap(tester, 'Đăng xuất');
         await h.container.read(authActionProvider.notifier).signOut();
         expect(h.service.signOuts, 2);
         expect(find.text('Đang đăng xuất...'), findsOneWidget);

@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/theme/app_theme.dart';
 import 'package:token_ledger/widgets/common.dart';
 
+import 'support/app_fonts.dart';
+
 // QA-only gallery: exercises the same theme/widgets used by the app, no route
 // or dependencies are added to the production navigation.
 class ComponentGallery extends StatefulWidget {
@@ -145,9 +147,7 @@ const _imageRoot = String.fromEnvironment(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
-    await (FontLoader(
-      'Inter',
-    )..addFont(rootBundle.load('assets/fonts/Inter-Variable.ttf'))).load();
+    await loadAppFonts();
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();

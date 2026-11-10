@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Companion reads local CLI logs, runs read-only CLI usage commands,
+	     stores its session in the login Keychain and writes a LaunchAgent,
+	     none of which the App Sandbox permits. Distribute only signed builds. -->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<key>com.apple.security.network.server</key>
+	<true/>
+</dict>
+</plist>

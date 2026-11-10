@@ -22,52 +22,39 @@ class DataScopePicker extends ConsumerWidget {
         scope != DataScope.manual ||
         (data?.sessions.any(DataScope.legacy.includes) ?? false) ||
         (data?.accounts.any((a) => a.dataSource == DataSource.legacy) ?? false);
-    // Wraps when standalone; stays on one line inside FilterBar's scroll.
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        if (hasChoice)
-          PopupMenuButton<DataScope>(
-            tooltip: 'Chọn nguồn dữ liệu báo cáo',
-            icon: compact ? const Icon(Icons.filter_alt_outlined) : null,
-            initialValue: ref.watch(effectiveDataScopeProvider),
-            onSelected: (scope) =>
-                ref.read(dataScopeProvider.notifier).select(scope),
-            itemBuilder: (_) => DataScope.values
-                .where((scope) => scope != DataScope.demo)
-                .map(
-                  (scope) =>
-                      PopupMenuItem(value: scope, child: Text(scope.label)),
-                )
-                .toList(),
-            child: compact
-                ? null
-                : FilterButton(ref.watch(effectiveDataScopeProvider).label),
-          ),
-        // Timezone is a rarely changed setting, so it is icon-only here.
-        IconButton(
-          tooltip: 'Múi giờ báo cáo',
-          icon: const Icon(Icons.schedule, size: 20),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (_) => const _ReportingSettingsScreen(),
-            ),
-          ),
-        ),
-      ],
+    // Nothing to choose: render nothing rather than a lone control.
+    if (!hasChoice) return const SizedBox.shrink();
+    final picker = PopupMenuButton<DataScope>(
+      tooltip: 'Chọn nguồn dữ liệu báo cáo',
+      icon: compact ? const Icon(Icons.filter_alt_outlined) : null,
+      initialValue: ref.watch(effectiveDataScopeProvider),
+      onSelected: (scope) => ref.read(dataScopeProvider.notifier).select(scope),
+      itemBuilder: (_) => DataScope.values
+          .where((scope) => scope != DataScope.demo)
+          .map((scope) => PopupMenuItem(value: scope, child: Text(scope.label)))
+          .toList(),
+      child: compact
+          ? null
+          : FilterButton(ref.watch(effectiveDataScopeProvider).label),
     );
+    return compact
+        ? picker
+        : Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Align(alignment: Alignment.centerLeft, child: picker),
+          );
   }
 }
 
-class _ReportingSettingsScreen extends ConsumerStatefulWidget {
-  const _ReportingSettingsScreen();
+/// Reporting timezone, a rarely changed setting opened from Profile.
+class ReportingSettingsScreen extends ConsumerStatefulWidget {
+  const ReportingSettingsScreen({super.key});
   @override
-  ConsumerState<_ReportingSettingsScreen> createState() =>
+  ConsumerState<ReportingSettingsScreen> createState() =>
       _ReportingSettingsState();
 }
 
-class _ReportingSettingsState extends ConsumerState<_ReportingSettingsScreen> {
+class _ReportingSettingsState extends ConsumerState<ReportingSettingsScreen> {
   final _form = GlobalKey<FormState>();
   late final TextEditingController _zone;
   late final String _initial;

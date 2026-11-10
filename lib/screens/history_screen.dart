@@ -99,7 +99,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
     final zone = data.reportingTimezone;
     final header = <Widget>[
       const DataScopePicker(),
-      const SizedBox(height: 16),
       HistoryFilterBar(
         accounts: data.accounts,
         accountId: _accountId,

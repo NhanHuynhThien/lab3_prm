@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/app.dart';
 import 'package:token_ledger/models/auth_session.dart';
+import 'package:token_ledger/screens/account_form_screen.dart';
 import 'package:token_ledger/services/firestore_ledger_repository.dart';
 import 'package:token_ledger/viewmodels/auth_viewmodel.dart';
 import 'package:token_ledger/viewmodels/cloud_ledger_viewmodel.dart';
@@ -13,6 +16,7 @@ import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 import '../ledger_viewmodel_test.dart' show MemoryRepository;
 import 'auth_fakes.dart';
 import 'ledger_cloud_fake.dart';
+import 'app_fonts.dart';
 
 class CloudWorkspaceHarness {
   final DateTime now = DateTime.utc(2026, 10, 21, 9);
@@ -22,9 +26,7 @@ class CloudWorkspaceHarness {
   late GlobalKey boundary;
 
   static Future<void> loadFonts() async {
-    await (FontLoader(
-      'Inter',
-    )..addFont(rootBundle.load('assets/fonts/Inter-Variable.ttf'))).load();
+    await loadAppFonts();
     await (FontLoader(
       'MaterialIcons',
     )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
@@ -118,7 +120,14 @@ class CloudWorkspaceHarness {
 
   Future<void> form(WidgetTester tester) async {
     await nav(tester, 'Tài khoản');
-    await tap(tester, 'Thêm tài khoản');
+    // No add button in the UI any more; legacy manual accounts still use the
+    // form, so open it directly inside the signed-in workspace.
+    unawaited(
+      Navigator.of(tester.element(find.text('Tài khoản').first)).push(
+        MaterialPageRoute<void>(builder: (_) => const AccountFormScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).first, 'Private A');
   }
 

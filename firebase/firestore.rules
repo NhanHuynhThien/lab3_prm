@@ -208,6 +208,40 @@ service cloud.firestore {
         keys(request.resource.data.payload,['reportingTimezone']) && zone(request.resource.data.payload.reportingTimezone) &&
         receipt(uid,request.resource.data.lastOperationId,'settings',setting,'update',request.resource.data.revision);
     }
+    // Per-task Companion rows. The Companion upserts counts/time with an
+    // update mask; the phone only edits purpose/title/note or hides a row.
+    // No prompt, path or session ID is stored (opaque hashed document IDs).
+    function purposeName(s) { return s in ['code','debug','review','test','learn','write','research','design','other']; }
+    function autoUsage(d, uid, usageId) {
+      return d.keys().hasAll(['ownerId','provider','detectedPurpose','inputTokens','outputTokens','occurredAt','syncedAt']) &&
+        d.keys().hasOnly(['ownerId','provider','detectedPurpose','model','inputTokens','outputTokens','occurredAt',
+          'startedAt','syncedAt','purpose','title','note','hidden','superseded']) &&
+        d.ownerId == uid && usageId.matches('auto-(codex|claude|google)-[0-9a-f]{16}-[0-9]{8}') &&
+        usageId.matches('auto-' + d.provider + '-.*') &&
+        d.provider in ['codex','claude','google'] && purposeName(d.detectedPurpose) &&
+        (!d.keys().hasAny(['model']) || d.model == null || text(d.model,128)) &&
+        integer(d.inputTokens,1000000000000) && integer(d.outputTokens,1000000000000) &&
+        d.occurredAt is timestamp && d.occurredAt <= request.time + duration.value(10, 'm') &&
+        (!d.keys().hasAny(['startedAt']) || d.startedAt == null ||
+          (d.startedAt is timestamp && d.startedAt <= d.occurredAt)) &&
+        d.syncedAt is timestamp &&
+        (!d.keys().hasAny(['purpose']) || d.purpose == null || purposeName(d.purpose)) &&
+        (!d.keys().hasAny(['title']) || text(d.title,120)) &&
+        (!d.keys().hasAny(['note']) || text(d.note,1000)) &&
+        (!d.keys().hasAny(['hidden']) || d.hidden is bool) &&
+        // Companion retires a row it no longer produces (re-numbered task).
+        (!d.keys().hasAny(['superseded']) || d.superseded is bool);
+    }
+    match /users/{uid}/auto_usage/{usageId} {
+      allow read: if owner(uid);
+      allow create: if owner(uid) && autoUsage(request.resource.data,uid,usageId) &&
+        request.resource.data.syncedAt == request.time;
+      allow update: if owner(uid) && autoUsage(request.resource.data,uid,usageId) &&
+        request.resource.data.provider == resource.data.provider &&
+        // A hidden row stays hidden; the Companion cannot bring it back.
+        (resource.data.get('hidden', false) == false || request.resource.data.hidden == true);
+      allow delete: if false;
+    }
     // Last companion snapshot (token/model/purpose aggregates as JSON text),
     // so an account sees its figures on login without the companion running.
     match /users/{uid}/provider_snapshots/{snapshot} {

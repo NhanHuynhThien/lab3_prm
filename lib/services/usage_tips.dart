@@ -50,7 +50,7 @@ List<String> usageTips(
     final left = usage.remaining(w, now);
     if (left != null && left < 15) {
       tips.add(
-        '${w.displayLabel} chỉ còn ${left.toStringAsFixed(0)}%. '
+        '${w.scopeLabel} chỉ còn ${left.toStringAsFixed(0)}%. '
         'Dùng model nhẹ hơn cho việc đơn giản cho tới khi hạn mức đặt lại.',
       );
     }

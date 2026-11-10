@@ -63,21 +63,79 @@ class FilterButton extends StatelessWidget {
   );
 }
 
+String _dd(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+
+/// What the period filter shows: a preset name or the picked days.
+String rangeLabelOf(UsageRange range, CalendarDays? days) =>
+    range == UsageRange.custom && days != null
+    ? '${_dd(days.first)} – ${_dd(days.last)}'
+    : range.label;
+
+/// Period filter: opens the date range picker straight away. The label
+/// keeps preset names until the user picks days on the calendar.
 class RangePicker extends ConsumerWidget {
   const RangePicker({super.key});
 
+  /// Calendar days the current filter covers, for the picker's preselection.
+  static DateTimeRange _shown(
+    UsageRange range,
+    CalendarDays? days,
+    DateTime now,
+  ) {
+    final today = DateTime(now.year, now.month, now.day);
+    return switch (range) {
+      UsageRange.custom when days != null => DateTimeRange(
+        start: days.first,
+        end: days.last,
+      ),
+      UsageRange.lastMonth => DateTimeRange(
+        start: DateTime(now.year, now.month - 1, 1),
+        end: DateTime(now.year, now.month, 0),
+      ),
+      UsageRange.week => DateTimeRange(
+        start: today.subtract(const Duration(days: 6)),
+        end: today,
+      ),
+      UsageRange.all => DateTimeRange(start: DateTime(2020), end: today),
+      _ => DateTimeRange(start: DateTime(now.year, now.month, 1), end: today),
+    };
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) =>
-      PopupMenuButton<UsageRange>(
-        tooltip: 'Chọn khoảng thời gian',
-        initialValue: ref.watch(rangeProvider),
-        onSelected: (value) => ref.read(rangeProvider.notifier).select(value),
-        itemBuilder: (_) => UsageRange.values
-            .map((v) => PopupMenuItem(value: v, child: Text(v.label)))
-            .toList(),
-        child: FilterButton(
-          ref.watch(rangeProvider).label,
-          icon: Icons.calendar_today_outlined,
-        ),
-      );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final range = ref.watch(rangeProvider);
+    final days = ref.watch(customDaysProvider);
+    final label = rangeLabelOf(range, days);
+    return Semantics(
+      button: true,
+      label: 'Chọn khoảng thời gian, đang xem $label',
+      excludeSemantics: true,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpace.controlRadius),
+        onTap: () async {
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+          final shown = _shown(range, days, now);
+          final picked = await showDateRangePicker(
+            context: context,
+            firstDate: DateTime(2020),
+            lastDate: today,
+            initialDateRange: DateTimeRange(
+              start: shown.start,
+              end: shown.end.isAfter(today) ? today : shown.end,
+            ),
+            helpText: 'Chọn khoảng ngày',
+            saveText: 'Áp dụng',
+          );
+          if (picked != null) {
+            ref
+                .read(rangeProvider.notifier)
+                .selectDays(picked.start, picked.end);
+          }
+        },
+        child: FilterButton(label, icon: Icons.calendar_today_outlined),
+      ),
+    );
+  }
 }

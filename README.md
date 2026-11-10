@@ -8,21 +8,22 @@ TokenLedger giúp người dùng biết **AI nào đang được sử dụng, to
 |---|---|---|
 | Đăng nhập | Dùng tài khoản Google | Workspace riêng theo UID, không có login demo |
 | Tài khoản AI | Thêm/sửa, archive hoặc xóa account rỗng | Quản lý provider/model, ngân sách và lịch sử |
-| Phiên sử dụng | Ghi công việc, mục đích, token, thời gian và chi phí có nguồn | Sổ usage có thể tìm kiếm/sửa/xóa |
-| Tổng quan | Xem các agent/provider thực sự đã sử dụng | Dashboard theo nguồn, không lặp màn tài khoản |
+| Phiên sử dụng | Companion tự ghi từng task CLI (Codex, Claude Code, Gemini CLI); user chỉ sửa mục đích/tên/ghi chú hoặc ẩn. Nhập tay chỉ cho nguồn không đọc được | Một sổ usage chung có thể tìm kiếm/sửa/xóa |
+| Tổng quan | Xem quota agent đang kết nối và tổng token/phiên trong kỳ | Một dashboard: quota agent ở trên, số liệu từ cùng sổ usage |
 | Phân tích | Lọc theo kỳ, account, mục đích và xem chi tiết | Tổng token/chi phí, tỷ trọng và coverage nguồn |
 | Quota | Theo dõi từng account và cửa sổ quota | Có thời điểm cập nhật; không cộng quota% giữa account |
 | Nguồn AI | Kết nối companion local hoặc nhập Takeout do user chọn | Chỉ lấy dữ liệu nguồn hỗ trợ; thiếu số liệu hiển thị unknown |
 | Báo cáo | Chọn kỳ, tạo và mở PDF trên thiết bị | Không upload PDF lên cloud |
 | Hồ sơ | Xem tài khoản đăng nhập, thông báo và chẩn đoán | Quản lý phiên và các tích hợp Firebase |
 
-Ba flow chính: **tạo account → ghi usage → xem phân tích**; **lọc lịch sử → mở chi tiết → sửa/xóa usage**; **xem account → quota/lịch sử → archive**. Lỗi lưu phải giữ draft và cho thử lại; dữ liệu không được lẫn giữa UID khi logout.
+Ba flow chính: **kết nối Companion → usage tự vào sổ (nhập tay là dự phòng) → xem phân tích**; **lọc lịch sử → mở chi tiết → sửa/xóa usage**; **xem account → quota/lịch sử → archive**. Lỗi lưu phải giữ draft và cho thử lại; dữ liệu không được lẫn giữa UID khi logout.
 
 ## Quy tắc số liệu và quyền riêng tư
 
 - Tiền lưu integer USD micros; `null` là chưa biết, khác số 0. Giá suy từ token phải có nguồn và nhãn estimate, không gọi là hóa đơn.
 - Token/quota/tốc độ/thời gian chỉ xuất hiện khi nguồn có dữ liệu tương ứng. Thời gian gọi API không phải thời gian user làm việc.
-- Firestore owner rules tách dữ liệu cá nhân. Companion là lựa chọn bổ sung, không bắt buộc cho core flows.
+- Firestore owner rules tách dữ liệu cá nhân. Companion là nguồn chính của usage; thiếu Companion thì app vẫn chạy với sổ nhập tay.
+- Dữ liệu tự động (`users/{uid}/auto_usage`): mỗi task CLI theo ngày địa phương, ID là hash, chỉ có nhãn mục đích suy từ từ khóa (suy ngay trên máy), model, token và thời gian; không upload prompt, đường dẫn hay session ID. Gói thuê bao không có chi phí từng phiên nên chi phí để unknown. Account tự động (`auto-codex`, `auto-claude`, `auto-google`) không sửa/lưu trữ/xóa tay; ẩn phiên thì Companion không thêm lại.
 - Admin chỉ vận hành model/bảng giá/thông báo và trạng thái hệ thống; không xem nội dung chat hay toàn bộ sổ token của user.
 - Gemini/FCM/Supabase secret không nằm mobile hoặc frontend bundle. Không đọc Gmail, cookies hoặc thay đổi bảo mật tài khoản Google.
 
@@ -55,18 +56,17 @@ node --test tool/provider_bridge/*.test.mjs
 
 ## Phát triển Companion desktop
 
-Cài bộ cài tại `companion/dist/`, mở Companion, đăng nhập cùng tài khoản Google với mobile và bật đồng bộ. Có tùy chọn tự khởi động khi đăng nhập máy; đóng cửa sổ sẽ tiếp tục chạy ở thanh menu.
+Companion là app Flutter macOS trong chính project này (entry `lib/main_companion.dart`, source `lib/companion/`, native shell `macos/Runner/AppDelegate.swift`). Mở Companion, đăng nhập cùng tài khoản Google với mobile qua trình duyệt và bật đồng bộ. Có tùy chọn tự khởi động khi đăng nhập máy (LaunchAgent, chỉ bản release); đóng cửa sổ sẽ tiếp tục chạy ở thanh menu.
 
-Token tự cập nhật ngầm theo thay đổi log CLI, chỉ ghi Firestore khi aggregate đổi. Hạn mức được kiểm tra mỗi 5 phút; lỗi mạng tự thử lại. Phiên đăng nhập lưu trong kho bảo mật hệ điều hành, dữ liệu ghi vào `users/{uid}/provider_snapshots/latest`.
+Token tự cập nhật ngầm theo thay đổi log CLI, chỉ ghi Firestore khi aggregate đổi. Hạn mức được kiểm tra mỗi 5 phút; lỗi mạng tự thử lại. Phiên đăng nhập lưu trong Keychain macOS, aggregate và quota ghi vào `users/{uid}/provider_snapshots/latest`, từng task ghi upsert vào `users/{uid}/auto_usage/{id}` với update mask chỉ gồm trường của Companion (chỉ gửi dòng đổi). CLI `tool/provider_bridge/cloud.mjs` chưa ghi `auto_usage`. Firebase public config lấy từ `DefaultFirebaseOptions.web`.
 
 ```sh
-cd companion
-npm ci
-npm test
-npm run build:mac
+flutter test test/companion
+flutter run -d macos -t lib/main_companion.dart
+flutter build macos --release -t lib/main_companion.dart
 ```
 
-Bản macOS Apple Silicon nằm ở `companion/dist/TokenLedger Companion-0.1.4-arm64.dmg` và thư mục `mac-arm64`. Gói runtime dùng Firebase public config tại `tool/provider_bridge/firebase-config.json`, chạy độc lập với source Flutter và Node cài ngoài. Source desktop ở `companion/src/`; các collector được tái sử dụng từ `tool/provider_bridge/`. CLI `cloud.mjs login/once/install` dùng cho phát triển. Ghép trực tiếp local dùng `setup.mjs` và `adb reverse tcp:8787 tcp:8787`. Bản macOS local chưa ký/notarize; Windows cần build và nghiệm thu trên môi trường phù hợp.
+App build ra `build/macos/Build/Products/Release/TokenLedger Companion.app`. App tắt App Sandbox vì cần đọc log CLI, chạy lệnh usage chỉ đọc, dùng Keychain và LaunchAgent; bản local chưa ký/notarize. Collector Node trong `tool/provider_bridge/` vẫn dùng cho status line Claude Code và bridge phát triển (`adb reverse tcp:8787 tcp:8787`).
 
 ## Tiến độ và tài liệu bài
 

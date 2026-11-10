@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:token_ledger/widgets/action_buttons.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:token_ledger/models/ledger.dart';
 import 'package:token_ledger/screens/analytics_screen.dart';
@@ -8,6 +9,7 @@ import 'package:token_ledger/screens/quota_form_screen.dart';
 import 'package:token_ledger/services/usage_calculator.dart';
 import 'package:token_ledger/viewmodels/ledger_viewmodel.dart';
 import 'package:token_ledger/widgets/charts.dart';
+import 'package:token_ledger/widgets/data_scope_picker.dart';
 
 import 'support/scope_forms_harness.dart';
 
@@ -101,8 +103,14 @@ void main() {
       await h.reveal(tester, find.text('20/10/2026'));
       expect(find.text('20/10/2026'), findsOneWidget);
       expect(find.text('Không thuộc provider'), findsNothing);
-      await h.reveal(tester, find.byTooltip('Múi giờ báo cáo'), step: -240);
-      await tester.tap(find.byTooltip('Múi giờ báo cáo'));
+      // The timezone setting now lives in Profile; open the same screen.
+      unawaited(
+        Navigator.of(tester.element(find.byType(HistoryScreen))).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const ReportingSettingsScreen(),
+          ),
+        ),
+      );
       await tester.pumpAndSettle();
       final zone = find.byKey(const ValueKey('reporting-timezone'));
       await tester.enterText(zone, 'Made/Up');
@@ -147,14 +155,16 @@ void main() {
       h.container.invalidate(ledgerProvider);
       await h.container.read(ledgerProvider.future);
       await h.open(tester, const Scaffold(body: AnalyticsScreen()), 412);
+      // No costed or tokened session: count is selected and cost is hidden.
       expect(
         tester
-            .widget<SelectionButton>(
-              find.widgetWithText(SelectionButton, UsageMetric.sessions.label),
+            .widget<SegmentedButton<UsageMetric>>(
+              find.byType(SegmentedButton<UsageMetric>),
             )
             .selected,
-        isTrue,
+        {UsageMetric.sessions},
       );
+      expect(find.text(UsageMetric.cost.label), findsNothing);
       await h.reveal(tester, find.text('Tài khoản a'));
       await tester.tap(find.text('Tài khoản a'));
       await tester.pumpAndSettle();

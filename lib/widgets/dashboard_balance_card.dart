@@ -117,9 +117,18 @@ class DashboardBalanceCard extends StatelessWidget {
 }
 
 class DashboardMetricsCard extends StatelessWidget {
-  const DashboardMetricsCard({super.key, required this.summary});
+  const DashboardMetricsCard({
+    super.key,
+    required this.summary,
+    this.hasCost = true,
+    this.rangeLabel,
+  });
 
   final UsageSummary summary;
+
+  /// False for subscription-only usage: no cost exists, so none is shown.
+  final bool hasCost;
+  final String? rangeLabel;
 
   @override
   Widget build(BuildContext context) => Panel(
@@ -128,30 +137,34 @@ class DashboardMetricsCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              child: DashboardMetric(
-                'Chi phí đã ghi',
-                money(summary.costMicros),
+            if (hasCost)
+              Expanded(
+                child: DashboardMetric(
+                  'Chi phí đã ghi',
+                  money(summary.costMicros),
+                ),
               ),
-            ),
             Expanded(
-              child: DashboardMetric(
-                'Token đã ghi',
-                compactTokens(summary.tokens),
-              ),
+              child: DashboardMetric('Token', compactTokens(summary.tokens)),
             ),
+            if (!hasCost)
+              Expanded(child: DashboardMetric('Phiên', '${summary.count}')),
           ],
         ),
         const SizedBox(height: 12),
         Text(
-          '${summary.count} phiên sử dụng',
+          [
+            if (hasCost) '${summary.count} phiên sử dụng',
+            if (rangeLabel != null) 'Kỳ: $rangeLabel',
+          ].join(' · '),
           style: Theme.of(context).textTheme.bodySmall,
         ),
-        if (summary.unknownCost > 0 || summary.unknownTokens > 0) ...[
+        if ((hasCost && summary.unknownCost > 0) ||
+            summary.unknownTokens > 0) ...[
           const SizedBox(height: 4),
           Text(
             [
-              if (summary.unknownCost > 0)
+              if (hasCost && summary.unknownCost > 0)
                 '${summary.unknownCost} phiên chưa biết chi phí',
               if (summary.unknownTokens > 0)
                 '${summary.unknownTokens} phiên chưa biết token',

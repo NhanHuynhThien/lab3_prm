@@ -215,6 +215,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen>
             : Column(
                 children: [
                   AppTopBar(
+                    user: _profileUser ?? widget.user,
                     onHistory: () => Navigator.push(
                       context,
                       MaterialPageRoute<void>(

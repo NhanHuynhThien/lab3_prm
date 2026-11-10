@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/agent_dashboard.dart';
+import '../models/auto_usage.dart';
 import '../models/provider_usage.dart';
 import '../screens/provider_connections_screen.dart';
 import '../theme/app_theme.dart';
@@ -14,11 +15,20 @@ import 'agent_summary_card.dart';
 import 'common.dart';
 import 'provider_brand_icon.dart';
 import 'quota_ring.dart';
+import 'range_picker.dart';
 import 'token_limit_dialog.dart';
 
 class AgentDashboardPanel extends ConsumerStatefulWidget {
-  const AgentDashboardPanel({super.key, required this.onAnalytics});
+  const AgentDashboardPanel({
+    super.key,
+    required this.onAnalytics,
+    this.filter,
+  });
   final VoidCallback onAnalytics;
+
+  /// Period filter shown right under the title, so it visibly governs every
+  /// figure below it, the agent cards included.
+  final Widget? filter;
   @override
   ConsumerState<AgentDashboardPanel> createState() =>
       _AgentDashboardPanelState();
@@ -90,6 +100,10 @@ class _AgentDashboardPanelState extends ConsumerState<AgentDashboardPanel> {
           const SizedBox(height: AppSpace.sm),
         ],
         const SizedBox(height: AppSpace.sm),
+        if (widget.filter case final filter?) ...[
+          filter,
+          const SizedBox(height: AppSpace.lg),
+        ],
         if (dashboard.connected.isEmpty)
           EmptyFeedback(
             title: 'Chưa có agent nào',
@@ -138,6 +152,9 @@ class _AgentDashboardPanelState extends ConsumerState<AgentDashboardPanel> {
   }
 }
 
+/// Every agent card has the same two rows, whatever the source reports:
+/// tokens in the selected period (from the ledger) and the current quota.
+/// A missing figure says so instead of collapsing the row.
 class _AgentCard extends ConsumerWidget {
   const _AgentCard({
     required this.source,
@@ -157,6 +174,17 @@ class _AgentCard extends ConsumerWidget {
         : AgentDashboard.level(quota.usedPercent, alertAt);
     final fresh = source.status == 'ready' && !source.stale(dashboard.now);
     final text = Theme.of(context).textTheme;
+    final perTask = autoProviders.containsKey(source.id);
+    final account = autoAccountId(source.id);
+    final sessions = ref
+        .watch(filteredSessionsProvider)
+        .where((s) => s.accountId == account)
+        .toList();
+    final tokens = sessions.fold(0, (n, s) => n + (s.knownTokens ?? 0));
+    final period = rangeLabelOf(
+      ref.watch(rangeProvider),
+      ref.watch(customDaysProvider),
+    );
     return Panel(
       color: level.tint,
       child: Column(
@@ -176,38 +204,46 @@ class _AgentCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpace.md),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      source.totalTokens == null
-                          ? '—'
-                          : compactTokens(source.totalTokens),
-                      style: text.headlineMedium,
-                    ),
-                    Text(
-                      source.totalTokens == null
-                          ? 'chưa có số token'
-                          : source.tokenLabel,
-                      style: text.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              if (quota != null) ...[
-                const SizedBox(width: AppSpace.md),
-                QuotaRing(usedPercent: quota.usedPercent, level: level),
-              ],
-            ],
-          ),
-          if (quota != null) ...[
-            const Divider(height: AppSpace.xl),
+          Text('Token · $period', style: text.bodySmall),
+          const SizedBox(height: 2),
+          if (perTask)
             Text(
-              'Quota ${quota.displayLabel} · đặt lại ${shortTime(quota.resetsAt)}',
-              style: text.bodySmall,
+              '${compactTokens(tokens)} · ${sessions.length} phiên',
+              style: text.headlineSmall,
+            )
+          else
+            Text(
+              'Nguồn này không cung cấp số token',
+              style: text.bodyMedium?.copyWith(color: AppColors.muted),
+            ),
+          const Divider(height: AppSpace.xl),
+          Text('Hạn mức hiện tại', style: text.bodySmall),
+          const SizedBox(height: AppSpace.sm),
+          if (quota == null)
+            Text(
+              source.windows.isEmpty
+                  ? 'Nguồn chưa cung cấp hạn mức.'
+                  : 'Hạn mức đã cũ, chờ Companion cập nhật.',
+              style: text.bodyMedium?.copyWith(color: AppColors.muted),
+            )
+          else ...[
+            Row(
+              children: [
+                QuotaRing(usedPercent: quota.usedPercent, level: level),
+                const SizedBox(width: AppSpace.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(quota.usageLabel, style: text.titleMedium),
+                      Text(
+                        '${quota.scopeLabel} · đặt lại ${resetLabel(quota.resetsAt, dashboard.now)}',
+                        style: text.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             Align(
               alignment: Alignment.centerRight,

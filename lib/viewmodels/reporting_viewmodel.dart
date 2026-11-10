@@ -4,41 +4,10 @@ import '../models/ledger.dart';
 import '../services/usage_calculator.dart';
 import '../services/reporting_calendar.dart';
 import 'ledger_viewmodel.dart';
+import 'dashboard_projection.dart';
 import 'product_features_viewmodel.dart';
 
-/// Derived screen state: views render results and never own accounting formulas.
-class DashboardProjection {
-  DashboardProjection({
-    required this.sessions,
-    required this.summary,
-    required this.now,
-    required this.budgetAccounts,
-    required this.budget,
-    required this.spent,
-    required this.shares,
-    required this.dailyCosts,
-    this.recentLimit = 3,
-    this.warningPercent = 80,
-    this.budgetAlerts = const [],
-    this.budgetUnknownCost = 0,
-  });
-  final List<BudgetAlert> budgetAlerts;
-  final int budgetUnknownCost;
-  final List<UsageSession> sessions;
-  final UsageSummary summary;
-  final DateTime now;
-  final List<AIAccount> budgetAccounts;
-  final int budget, spent;
-  int get remaining => budget - spent;
-  final List<PurposeShare> shares;
-  final List<int?> dailyCosts;
-  final int recentLimit, warningPercent;
-  List<UsageSession> get recentSessions => sessions.take(recentLimit).toList();
-  bool get budgetWarning =>
-      budgetAlerts.isNotEmpty ||
-      budget > 0 &&
-          UsageCalculator.reachesWarning(spent, budget, warningPercent);
-}
+export 'dashboard_projection.dart';
 
 final dashboardProjectionProvider = Provider.autoDispose<DashboardProjection>((
   ref,
@@ -69,6 +38,7 @@ final dashboardProjectionProvider = Provider.autoDispose<DashboardProjection>((
   }
   alerts.sort((x, y) => (y.exceeded ? 1 : 0) - (x.exceeded ? 1 : 0));
   final budgetSummary = UsageCalculator.summarize(budgetSessions);
+  final inScope = data.sessions.where(scope.includes).toList();
   return DashboardProjection(
     sessions: sessions,
     summary: UsageCalculator.summarize(sessions),
@@ -81,7 +51,12 @@ final dashboardProjectionProvider = Provider.autoDispose<DashboardProjection>((
     shares: UsageCalculator.shares(sessions, UsageMetric.sessions),
     // A fixed 7-day window: the selected range must not blank out recent days.
     dailyCosts: UsageCalculator.dailyCosts(
-      data.sessions.where(scope.includes).toList(),
+      inScope,
+      now,
+      timezone: data.reportingTimezone,
+    ),
+    dailyTokens: UsageCalculator.dailyTokens(
+      inScope,
       now,
       timezone: data.reportingTimezone,
     ),
@@ -247,8 +222,10 @@ final historyQueryProjectionProvider = Provider.autoDispose
           provider: query.provider,
           accounts: data.accounts,
           search: query.search,
-          periodStart: cycle?.start,
-          periodEnd: cycle?.end,
+          periodStart:
+              cycle?.start ?? customBounds(ref, data.reportingTimezone)?.start,
+          periodEnd:
+              cycle?.end ?? customBounds(ref, data.reportingTimezone)?.end,
         ),
       );
     });
