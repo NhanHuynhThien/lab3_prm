@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/export_report.dart';
+import '../services/report_summary.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import 'common.dart';
@@ -51,58 +52,57 @@ class ExportReportPeriodSelector extends StatelessWidget {
 class ExportReportPreviewCard extends StatelessWidget {
   const ExportReportPreviewCard({
     super.key,
-    required this.sessionCount,
-    required this.totalCostMicros,
+    required this.summary,
     required this.accountCount,
-    required this.totalTokens,
-    this.knownCostCount,
-    this.knownTokensCount,
   });
 
-  final int sessionCount;
-  final int totalCostMicros;
+  final ReportSummary summary;
   final int accountCount;
-  final int totalTokens;
-  final int? knownCostCount, knownTokensCount;
 
   @override
   Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final n = summary.sessionCount;
     return Panel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Dữ liệu sẽ được kết xuất:',
-            style: TextStyle(fontSize: 12, color: AppColors.muted),
-          ),
+          Text('Dữ liệu sẽ được kết xuất', style: text.bodySmall),
           const SizedBox(height: 6),
           Wrap(
             spacing: 16,
             runSpacing: 8,
             children: [
               Text(
-                '$sessionCount phiên công việc',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              Text(
-                money(knownCostCount == 0 ? null : totalCostMicros),
+                '${compactTokens(summary.tokens)} token',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
                 ),
               ),
+              Text(
+                '$n phiên',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '$accountCount agent',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              if (summary.hasCost)
+                Text(
+                  money(summary.costMicros),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
             ],
           ),
           const SizedBox(height: 8),
-          if (knownCostCount != null && knownTokensCount != null)
-            Text(
-              '$knownCostCount/$sessionCount phiên có chi phí · $knownTokensCount/$sessionCount có token',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          const SizedBox(height: 8),
           Text(
-            '$accountCount tài khoản · ${compactTokens(knownTokensCount == 0 ? null : totalTokens)} token đã ghi nhận',
-            style: const TextStyle(fontSize: 12, color: AppColors.muted),
+            n == 0
+                ? 'Kỳ này chưa có phiên nào; PDF vẫn tạo được nhưng sẽ trống.'
+                : '${summary.knownTokenCount}/$n phiên có token · '
+                      '${summary.byModel.length} model · '
+                      '${summary.byDay.length} ngày có hoạt động',
+            style: text.bodySmall,
           ),
         ],
       ),

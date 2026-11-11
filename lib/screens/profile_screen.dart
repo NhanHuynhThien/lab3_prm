@@ -8,6 +8,7 @@ import '../viewmodels/cloud_ledger_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
 import '../viewmodels/provider_sources_viewmodel.dart';
+import '../widgets/export_report_dialog.dart';
 import '../widgets/common.dart';
 import '../widgets/data_scope_picker.dart';
 import '../widgets/product_feature_cards.dart';
@@ -133,7 +134,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ],
         ),
-        const SettingsGroup(title: 'Báo cáo', children: [ExportedReports()]),
+        SettingsGroup(
+          title: 'Báo cáo',
+          children: [
+            SettingsTile(
+              icon: Icons.file_download_outlined,
+              title: 'Xuất báo cáo PDF',
+              subtitle: 'Token, phiên, model và hạn mức theo kỳ.',
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => ExportReportDialog.show(context),
+            ),
+            const ExportedReports(),
+          ],
+        ),
         const DiagnosticsGroup(),
       ],
     );

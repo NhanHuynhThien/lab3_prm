@@ -4,7 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../models/ai_account.dart';
 import '../models/usage_session.dart';
 import '../utils/formatters.dart';
-import 'reporting_calendar.dart';
+import 'report_summary.dart';
 
 class PdfReportBuilders {
   const PdfReportBuilders._();
@@ -37,27 +37,32 @@ class PdfReportBuilders {
                 ),
               ),
               pw.Text(
-                'Báo cáo chi phí và sử dụng AI',
+                'Báo cáo sử dụng AI',
                 style: const pw.TextStyle(fontSize: 12, color: mutedText),
               ),
             ],
           ),
-          pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.end,
-            children: [
-              pw.Text(
-                'Kỳ: $periodLabel',
-                style: pw.TextStyle(
-                  fontSize: 11,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              if (userEmail != null && userEmail.isNotEmpty)
+          pw.SizedBox(width: 24),
+          // Long period labels wrap here instead of crowding the brand.
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
                 pw.Text(
-                  userEmail,
-                  style: const pw.TextStyle(fontSize: 10, color: mutedText),
+                  'Kỳ: $periodLabel',
+                  textAlign: pw.TextAlign.right,
+                  style: pw.TextStyle(
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
                 ),
-            ],
+                if (userEmail != null && userEmail.isNotEmpty)
+                  pw.Text(
+                    userEmail,
+                    style: const pw.TextStyle(fontSize: 10, color: mutedText),
+                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -86,29 +91,25 @@ class PdfReportBuilders {
     );
   }
 
-  static pw.Widget buildSummaryCards(
-    int sessionCount,
-    int? costMicros,
-    int? tokenCount,
-    int accountCount,
-  ) {
+  /// Headline figures; cost appears only when some source reported one.
+  static pw.Widget buildSummaryCards(ReportSummary summary, int accountCount) {
+    final boxes = <pw.Widget>[
+      _buildMetricBox(
+        'Tổng token',
+        compactTokens(summary.tokens),
+        primaryColor,
+      ),
+      _buildMetricBox('Số phiên', '${summary.sessionCount} phiên', darkText),
+      _buildMetricBox('Agent / tài khoản', '$accountCount', darkText),
+      if (summary.hasCost)
+        _buildMetricBox('Chi phí đã biết', money(summary.costMicros), darkText),
+    ];
     return pw.Row(
       children: [
-        _buildMetricBox(
-          'Tổng chi phí đã biết',
-          money(costMicros),
-          primaryColor,
-        ),
-        pw.SizedBox(width: 8),
-        _buildMetricBox(
-          'Tổng token đã ghi',
-          compactTokens(tokenCount),
-          darkText,
-        ),
-        pw.SizedBox(width: 8),
-        _buildMetricBox('Số phiên công việc', '$sessionCount phiên', darkText),
-        pw.SizedBox(width: 8),
-        _buildMetricBox('Tài khoản AI', '$accountCount tài khoản', darkText),
+        for (var i = 0; i < boxes.length; i++) ...[
+          if (i > 0) pw.SizedBox(width: 8),
+          boxes[i],
+        ],
       ],
     );
   }
@@ -148,136 +149,16 @@ class PdfReportBuilders {
     );
   }
 
-  static pw.Widget buildAccountTable(
-    List<AIAccount> accounts,
-    List<UsageSession> sessions,
-  ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          '1. Thống kê theo tài khoản AI',
-          style: pw.TextStyle(
-            fontSize: 13,
-            fontWeight: pw.FontWeight.bold,
-            color: primaryColor,
-          ),
-        ),
-        pw.SizedBox(height: 8),
-        pw.TableHelper.fromTextArray(
-          border: pw.TableBorder.all(color: cardBorder, width: 0.5),
-          headerStyle: pw.TextStyle(
-            fontWeight: pw.FontWeight.bold,
-            fontSize: 9,
-          ),
-          cellStyle: const pw.TextStyle(fontSize: 9),
-          headerDecoration: const pw.BoxDecoration(color: mintBackground),
-          headers: [
-            'Tài khoản',
-            'Nhà cung cấp',
-            'Gói cước',
-            'Số phiên',
-            'Chi phí (USD)',
-            'Token',
-          ],
-          data: accounts.map((acc) => accountRow(acc, sessions)).toList(),
-        ),
-      ],
-    );
-  }
-
   /// Sessions without any known figure stay "Chưa biết", never 0.
   static List<String> accountRow(AIAccount acc, List<UsageSession> sessions) {
-    final rows = sessions.where((s) => s.accountId == acc.id).toList();
-    int? total(Iterable<int?> values) {
-      final known = values.whereType<int>();
-      return rows.isNotEmpty && known.isEmpty
-          ? null
-          : known.fold<int>(0, (a, b) => a + b);
-    }
-
+    final row = ReportSummary.of(sessions).account(acc);
     return [
       acc.alias,
       acc.provider,
       acc.plan.isEmpty ? 'Mặc định' : acc.plan,
-      '${rows.length}',
-      money(total(rows.map((s) => s.costMicros))),
-      compactTokens(total(rows.map((s) => s.knownTokens))),
+      '${row.sessions}',
+      money(row.costMicros),
+      compactTokens(row.tokens),
     ];
-  }
-
-  static pw.Widget buildPurposeTable(
-    Map<String, int> counts,
-    Map<String, int> costs,
-  ) {
-    if (counts.isEmpty) return pw.Container();
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          '2. Phân bổ theo mục đích sử dụng',
-          style: pw.TextStyle(
-            fontSize: 13,
-            fontWeight: pw.FontWeight.bold,
-            color: primaryColor,
-          ),
-        ),
-        pw.SizedBox(height: 8),
-        pw.TableHelper.fromTextArray(
-          border: pw.TableBorder.all(color: cardBorder, width: 0.5),
-          headerStyle: pw.TextStyle(
-            fontWeight: pw.FontWeight.bold,
-            fontSize: 9,
-          ),
-          cellStyle: const pw.TextStyle(fontSize: 9),
-          headerDecoration: const pw.BoxDecoration(color: mintBackground),
-          headers: ['Mục đích', 'Số phiên', 'Chi phí (USD)'],
-          data: counts.entries
-              .map((e) => [e.key, '${e.value} phiên', money(costs[e.key])])
-              .toList(),
-        ),
-      ],
-    );
-  }
-
-  static pw.Widget buildRecentSessionsTable(
-    List<UsageSession> sessions, [
-    String timezone = 'device',
-  ]) {
-    final recent = sessions.take(10).toList();
-    if (recent.isEmpty) return pw.Container();
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          '3. Phiên sử dụng gần đây (tối đa 10 phiên)',
-          style: pw.TextStyle(
-            fontSize: 13,
-            fontWeight: pw.FontWeight.bold,
-            color: primaryColor,
-          ),
-        ),
-        pw.SizedBox(height: 8),
-        pw.TableHelper.fromTextArray(
-          border: pw.TableBorder.all(color: cardBorder, width: 0.5),
-          headerStyle: pw.TextStyle(
-            fontWeight: pw.FontWeight.bold,
-            fontSize: 8,
-          ),
-          cellStyle: const pw.TextStyle(fontSize: 8),
-          headerDecoration: const pw.BoxDecoration(color: mintBackground),
-          headers: ['Thời gian', 'Công việc', 'Mục đích', 'Chi phí', 'Token'],
-          data: recent.map((s) {
-            return [
-              '${ReportingCalendar.dayKey(s.occurredAt, timezone)} ${shortTime(s.occurredAt, timezone: timezone)}',
-              s.title,
-              s.purpose.label,
-              s.costMicros != null ? money(s.costMicros!) : 'Chưa rõ',
-              s.knownTokens != null ? compactTokens(s.knownTokens!) : 'Chưa rõ',
-            ];
-          }).toList(),
-        ),
-      ],
-    );
   }
 }

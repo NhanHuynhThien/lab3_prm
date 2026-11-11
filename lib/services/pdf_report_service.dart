@@ -10,6 +10,8 @@ import 'package:pdf/widgets.dart' as pw;
 import '../models/ai_account.dart';
 import '../models/usage_session.dart';
 import 'pdf_report_builders.dart';
+import 'pdf_report_sections.dart';
+import 'report_summary.dart';
 
 class PdfReportService {
   const PdfReportService();
@@ -32,52 +34,29 @@ class PdfReportService {
   }) async {
     final pdf = pw.Document();
     final font = await _resolveFont();
-    final boldFont = font;
-
-    int totalCostMicros = 0;
-    int totalTokens = 0;
-    for (final s in sessions) {
-      if (s.costMicros != null) totalCostMicros += s.costMicros!;
-      if (s.knownTokens != null) totalTokens += s.knownTokens!;
-    }
-
-    final purposeCounts = <String, int>{};
-    final purposeCost = <String, int>{};
-    for (final s in sessions) {
-      final pName = s.purpose.label;
-      purposeCounts[pName] = (purposeCounts[pName] ?? 0) + 1;
-      if (s.costMicros != null) {
-        purposeCost[pName] = (purposeCost[pName] ?? 0) + s.costMicros!;
-      }
-    }
+    final summary = ReportSummary.of(sessions, timezone: timezone);
+    final n = summary.sessionCount;
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
-        theme: pw.ThemeData.withFont(base: font, bold: boldFont),
+        theme: pw.ThemeData.withFont(base: font, bold: font),
         header: (context) =>
             PdfReportBuilders.buildHeader(userEmail, periodLabel),
         footer: (context) => PdfReportBuilders.buildFooter(context),
         build: (context) => [
           pw.SizedBox(height: 12),
-          PdfReportBuilders.buildSummaryCards(
-            sessions.length,
-            sessions.any((s) => s.costMicros != null) ? totalCostMicros : null,
-            sessions.any((s) => s.knownTokens != null) ? totalTokens : null,
-            accounts.length,
-          ),
+          PdfReportBuilders.buildSummaryCards(summary, accounts.length),
           pw.SizedBox(height: 12),
           pw.Text(
-            'Sổ ghi nhận: ${sessions.where((s) => s.costMicros != null).length}/${sessions.length} phiên có chi phí; ${sessions.where((s) => s.knownTokens != null).length}/${sessions.length} có token. Số liệu thiếu không được xem là 0. Không bao gồm snapshot CLI/nguồn AI.',
-            style: const pw.TextStyle(fontSize: 10),
+            '${['${summary.autoCount}/$n phiên do Companion ghi tự động từ log CLI', '${summary.knownTokenCount}/$n phiên có token', if (summary.hasCost) '${summary.knownCostCount}/$n phiên có chi phí'].join('; ')}. Số liệu thiếu không được tính là 0.',
+            style: const pw.TextStyle(
+              fontSize: 9,
+              color: PdfReportBuilders.mutedText,
+            ),
           ),
-          pw.SizedBox(height: 24),
-          PdfReportBuilders.buildAccountTable(accounts, sessions),
-          pw.SizedBox(height: 24),
-          PdfReportBuilders.buildPurposeTable(purposeCounts, purposeCost),
-          pw.SizedBox(height: 24),
-          PdfReportBuilders.buildRecentSessionsTable(sessions, timezone),
+          ...PdfReportSections(summary, timezone).build(accounts),
         ],
       ),
     );

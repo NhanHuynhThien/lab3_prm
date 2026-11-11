@@ -7,7 +7,7 @@ import '../viewmodels/product_features_viewmodel.dart';
 import 'common.dart';
 import 'settings_group.dart';
 
-/// Recently exported PDFs kept on this device. Exporting lives in Analytics.
+/// Recently exported PDFs kept on this device. Export from Profile or Analytics.
 class ExportedReports extends ConsumerWidget {
   const ExportedReports({super.key});
 
@@ -27,7 +27,7 @@ class ExportedReports extends ConsumerWidget {
           icon: Icons.picture_as_pdf_outlined,
           title: 'Báo cáo đã xuất',
           subtitle: reports.isEmpty
-              ? 'Chưa có báo cáo. Xuất PDF ở tab Phân tích.'
+              ? 'Chưa có báo cáo nào trên máy này.'
               : 'Lưu trên thiết bị, không tải lên cloud.',
         ),
         for (final rep in reports.take(visibleCount))

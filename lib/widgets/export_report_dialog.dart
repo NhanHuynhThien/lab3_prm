@@ -2,23 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/export_report.dart';
-import '../models/ledger.dart';
 import '../services/manual_report_projection.dart';
 import '../theme/app_theme.dart';
 import '../utils/formatters.dart';
 import '../viewmodels/auth_viewmodel.dart';
 import '../viewmodels/ledger_viewmodel.dart';
 import '../viewmodels/product_features_viewmodel.dart';
+import '../viewmodels/report_export_viewmodel.dart';
 import 'export_report_views.dart';
 import 'action_buttons.dart';
 
 class ExportReportDialog extends ConsumerStatefulWidget {
   const ExportReportDialog({super.key});
 
+  /// Dialogs open on the root navigator, outside the per-UID workspace
+  /// container; carry the caller's container so the ledger is the user's.
   static Future<void> show(BuildContext context) {
+    final container = ProviderScope.containerOf(context);
     return showDialog<void>(
       context: context,
-      builder: (_) => const ExportReportDialog(),
+      builder: (_) => UncontrolledProviderScope(
+        container: container,
+        child: const ExportReportDialog(),
+      ),
     );
   }
 
@@ -35,22 +41,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final data = ref.watch(ledgerProvider).asData?.value;
-    final projection = ManualReportProjection(
-      data: data ?? LedgerData(accounts: [], sessions: []),
-      now: ref.watch(nowProvider),
-      period: _selectedPeriod,
-      scope: ref.watch(effectiveDataScopeProvider),
-    );
-    final accounts = projection.accounts;
-    final sessions = projection.sessions;
-
-    int totalCostMicros = 0;
-    int totalTokens = 0;
-    for (final s in sessions) {
-      if (s.costMicros != null) totalCostMicros += s.costMicros!;
-      if (s.knownTokens != null) totalTokens += s.knownTokens!;
-    }
+    final preview = ref.watch(reportPreviewProvider(_selectedPeriod));
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -80,7 +71,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
               ),
               const SizedBox(height: AppSpace.sm),
               const Text(
-                'Báo cáo các phiên trong sổ ghi nhận theo kỳ bên dưới. Số liệu nguồn AI/CLI được xem riêng trong Phân tích.',
+                'Tổng hợp token, phiên, model, mục đích và hạn mức hiện tại của các agent trong kỳ đã chọn. File lưu trên máy, không tải lên cloud.',
                 style: TextStyle(color: AppColors.muted, fontSize: 13),
               ),
               const SizedBox(height: AppSpace.md),
@@ -95,18 +86,13 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
                 }),
               ),
               const SizedBox(height: AppSpace.md),
-              ExportReportPreviewCard(
-                sessionCount: sessions.length,
-                totalCostMicros: totalCostMicros,
-                accountCount: accounts.length,
-                totalTokens: totalTokens,
-                knownCostCount: sessions
-                    .where((s) => s.costMicros != null)
-                    .length,
-                knownTokensCount: sessions
-                    .where((s) => s.knownTokens != null)
-                    .length,
-              ),
+              if (preview == null)
+                const LinearProgressIndicator()
+              else
+                ExportReportPreviewCard(
+                  summary: preview.summary,
+                  accountCount: preview.accountCount,
+                ),
               if (_isWorking) ...[
                 const SizedBox(height: AppSpace.md),
                 LinearProgressIndicator(
@@ -131,7 +117,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
                 ExportCompletedCard(report: _completedReport!),
               ],
               const SizedBox(height: AppSpace.lg),
-              _buildActions(context),
+              _buildActions(context, ready: preview != null),
             ],
           ),
         ),
@@ -139,7 +125,7 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
     );
   }
 
-  Widget _buildActions(BuildContext context) {
+  Widget _buildActions(BuildContext context, {required bool ready}) {
     return ActionButtons(
       children: [
         TextButton(
@@ -148,9 +134,9 @@ class _ExportReportDialogState extends ConsumerState<ExportReportDialog> {
         ),
         if (_completedReport == null) ...[
           FilledButton.icon(
-            onPressed: _isWorking ? null : _generate,
+            onPressed: _isWorking || !ready ? null : _generate,
             icon: const Icon(Icons.file_open_outlined, size: 18),
-            label: const Text('Tạo PDF trên máy'),
+            label: const Text('Xuất PDF'),
           ),
         ] else ...[
           if (_completedReport!.localPath != null)
